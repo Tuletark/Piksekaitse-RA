@@ -1,0 +1,1951 @@
+<!DOCTYPE html>
+<html lang="et">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Piksekaitse riskianalüüs · EVS-EN IEC 62305-2:2025</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: #f4f6f8;
+  color: #1a1a1a;
+  line-height: 1.5;
+  font-size: 14px;
+}
+
+header {
+  background: linear-gradient(135deg, #0a4080, #1565c0);
+  color: white;
+  padding: 18px 24px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+header h1 { font-size: 20px; font-weight: 600; }
+header .sub { font-size: 12px; opacity: 0.85; margin-top: 2px; }
+
+.container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  max-width: 1600px;
+  margin: 16px auto;
+  padding: 0 16px;
+}
+
+@media (max-width: 1100px) { .container { grid-template-columns: 1fr; } }
+
+.panel {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  overflow: hidden;
+}
+
+.panel-header {
+  background: #f8f9fa;
+  padding: 10px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  font-weight: 600;
+  color: #0a4080;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.panel-body { padding: 14px 16px; max-height: calc(100vh - 250px); overflow-y: auto; }
+
+/* Vahekaardid */
+.tabs {
+  display: flex;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e5e7eb;
+  flex-wrap: wrap;
+}
+.tab {
+  padding: 10px 14px;
+  cursor: pointer;
+  border-right: 1px solid #e5e7eb;
+  font-size: 13px;
+  user-select: none;
+  transition: background 0.15s;
+}
+.tab:hover { background: #eef2f7; }
+.tab.active { background: white; color: #0a4080; font-weight: 600; border-bottom: 2px solid #1565c0; }
+
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* Vormid */
+.section-title {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #0a4080;
+  margin: 18px 0 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #e5e7eb;
+  font-weight: 600;
+}
+.section-title:first-child { margin-top: 0; }
+
+.field {
+  display: grid;
+  grid-template-columns: 1fr 200px;
+  gap: 8px;
+  margin-bottom: 8px;
+  align-items: center;
+}
+.field-wide { grid-template-columns: 1fr 1fr; }
+.field-full { display: block; }
+
+.field label {
+  font-size: 13px;
+  color: #333;
+  cursor: help;
+}
+
+.field label .formula {
+  font-family: "Cambria Math", Georgia, serif;
+  font-style: italic;
+  color: #666;
+  margin-left: 4px;
+}
+
+.field input[type="text"],
+.field input[type="number"],
+.field select {
+  padding: 6px 8px;
+  font-size: 13px;
+  border: 1px solid #cfd4da;
+  border-radius: 4px;
+  background: white;
+  font-family: inherit;
+  width: 100%;
+}
+
+.field input:focus, .field select:focus {
+  outline: none;
+  border-color: #1565c0;
+  box-shadow: 0 0 0 2px rgba(21,101,192,0.15);
+}
+
+.field-checkbox {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin-bottom: 8px;
+  padding: 6px 8px;
+  background: #f8f9fa;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.field-checkbox input { margin-top: 3px; cursor: pointer; }
+.field-checkbox label { font-size: 13px; cursor: pointer; flex: 1; }
+
+.help-text {
+  font-size: 11px;
+  color: #666;
+  margin-top: 2px;
+  font-style: italic;
+}
+
+/* Nupud */
+.btn-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 12px 16px;
+  background: #f8f9fa;
+  border-top: 1px solid #e5e7eb;
+}
+.btn {
+  padding: 8px 14px;
+  border: 1px solid #cfd4da;
+  background: white;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+.btn:hover { background: #f0f3f7; border-color: #1565c0; }
+.btn-primary { background: #1565c0; color: white; border-color: #1565c0; font-weight: 600; }
+.btn-primary:hover { background: #0d4a96; color: white; }
+
+/* Tulemused */
+.results-summary {
+  padding: 16px;
+  border-radius: 6px;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+.results-summary.ok { background: #e8f5e9; border-left: 4px solid #1a7f1a; }
+.results-summary.fail { background: #ffebee; border-left: 4px solid #c62828; }
+.results-summary h3 { margin-bottom: 8px; font-size: 16px; }
+.results-summary.ok h3 { color: #1a7f1a; }
+.results-summary.fail h3 { color: #c62828; }
+
+.result-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  padding: 4px 0;
+  font-family: "SF Mono", Monaco, "Cascadia Code", monospace;
+  font-size: 12px;
+}
+.result-row .val { font-weight: 600; }
+
+table.results-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 8px 0 16px;
+  font-size: 12px;
+}
+table.results-table th, table.results-table td {
+  padding: 6px 10px;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+}
+table.results-table th {
+  background: #f8f9fa;
+  font-weight: 600;
+  color: #0a4080;
+}
+table.results-table td.num { text-align: right; font-family: "SF Mono", Monaco, monospace; }
+table.results-table tr.ok td { background: #f1f8f1; }
+table.results-table tr.fail td { background: #fef5f5; }
+table.results-table tr.recommended td {
+  background: #e3f2fd;
+  font-weight: 600;
+}
+
+.formula-display {
+  font-family: "Cambria Math", Georgia, serif;
+  background: #f8f9fa;
+  padding: 8px 12px;
+  border-radius: 4px;
+  margin: 4px 0 8px;
+  font-size: 13px;
+  border-left: 3px solid #1565c0;
+}
+
+.standard-ref {
+  color: #1565c0;
+  font-size: 11px;
+  margin-left: 4px;
+}
+
+.tooltip {
+  position: relative;
+  border-bottom: 1px dotted #999;
+  cursor: help;
+}
+
+footer {
+  text-align: center;
+  padding: 16px;
+  color: #666;
+  font-size: 11px;
+}
+
+/* Helper */
+.flex-row { display: flex; gap: 8px; }
+.flex-row > * { flex: 1; }
+
+.summary-card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px 16px;
+  padding: 12px 16px;
+  background: #f8f9fa;
+  border-radius: 4px;
+  margin-bottom: 12px;
+  font-family: "SF Mono", Monaco, monospace;
+  font-size: 12px;
+}
+.summary-card .label { color: #666; }
+.summary-card .value { font-weight: 600; color: #0a4080; }
+
+.warning-box {
+  background: #fff8e1;
+  border-left: 4px solid #f57c00;
+  padding: 8px 12px;
+  margin: 8px 0;
+  font-size: 12px;
+  border-radius: 4px;
+}
+
+.info-box {
+  background: #e3f2fd;
+  border-left: 4px solid #1565c0;
+  padding: 8px 12px;
+  margin: 8px 0;
+  font-size: 12px;
+  border-radius: 4px;
+}
+
+.info-box-small {
+  background: #f0f7ff;
+  border-left: 3px solid #1565c0;
+  padding: 6px 10px;
+  margin: 4px 0 12px;
+  font-size: 11px;
+  border-radius: 4px;
+  color: #444;
+  line-height: 1.4;
+}
+
+.field input:disabled, .field select:disabled {
+  background: #f0f0f0;
+  color: #999;
+  cursor: not-allowed;
+}
+
+.disabled-section {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+@media print {
+  header, .btn-row, .tabs, .panel:first-child { display: none; }
+  .container { grid-template-columns: 1fr; }
+  .panel { box-shadow: none; }
+  .panel-body { max-height: none; overflow: visible; }
+  body { background: white; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>⚡ Piksekaitse riskianalüüs</h1>
+  <div class="sub">Vastavalt standardile EVS-EN IEC 62305-2:2025 (Eesti tõlge IEC 62305-2:2024)</div>
+</header>
+
+<div class="container">
+
+  <!-- VASAK PANEEL: SISENDID -->
+  <div class="panel">
+    <div class="panel-header">
+      <span>Sisendparameetrid</span>
+      <span style="font-weight: normal; font-size: 11px; color: #666;">7 vahekaarti</span>
+    </div>
+
+    <div class="tabs">
+      <div class="tab active" data-tab="t1">1. Üldine</div>
+      <div class="tab" data-tab="t2">2. Ehitis</div>
+      <div class="tab" data-tab="t3">3. Keskkond</div>
+      <div class="tab" data-tab="t4">4. Liinid</div>
+      <div class="tab" data-tab="t5">5. Kahjud</div>
+      <div class="tab" data-tab="t6">6. Kaitse</div>
+    </div>
+
+    <div class="panel-body">
+
+      <!-- VAHEKAART 1: ÜLDINE -->
+      <div class="tab-content active" id="t1">
+        <div class="section-title">Projekti info</div>
+        <div class="field"><label>Projekti nimi:</label><input type="text" id="projekt_nimi" value="Uus piksekaitse projekt"></div>
+        <div class="field"><label>Asukoht:</label><input type="text" id="asukoht"></div>
+        <div class="field"><label>Koostaja:</label><input type="text" id="koostaja"></div>
+        <div class="field"><label>Kuupäev:</label><input type="text" id="kuupaev"></div>
+
+        <div class="section-title">Pikselöökide salvesagedus <span class="standard-ref">(Lisa A)</span></div>
+        <div class="field">
+          <label>N<sub>G</sub> – välkude tihedus (1/km²/a):</label>
+          <input type="number" id="NG" value="4.0" step="0.1">
+        </div>
+        <div class="help-text">Sisesta N<sub>G</sub> väärtus (Eestis tüüpiliselt 2–4). Täpse väärtuse saab Eesti Meteoroloogia Instituudilt või LLS-ist.</div>
+
+        <div class="field">
+          <label>k tegur (N<sub>G</sub> → N<sub>SG</sub> teisendus):</label>
+          <input type="number" id="k_tegur_sg" value="2" step="0.1">
+        </div>
+        <div class="help-text">Vaikimisi 2 (Lisa A.1, MÄRKUS 1). N<sub>SG</sub> = k × N<sub>G</sub></div>
+
+        <div class="field">
+          <label>N<sub>SG</sub> – pilve-maa välkude tihedus (1/km²/a) <i>[automaatne]</i>:</label>
+          <input type="number" id="NSG" value="8.0" step="0.1" readonly style="background:#f0f3f7; color:#0a4080; font-weight:600;">
+        </div>
+        <div class="help-text">Arvutatakse automaatselt: N<sub>SG</sub> = k × N<sub>G</sub>. Saab käsitsi muuta vajadusel (eemalda readonly).</div>
+
+        <div class="section-title">Vastuvõetav risk R<sub>T</sub> <span class="standard-ref">(jaotis 7.3, MÄRKUS 1)</span></div>
+        <div class="info-box">
+          <b>R<sub>T</sub> = 1 × 10⁻⁵ (aasta⁻¹)</b><br>
+          Standardi tüüpiline väärtus inimelu kaotuse jaoks. See on fikseeritud vastavalt EVS-EN IEC 62305-2:2025 jaotisele 7.3 ja seda ei muudeta.
+        </div>
+        <input type="hidden" id="RT" value="1e-5">
+
+        <div class="section-title">Inimeste kohaolu aeg ehitises (P<sub>P</sub> – valem B.14)</div>
+        <div class="field">
+          <label>t<sub>Z</sub> – inimeste kohalolu aeg ehitises (h/a):</label>
+          <input type="number" id="tZ" value="8760" step="1">
+        </div>
+        <div class="help-text">P<sub>P</sub> = t<sub>Z</sub>/8760. Aasta = 8760 h. Pidevalt asustatud = 8760, päevasel ajal = 4380, töötunnid = ~2000.</div>
+
+        <input type="hidden" id="te" value="8760">
+      </div>
+
+      <!-- VAHEKAART 2: EHITIS -->
+      <div class="tab-content" id="t2">
+        <div class="section-title">Ehitise mõõtmed ja paiknemine</div>
+        <div class="field"><label>L – ehitise pikkus (m):</label><input type="number" id="L" value="15" step="0.5"></div>
+        <div class="field"><label>W – ehitise laius (m):</label><input type="number" id="W" value="20" step="0.5"></div>
+        <div class="field"><label>H – ehitise kõrgus (m):</label><input type="number" id="H" value="6" step="0.5"></div>
+
+        <div class="field">
+          <label>C<sub>D</sub> – paiknemistegur <span class="standard-ref">(Tabel A.1)</span>:</label>
+          <select id="CD_valik" onchange="naita_CD_selgitus()"></select>
+        </div>
+        <div id="CD_selgitus" class="info-box-small"></div>
+
+        <div class="section-title">Ehitusmaterjal ja varjestus</div>
+        <div class="field">
+          <label>P<sub>S</sub> – ehitusmaterjal <span class="standard-ref">(Tabel B.4)</span>:</label>
+          <select id="PS_valik"></select>
+        </div>
+        <details style="margin-top:12px;">
+          <summary style="cursor:pointer; color:#666; font-size:12px; padding:6px 0;">⚙ Täpsustatud varjestuse parameetrid (vaikimisi 1.0 - tavaehitised)</summary>
+          <div style="padding:8px; background:#f8f9fa; border-radius:4px; margin-top:6px;">
+            <div class="info-box-small" style="margin-bottom:8px;">
+              <b>Märkus:</b> K<sub>S1</sub> ja K<sub>S2</sub> on vaja muuta ainult juhul, kui ehitisel on eriline elektromagnetiline varjestus
+              (LPS-i metallekraan, raudbetoonelementide võrk, või sisemised ekraanid LPZ-tsoonide vahel). Tavalistele ehitistele
+              on standardväärtus <b>1.0</b> (näidetes F.1-F.3 kasutatakse alati 1.0).
+            </div>
+            <div class="field"><label>K<sub>S1</sub> – välimise varjestuse tegur:</label><input type="number" id="KS1" value="1.0" step="0.01"></div>
+            <div class="help-text">Vt jaotis B.6, valem B.8. Tavaehitisele = 1.0.</div>
+            <div class="field"><label>K<sub>S2</sub> – sisemiste ekraanide tegur:</label><input type="number" id="KS2" value="1.0" step="0.01"></div>
+            <div class="help-text">Tavaehitisele = 1.0.</div>
+          </div>
+        </details>
+
+        <div class="section-title">Ehitise kategooria <span class="standard-ref">(Tabel C.2)</span></div>
+        <div class="field">
+          <label>Kategooria (mõjutab kahju vaikeväärtuseid):</label>
+          <select id="kategooria"></select>
+        </div>
+        <div class="help-text">Kahju täpseid väärtuseid saad muuta vahekaardil "5. Kahjud".</div>
+
+        <div class="section-title">Avatud aladel viibivad inimesed (R<sub>AD</sub>)</div>
+        <label class="field-checkbox">
+          <input type="checkbox" id="kasuta_RAD" onchange="lulita_RAD()">
+          <span>Ehitisel on avatud alad, kus inimesed viibivad (terrass, katuseparkla, rõdu)</span>
+        </label>
+        <div class="field"><label>P<sub>O</sub> – paiknemise tegur:</label><input type="number" id="PO" value="0" step="0.1" disabled></div>
+        <div class="help-text">0 = pole inimesi avatud alal, 1 = on kaitsmata avatud alal</div>
+
+        <div class="section-title">Erilised ehitise tüübid (R<sub>C</sub>, R<sub>M</sub>, R<sub>W</sub>, R<sub>Z</sub>)</div>
+        <label class="field-checkbox">
+          <input type="checkbox" id="kasuta_RC1">
+          <span><b>Plahvatusoht või haigla</b> – sisesüsteemi rike → inimoht (RC1, RM1, RW1, RZ1)</span>
+        </label>
+        <label class="field-checkbox">
+          <input type="checkbox" id="kasuta_RC2">
+          <span><b>Plahvatusohtlik ehitis</b> – sisesüsteemi rike → ehitise plahvatus (RC2, RM2, RW2, RZ2)</span>
+        </label>
+      </div>
+
+      <!-- VAHEKAART 3: KESKKOND -->
+      <div class="tab-content" id="t3">
+        <div class="section-title">Keskkonnategur <span class="standard-ref">(Tabel A.4)</span></div>
+        <div class="field">
+          <label>C<sub>E</sub> – keskkond:</label>
+          <select id="CE_valik"></select>
+        </div>
+
+        <div class="section-title">Pinnase / põranda kattekiht <span class="standard-ref">(r<sub>t</sub> – Tabel B.2)</span></div>
+        <div class="field">
+          <label>Põranda või pinnase tüüp:</label>
+          <select id="rt_valik"></select>
+        </div>
+
+        <div class="section-title">Kaitse puute- ja sammupingete eest <span class="standard-ref">(P<sub>am</sub> – Tabel B.1)</span></div>
+        <div class="field">
+          <label>Kaitsemeetmed:</label>
+          <select id="Pam_valik"></select>
+        </div>
+
+        <div class="section-title">Tuleoht ja tulekaitse</div>
+        <div class="field">
+          <label>r<sub>f</sub> – tuleoht <span class="standard-ref">(Tabel B.6)</span>:</label>
+          <select id="rf_valik"></select>
+        </div>
+        <div class="field">
+          <label>r<sub>p</sub> – tulekaitse <span class="standard-ref">(Tabel B.5)</span>:</label>
+          <select id="rp_valik"></select>
+        </div>
+
+        <div class="section-title">Sisekaabelduse omadused <span class="standard-ref">(K<sub>S3</sub> – Tabel B.10)</span></div>
+        <div class="field">
+          <label>K<sub>S3</sub> elektrisüsteemis:</label>
+          <select id="KS3P_valik"></select>
+        </div>
+        <div class="field">
+          <label>K<sub>S3</sub> sidesüsteemis:</label>
+          <select id="KS3T_valik"></select>
+        </div>
+
+        <div class="section-title">Äikesetormi hoiatussüsteem (TWS) <span class="standard-ref">(jaotis B.1)</span></div>
+        <div class="field">
+          <label>P<sub>TWS</sub> – tõenäosus, et TWS ei tuvasta sündmust:</label>
+          <input type="number" id="PTWS" value="1.0" step="0.05">
+        </div>
+        <div class="help-text">Vaikimisi 1.0 (TWS-i pole). Kui TWS rakendatud, siis tootja andmetelt.</div>
+      </div>
+
+      <!-- VAHEKAART 4: LIINID -->
+      <div class="tab-content" id="t4">
+        <div class="section-title">Elektriliin (madalpinge)</div>
+        <label class="field-checkbox">
+          <input type="checkbox" id="kasuta_elektriliin" checked>
+          <span>Elektriliin on ehitisega ühendatud</span>
+        </label>
+        <div class="field"><label>L<sub>L</sub> – elektriliini pikkus (m, max 1000):</label><input type="number" id="LL_P" value="1000" step="10"></div>
+        <div class="field">
+          <label>C<sub>I</sub> – paigaldustegur <span class="standard-ref">(Tabel A.2)</span>:</label>
+          <select id="CIP_valik"></select>
+        </div>
+        <div class="field">
+          <label>C<sub>T</sub> – tüübitegur <span class="standard-ref">(Tabel A.3)</span>:</label>
+          <select id="CTP_valik"></select>
+        </div>
+        <div class="field">
+          <label>U<sub>W</sub> – seadmestiku impulsstaluvuspinge (kV):</label>
+          <input type="number" id="UWP" value="2.5" step="0.1">
+        </div>
+        <div class="help-text">Tüüpiliselt 2.5 kV (toiteseadmed)</div>
+        <div class="field">
+          <label>Kaabli tüüp <span class="standard-ref">(P<sub>LD</sub> – Tabel B.11/B.12)</span>:</label>
+          <select id="kaabli_tüüp_P"></select>
+        </div>
+        <div class="field">
+          <label>Varjestus <span class="standard-ref">(C<sub>LD</sub>/C<sub>LI</sub> – Tabel B.9)</span>:</label>
+          <select id="CLD_CLI_P_valik"></select>
+        </div>
+
+        <div class="section-title">Sideliin / andmeside</div>
+        <label class="field-checkbox">
+          <input type="checkbox" id="kasuta_sideliin" checked>
+          <span>Sideliin on ehitisega ühendatud</span>
+        </label>
+        <div class="field"><label>L<sub>L</sub> – sideliini pikkus (m, max 1000):</label><input type="number" id="LL_T" value="800" step="10"></div>
+        <div class="field">
+          <label>C<sub>I</sub> – paigaldustegur:</label>
+          <select id="CIT_valik"></select>
+        </div>
+        <div class="field">
+          <label>C<sub>T</sub> – tüübitegur:</label>
+          <select id="CTT_valik"></select>
+        </div>
+        <div class="field">
+          <label>U<sub>W</sub> – sideseadme impulsstaluvuspinge (kV):</label>
+          <input type="number" id="UWT" value="1.5" step="0.1">
+        </div>
+        <div class="help-text">Tüüpiliselt 1.5 kV (signaaliseadmed)</div>
+        <div class="field">
+          <label>Kaabli tüüp:</label>
+          <select id="kaabli_tüüp_T"></select>
+        </div>
+        <div class="field">
+          <label>Varjestus:</label>
+          <select id="CLD_CLI_T_valik"></select>
+        </div>
+
+        <div class="section-title">Naaberehitis (NDJ)</div>
+        <label class="field-checkbox">
+          <input type="checkbox" id="kasuta_naaber">
+          <span>Liin ühendab kahte hoonet (arvuta NDJ - välk teise hoonesse)</span>
+        </label>
+        <div class="flex-row">
+          <div class="field"><label>L<sub>J</sub> (m):</label><input type="number" id="L_J" value="0" step="0.5"></div>
+          <div class="field"><label>W<sub>J</sub> (m):</label><input type="number" id="W_J" value="0" step="0.5"></div>
+          <div class="field"><label>H<sub>J</sub> (m):</label><input type="number" id="H_J" value="0" step="0.5"></div>
+        </div>
+        <div class="field">
+          <label>C<sub>DJ</sub> – naaberehitise paiknemine:</label>
+          <select id="CDJ_valik"></select>
+        </div>
+      </div>
+
+      <!-- VAHEKAART 5: KAHJUD -->
+      <div class="tab-content" id="t5">
+        <div class="section-title">Kahju väärtused L<sub>X</sub> <span class="standard-ref">(Lisa C, Tabel C.2)</span></div>
+        <div class="info-box">
+          Kahju väärtused valitakse vahemikest standardi Tabel C.2 järgi. Vaikevalik tehakse automaatselt vastavalt vahekaardil "Ehitis" valitud kategooriale.
+          Saad valida vahemikust täpsema väärtuse oma ehitisele.
+        </div>
+
+        <div class="section-title">Inimeste vigastustega seonduvad kahjud (L1)</div>
+
+        <div class="field">
+          <label>L<sub>T</sub> – puute/sammupinge vigastuste suhe:</label>
+          <select id="LT_in"></select>
+        </div>
+        <div class="help-text">Tabel C.2: standardväärtus 10⁻² kõikide ehitiste jaoks.</div>
+
+        <div class="field">
+          <label>L<sub>D</sub> – välgu otselöögist vigastuste suhe (avatud alal):</label>
+          <select id="LD_in"></select>
+        </div>
+        <div class="help-text">Tabel C.2: standardväärtus 10⁻¹ kõikide ehitiste jaoks.</div>
+
+        <div class="field">
+          <label>L<sub>F1</sub> – tulekahjust inimeste vigastuse suhe:</label>
+          <select id="LF1_in"></select>
+        </div>
+        <div id="LF1_abi" class="help-text">Vahemik sõltub ehitise kategooriast (Tabel C.2)</div>
+
+        <div id="LO1_block">
+          <div class="field">
+            <label>L<sub>O1</sub> – sisesüsteemi rikkest inimeste vigastuse suhe:</label>
+            <select id="LO1_in"></select>
+          </div>
+          <div id="LO1_abi" class="help-text">Rakendub plahvatusoht/haigla puhul</div>
+        </div>
+
+        <div class="section-title">Ehitise füüsikaliste vigastustega seonduvad kahjud (L2)</div>
+
+        <div class="field">
+          <label>L<sub>F2</sub> – tulekahjust füüsikaliste vigastuste suhe:</label>
+          <select id="LF2_in"></select>
+        </div>
+        <div id="LF2_abi" class="help-text">Vahemik sõltub ehitise kategooriast (Tabel C.2)</div>
+
+        <div id="LO2_block">
+          <div class="field">
+            <label>L<sub>O2</sub> – sisesüsteemi rikkest füüsikaliste vigastuste suhe:</label>
+            <select id="LO2_in"></select>
+          </div>
+          <div id="LO2_abi" class="help-text">Rakendub plahvatusohu korral</div>
+        </div>
+      </div>
+
+      <!-- VAHEKAART 6: KAITSE -->
+      <div class="tab-content" id="t6">
+        <div class="section-title">Olemasolev kaitse</div>
+        <div class="info-box">
+          Sisesta hetkel ehitises olemasolev olukord. Tööriist arvutab seejärel,
+          kas vaja on lisameetmeid ja millise klassi.
+        </div>
+
+        <div class="section-title">Piksekaitsesüsteem (LPS) <span class="standard-ref">(Tabel B.3)</span></div>
+        <div class="field">
+          <label>P<sub>LPS</sub> – olemasolev LPS:</label>
+          <select id="PLPS_valik"></select>
+        </div>
+
+        <div class="section-title">Liigpingekaitsesüsteem (P<sub>SPD</sub>) <span class="standard-ref">(Tabelid B.7/B.8)</span></div>
+        <div class="field">
+          <label>SPD elektrisüsteemil:</label>
+          <select id="PSPD_P_valik"></select>
+        </div>
+        <div class="field">
+          <label>SPD sidesüsteemil:</label>
+          <select id="PSPD_T_valik"></select>
+        </div>
+
+        <div class="section-title">Potentsiaaliühtlustus liini sisenemiskohas (P<sub>EB</sub>) <span class="standard-ref">(Tabel B.13)</span></div>
+        <div class="field">
+          <label>P<sub>EB</sub> elektriliinil:</label>
+          <select id="PEB_P_valik"></select>
+        </div>
+        <div class="field">
+          <label>P<sub>EB</sub> sideliinil:</label>
+          <select id="PEB_T_valik"></select>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="arvuta()">▶ Arvuta risk</button>
+      <button class="btn" onclick="laeVaikevaartused()">🔄 Vaikeväärtused</button>
+      <button class="btn" onclick="salvestaSisendid()">💾 Salvesta</button>
+      <button class="btn" onclick="laeFailist()">📂 Lae</button>
+      <button class="btn" onclick="window.print()">🖨️ Prindi</button>
+      <button class="btn" onclick="kuvaAbi()">ℹ Abi</button>
+    </div>
+  </div>
+
+  <!-- PAREM PANEEL: TULEMUSED -->
+  <div class="panel">
+    <div class="panel-header">
+      <span>Tulemused</span>
+      <span id="status" style="font-weight: normal; font-size: 11px; color: #666;">Vajuta "Arvuta risk"</span>
+    </div>
+    <div class="panel-body" id="tulemused">
+      <div class="info-box">
+        <b>Tere tulemast!</b><br><br>
+        See tööriist arvutab piksekaitse riskianalüüsi vastavalt standardile <b>EVS-EN IEC 62305-2:2025</b>.
+        <br><br>
+        Tulemus näitab:
+        <ul style="margin-left: 20px; margin-top: 4px;">
+          <li>Kas piksekaitse on vajalik (R &gt; R<sub>T</sub>)</li>
+          <li>Millise klassi (LPS I-IV) abil saab risk vastuvõetavale tasemele viidud</li>
+          <li>Üksikasjalikud arvutused (haardealad, sagedused, tõenäosused, riskikomponendid)</li>
+        </ul>
+        <br>
+        <b>Alustamiseks:</b> sisesta parameetrid vasakpoolsel paneelil ja vajuta "▶ Arvuta risk".
+        <br><br>
+        Vaikimisi laaditakse standardi <b>näide F.2 (Maja)</b>, mille saad kohe arvutada,
+        et näha tööriista toimimist (oodatav R = 1,793 × 10⁻⁵).
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  Piksekaitse riskianalüüsi tööriist · EVS-EN IEC 62305-2:2025 · Eesti standard · ICS 29.020; 91.120.40
+  <br>
+  See tööriist on mõeldud projekteerimise abivahendina. Lõplikku piksekaitse projekteerimist peab teostama vastav spetsialist.
+</footer>
+
+<script>
+// =============================================================================
+// PIKSEKAITSE RISKIANALÜÜSI TÖÖRIIST - ARVUTUSLOOGIKA
+// Vastavalt standardile EVS-EN IEC 62305-2:2025
+// =============================================================================
+
+// ----- TABELID JA KONSTANDID -----
+
+// Tabel A.1: Ehitise paiknemistegurid CD ja CDJ
+const CD_VALIKUD = {
+  'Ümbritsetud kõrgemate objektidega': 0.25,
+  'Ümbritsetud sama kõrgete või väiksemate objektidega': 0.5,
+  'Eraldiseisev ehitis (läheduses pole teisi objekte)': 1.0,
+  'Eraldiseisev ehitis mäe või künka tipus': 2.0,
+};
+
+// CD valikute selgitused (et kasutaja teaks, millal mida valida)
+const CD_SELGITUSED = {
+  'Ümbritsetud kõrgemate objektidega':
+    'C<sub>D</sub> = <b>0.25</b> – Vali, kui ehitise lähedal (300 m raadiuses) on objekte, mis on sellest <b>kõrgemad</b> (näiteks linnasüdames keset kõrgehoonete kvartalit, või naabermaja katuseharja kõrguse poolest selgelt kõrgem). Sellised kõrgemad objektid varjavad osaliselt välgust.',
+  'Ümbritsetud sama kõrgete või väiksemate objektidega':
+    'C<sub>D</sub> = <b>0.5</b> – Vali, kui ehitise lähedal on samakõrguseid või veidi madalamaid objekte (näiteks tüüpiline eluhoonete kvartal, kus majad on enam-vähem ühekõrgused, tihe äärelinn).',
+  'Eraldiseisev ehitis (läheduses pole teisi objekte)':
+    'C<sub>D</sub> = <b>1.0</b> – Vali, kui ehitis seisab lahtisel maa-alal ilma märkimisväärsete naaberobjektideta (talu lahtisel põllul, üksik hoone metsa servas, eraldiseisev tööstushoone). See on standardi <b>vaikeväärtus</b>.',
+  'Eraldiseisev ehitis mäe või künka tipus':
+    'C<sub>D</sub> = <b>2.0</b> – Vali, kui ehitis paikneb mäe, künka, kõrgendiku või muu maastikulise tõusu tipus (näiteks vaatetorn, kõrgendikule ehitatud kirik). Selline asukoht <b>kahekordistab</b> piksetabamise tõenäosuse.',
+};
+
+// Tabel C.2 vahemikud kahjude jaoks (kategooria järgi)
+// Iga väärtus on dict, kus võti on kuvatav tekst ja väärtus on arvuline
+// Kategooriad: 0=Väga suur, 1=Suur, 2=Tavaline, 3=Väike
+
+// LT - kõikidele ehitistele sama (10^-2)
+const LT_VALIKUD = {
+  'Standardväärtus 10⁻² (kõik ehitised)': 1e-2,
+};
+
+// LD - kõikidele ehitistele sama (10^-1)
+const LD_VALIKUD = {
+  'Standardväärtus 10⁻¹ (kõik ehitised)': 1e-1,
+};
+
+// LF1 ja LF2 vahemikud (Tabel C.2)
+const LF_VAHEMIKUD = {
+  0: {  // Väga suur kahju
+    '2 × 10⁻¹ (suurim väärtus, soovituslik)': 2e-1,
+    '1 × 10⁻¹ (keskmine)': 1e-1,
+    '5 × 10⁻² (väikseim)': 5e-2,
+    '1 × 10⁻² (vahemiku alumine piir)': 1e-2,
+  },
+  1: {  // Suur kahju
+    '1 × 10⁻¹ (suurim väärtus, soovituslik)': 1e-1,
+    '5 × 10⁻² (keskmine)': 5e-2,
+    '1 × 10⁻² (vahemiku alumine piir)': 1e-2,
+  },
+  2: {  // Tavaline kahju
+    '5 × 10⁻² (suurim väärtus, soovituslik)': 5e-2,
+    '2 × 10⁻² (keskmine)': 2e-2,
+    '1 × 10⁻² (väikseim)': 1e-2,
+    '5 × 10⁻³ (vahemiku alumine piir)': 5e-3,
+  },
+  3: {  // Väike kahju
+    '2 × 10⁻² (suurim väärtus, soovituslik)': 2e-2,
+    '1 × 10⁻² (keskmine)': 1e-2,
+    '5 × 10⁻³ (väikseim)': 5e-3,
+    '2 × 10⁻³ (vahemiku alumine piir)': 2e-3,
+  },
+};
+
+// LO1 ja LO2 vahemikud (Tabel C.2)
+const LO_VAHEMIKUD = {
+  0: {  // Väga suur kahju (haigla, plahvatusoht)
+    '1 × 10⁻² (suurim väärtus, soovituslik)': 1e-2,
+    '5 × 10⁻³ (keskmine)': 5e-3,
+    '1 × 10⁻³ (vahemiku alumine piir)': 1e-3,
+  },
+  1: {  // Suur kahju
+    '1 × 10⁻³ (suurim väärtus, soovituslik)': 1e-3,
+    '5 × 10⁻⁴ (keskmine)': 5e-4,
+    '1 × 10⁻⁴ (vahemiku alumine piir)': 1e-4,
+  },
+  2: {  // Tavaline kahju
+    '5 × 10⁻⁴ (suurim väärtus, soovituslik)': 5e-4,
+    '1 × 10⁻⁴ (keskmine)': 1e-4,
+    '5 × 10⁻⁵ (väikseim)': 5e-5,
+    '1 × 10⁻⁵ (vahemiku alumine piir)': 1e-5,
+  },
+  3: {  // Väike kahju
+    '1 × 10⁻⁴ (suurim väärtus, soovituslik)': 1e-4,
+    '5 × 10⁻⁵ (keskmine)': 5e-5,
+    '1 × 10⁻⁵ (vahemiku alumine piir)': 1e-5,
+  },
+};
+
+// Tabel A.2: Liini paigaldustegur CI
+const CI_VALIKUD = {
+  'Õhus (õhuliin)': 1.0,
+  'Süvistatud (maakaabel)': 0.3,
+  'Süvistatud kaablid maandurite võrksüsteemi sees': 0.01,
+};
+
+// Tabel A.3: Liini tüübitegur CT
+const CT_VALIKUD = {
+  'LV-elektriliin, side- või andmesideliin': 1.0,
+  'HV-elektriliin (HV/LV trafoga, eraldatud mähistega)': 0.2,
+};
+
+// Tabel A.4: Keskkonnategur CE
+const CE_VALIKUD = {
+  'Maakeskkond': 1.0,
+  'Äärelinnaline keskkond': 0.5,
+  'Linnaline keskkond': 0.1,
+  'Linnaline keskkond, kus hooned on >20 m kõrged': 0.01,
+};
+
+// Tabel B.1: Pam
+const PAM_VALIKUD = {
+  'Kaitsemeetmeid pole': 1.0,
+  'Hoiatustähis': 1e-1,
+  'Elektriline isolatsioon kaitsmata osadel (≥3 mm XLPE)': 1e-2,
+  'Efektiivne pinnase potentsiaalitasandus (võrkmaandurid)': 1e-2,
+  'Loomulik piksekaitsesüsteem (tugev metallkarkass)': 1e-3,
+  'Ligipääsupiirangud': 0.0,
+};
+
+// Tabel B.2: rt
+const RT_VALIKUD = {
+  'Põllumajanduslik, betoon (≤1 kΩ)': 1e-2,
+  'Marmor, keraamika (1-10 kΩ)': 1e-3,
+  'Kruus, vaipkate, vaibad (10-100 kΩ)': 1e-4,
+  'Asfalt, linoleum, puit (≥100 kΩ)': 1e-5,
+  'Isoleerkiht ≥5 cm asfalti': 0.0,
+};
+
+// Tabel B.3: PLPS
+const PLPS_VALIKUD = {
+  'LPS puudub (kaitsmata)': 1.0,
+  'LPS klass IV': 0.2,
+  'LPS klass III': 0.1,
+  'LPS klass II': 0.05,
+  'LPS klass I': 0.02,
+  'LPS I + katkematu metall- või raudbetoonkarkass': 0.01,
+  'LPS I + metallkatus + täielik katuse paigaldiste kaitse': 0.001,
+};
+
+// Tabel B.4: PS
+const PS_VALIKUD = {
+  'Puit ja müüritis': 1.0,
+  'Elektriliselt katkematu raudbetoon või metallkarkass': 0.5,
+};
+
+// Tabel B.5: rp
+const RP_VALIKUD = {
+  'Abinõud puuduvad': 1.0,
+  'Käsikustutid, hüdrandid, tulekindlad seinad jms': 0.5,
+  'Automaatne tulekustutus / häireseadmed (kaitstud SPD-ga)': 0.2,
+};
+
+// Tabel B.6: rf
+const RF_VALIKUD = {
+  'Plahvatusoht: Tsoonid 0, 20 või tahke lõhkeaine': 1.0,
+  'Plahvatusoht: Tsoonid 1, 21': 1e-1,
+  'Plahvatusoht: Tsoonid 2, 22': 1e-3,
+  'Tulekahju: Kõrge tuleoht (>800 MJ/m²)': 1e-1,
+  'Tulekahju: Tavaline (400-800 MJ/m²)': 1e-2,
+  'Tulekahju: Madal (<400 MJ/m²)': 1e-3,
+  'Plahvatus või tulekahju puudub': 0.0,
+};
+
+// Tabelid B.7/B.8: PSPD
+const PSPD_VALIKUD = {
+  'SPD-d puuduvad': 1.0,
+  'SPD LPL III-IV': 0.05,
+  'SPD LPL II': 0.02,
+  'SPD LPL I': 0.01,
+  'SPD parem kui LPL I (täiustatud)': 0.005,
+  'SPD parem kui LPL I (väga hea)': 1e-4,
+  'SPD parem kui LPL I (parim)': 1e-5,
+};
+
+// Tabel B.9: CLD ja CLI väärtused (paaridena)
+const CLD_CLI_VALIKUD = {
+  'Varjestamata õhuliin': [1.0, 1.0],
+  'Varjestamata süvistatud liin': [1.0, 1.0],
+  'Õhuliin, neutraal korduvmaandustega': [1.0, 0.2],
+  'Süvistatud varjestatud liin, varje ei ole ühendatud': [1.0, 0.3],
+  'Varjestatud õhuliin, varje ei ole ühendatud': [1.0, 0.1],
+  'Süvistatud varjestatud liin, varje ühendatud potentsiaaliühtlustusega': [1.0, 0.0],
+  'Varjestatud õhuliin, varje ühendatud potentsiaaliühtlustusega': [1.0, 0.0],
+  'Välgu eest kaitstud kaabel/torus, varje ühendatud': [0.0, 0.0],
+  'Välisliini pole / optiline liin': [0.0, 0.0],
+  'Liin isoleeriva sisendiga': [0.0, 0.0],
+};
+
+// Tabel B.10: KS3
+const KS3_VALIKUD = {
+  'Varjestamata kaabel, silmuste vältimine pole rakendatud': 1.0,
+  'Varjestamata kaabel, mõõdukad abinõud (silmused ~25 m²)': 0.5,
+  'Varjestamata kaabel, head abinõud (silmused ~10 m²)': 0.2,
+  'Varjestamata kaabel, väga head abinõud (silmused ~0,5 m²)': 0.01,
+  'Varjestatud kaablid või metallkarbikus': 1e-4,
+};
+
+// Tabel B.13: PEB
+const PEB_VALIKUD = {
+  'SPD-d puuduvad': 1.0,
+  'PEB LPL III-IV': 0.05,
+  'PEB LPL II': 0.02,
+  'PEB LPL I': 0.01,
+};
+
+// Kaabli tüübid PLD arvutamiseks
+const KAABLI_TÜÜP_VALIKUD = {
+  'Kaitsmata või varje ühendamata': 'kaitsmata',
+  'Varjestatud, RS 5-20 Ω/km, varje ühendatud': 'rs_5_20',
+  'Varjestatud, RS 1-5 Ω/km, varje ühendatud': 'rs_1_5',
+  'Varjestatud, RS ≤1 Ω/km, varje ühendatud': 'rs_alla_1',
+};
+
+// Ehitise kategooriad (Tabel C.2)
+const EHITISE_KATEGOORIA = {
+  'Väga suure kahjuga (haigla intensiivravi, plahvatusohtlik)': 0,
+  'Suure kahjuga (palatid, juhtimisruumid, muuseumid)': 1,
+  'Tavalise kahjuga (kirikud, koolid, kontorid, kaubahallid)': 2,
+  'Väikese kahjuga (eluhoone, talu)': 3,
+};
+
+// Soovituslikud kahju vaikeväärtused: [LT, LD, LF1, LF2, LO1, LO2]
+const KAHJU_VAIKEVÄÄRTUSED = {
+  0: [1e-2, 1e-1, 1e-1, 1e-1, 1e-2, 1e-2],
+  1: [1e-2, 1e-1, 1e-1, 1e-1, 1e-3, 1e-3],
+  2: [1e-2, 1e-1, 5e-2, 5e-2, 5e-4, 5e-4],
+  3: [1e-2, 1e-1, 2e-2, 2e-2, 1e-4, 1e-4],
+};
+
+// =============================================================================
+// HAARDEALADE ARVUTUSVALEMID (Lisa A)
+// =============================================================================
+
+function arvutaAD(L, W, H) {
+  // Valem A.3: AD = L*W + 2*(3H)*(L+W) + π*(3H)²
+  return L * W + 2 * (3 * H) * (L + W) + Math.PI * Math.pow(3 * H, 2);
+}
+
+function arvutaAM(L, W, UW_kV) {
+  // Valem A.8: AM = 2*rM*(L+W) + π*rM², kus rM = 350/UW
+  if (!UW_kV || UW_kV <= 0.1) UW_kV = 1.5;
+  const rM = 350.0 / UW_kV;
+  return 2 * rM * (L + W) + Math.PI * rM * rM;
+}
+
+function arvutaAL(LL) {
+  // Valem A.10: AL = 40*LL
+  return 40 * LL;
+}
+
+function arvutaAI(LL, UW_kV) {
+  // Valem A.12: AI = 2*rI*LL, kus rI = 2000/UW^1.8
+  if (!UW_kV || UW_kV <= 0.1) UW_kV = 1.5;
+  const rI = 2000.0 / Math.pow(UW_kV, 1.8);
+  return 2 * rI * LL;
+}
+
+function arvutaND(NSG, AD, CD) {
+  // Valem A.5: ND = NSG * AD * CD * 1e-6
+  return NSG * AD * CD * 1e-6;
+}
+
+function arvutaNM(NSG, AM, k = 2) {
+  // Valem A.7: NM = (1/k) * NSG * AM * 1e-6
+  return (1.0 / k) * NSG * AM * 1e-6;
+}
+
+function arvutaNL(NSG, AL, CI, CE, CT) {
+  // Valem A.9: NL = NSG * AL * CI * CE * CT * 1e-6
+  return NSG * AL * CI * CE * CT * 1e-6;
+}
+
+function arvutaNI(NSG, AI, CI, CE, CT, k = 2) {
+  // Valem A.11: NI = (1/k) * NSG * AI * CI * CE * CT * 1e-6
+  return (1.0 / k) * NSG * AI * CI * CE * CT * 1e-6;
+}
+
+// =============================================================================
+// TÕENÄOSUSED (Lisa B)
+// =============================================================================
+
+function arvutaPAT(PLPS, Pam, rt, PTWS = 1.0) {
+  return PLPS * Pam * rt * PTWS;
+}
+
+function arvutaPAD(PTWS, Pam, PO, PLPS) {
+  return PTWS * Pam * PO * PLPS;
+}
+
+function arvutaPB(PS, PLPS, rf, rp) {
+  return PS * PLPS * rf * rp;
+}
+
+function arvutaPC(PSPD, CLD) {
+  return PSPD * CLD;
+}
+
+function arvutaPM(PSPD, KS1, KS2, KS3) {
+  const PMS = Math.pow(KS1 * KS2 * KS3, 2);
+  return PSPD * PMS;
+}
+
+function arvutaPU(Pam, PEB, PLD, CLD, rt, PTWS = 1.0) {
+  return Pam * PEB * PLD * PTWS * CLD * rt;
+}
+
+function arvutaPV(PEB, PLD, CLD, rf, rp, PTWS = 1.0) {
+  return PEB * PLD * PTWS * CLD * rf * rp;
+}
+
+function arvutaPW(PSPD, PLD, CLD, PTWS = 1.0) {
+  return PSPD * PTWS * PLD * CLD;
+}
+
+function arvutaPZ(PSPD, CLI, PTWS = 1.0) {
+  return PSPD * PTWS * CLI;
+}
+
+// PLD - Tabelid B.11/B.12
+function arvutaPLD(kaabli_tüüp, uw_kV) {
+  if (kaabli_tüüp === 'kaitsmata' || !uw_kV || uw_kV <= 0) return 1.0;
+
+  let tabel;
+  if (uw_kV <= 12) {
+    if (kaabli_tüüp === 'rs_5_20') {
+      tabel = [[0.35,1],[0.5,1],[1,1],[1.5,1],[2.5,0.95],[4,0.9],[6,0.8],[12,0.4]];
+    } else if (kaabli_tüüp === 'rs_1_5') {
+      tabel = [[0.35,1],[0.5,1],[1,0.9],[1.5,0.8],[2.5,0.6],[4,0.3],[6,0.1],[12,0.02]];
+    } else if (kaabli_tüüp === 'rs_alla_1') {
+      tabel = [[0.35,1],[0.5,0.85],[1,0.6],[1.5,0.4],[2.5,0.2],[4,0.04],[6,0.02],[12,0.005]];
+    } else return 1.0;
+  } else {
+    if (kaabli_tüüp === 'rs_5_20') {
+      tabel = [[16,0.3],[20,0.15],[40,0.03],[60,0.01],[75,0.007],[95,0.005]];
+    } else if (kaabli_tüüp === 'rs_1_5') {
+      tabel = [[16,0.01],[20,0.007],[40,0.0015],[60,0.001],[75,4e-4],[95,2e-4]];
+    } else if (kaabli_tüüp === 'rs_alla_1') {
+      tabel = [[16,0.002],[20,0.0015],[40,4e-4],[60,1.5e-4],[75,1e-4],[95,0.7e-4]];
+    } else return 1.0;
+  }
+
+  for (const [u, p] of tabel) {
+    if (uw_kV <= u + 0.001) return p;
+  }
+  return tabel[tabel.length - 1][1];
+}
+
+// =============================================================================
+// RISKIKOMPONENDID (jaotis 8, Tabel 3)
+// =============================================================================
+
+function arvutaRiskid(p) {
+  const R = {};
+
+  const ND = p.ND || 0, NM = p.NM || 0;
+  const NL_P = p.NL_P || 0, NL_T = p.NL_T || 0;
+  const NI_P = p.NI_P || 0, NI_T = p.NI_T || 0;
+  const NDJ_P = p.NDJ_P || 0, NDJ_T = p.NDJ_T || 0;
+
+  const PAT = p.PAT || 0, PAD = p.PAD || 0;
+  const PB = p.PB || 0, PC = p.PC || 0, PM = p.PM || 0;
+  const PU_P = p.PU_P || 0, PU_T = p.PU_T || 0;
+  const PV_P = p.PV_P || 0, PV_T = p.PV_T || 0;
+  const PW_P = p.PW_P || 0, PW_T = p.PW_T || 0;
+  const PZ_P = p.PZ_P || 0, PZ_T = p.PZ_T || 0;
+
+  const PP = p.PP || 1.0, Pe = p.Pe || 1.0;
+
+  const LT = p.LT || 0, LD = p.LD || 0;
+  const LF1 = p.LF1 || 0, LF2 = p.LF2 || 0;
+  const LO1 = p.LO1 || 0, LO2 = p.LO2 || 0;
+
+  const useRC1 = p.kasuta_RC1 || false;
+  const useRM1 = p.kasuta_RM1 || false;
+  const useRW1 = p.kasuta_RW1 || false;
+  const useRZ1 = p.kasuta_RZ1 || false;
+  const useRC2 = p.kasuta_RC2 || false;
+  const useRM2 = p.kasuta_RM2 || false;
+  const useRW2 = p.kasuta_RW2 || false;
+  const useRZ2 = p.kasuta_RZ2 || false;
+  const useRAD = p.kasuta_RAD || false;
+
+  // L1 - inimelu kaotus
+  R.RAT = ND * PAT * PP * LT;
+  R.RAD = useRAD ? ND * PAD * PP * LD : 0;
+  R.RB1 = ND * PB * PP * LF1;
+  R.RC1 = useRC1 ? ND * PC * PP * Pe * LO1 : 0;
+  R.RM1 = useRM1 ? NM * PM * PP * Pe * LO1 : 0;
+  R.RU = (NL_P + NDJ_P) * PU_P * PP * LT + (NL_T + NDJ_T) * PU_T * PP * LT;
+  R.RV1 = (NL_P + NDJ_P) * PV_P * PP * LF1 + (NL_T + NDJ_T) * PV_T * PP * LF1;
+  R.RW1 = useRW1 ? ((NL_P + NDJ_P) * PW_P + (NL_T + NDJ_T) * PW_T) * PP * Pe * LO1 : 0;
+  R.RZ1 = useRZ1 ? (NI_P * PZ_P + NI_T * PZ_T) * PP * Pe * LO1 : 0;
+
+  // L2 - füüsikalised vigastused
+  R.RB2 = ND * PB * LF2;
+  R.RC2 = useRC2 ? ND * PC * Pe * LO2 : 0;
+  R.RM2 = useRM2 ? NM * PM * Pe * LO2 : 0;
+  R.RV2 = (NL_P + NDJ_P) * PV_P * LF2 + (NL_T + NDJ_T) * PV_T * LF2;
+  R.RW2 = useRW2 ? ((NL_P + NDJ_P) * PW_P + (NL_T + NDJ_T) * PW_T) * Pe * LO2 : 0;
+  R.RZ2 = useRZ2 ? (NI_P * PZ_P + NI_T * PZ_T) * Pe * LO2 : 0;
+
+  R.RB = R.RB1 + R.RB2;
+  R.RC = R.RC1 + R.RC2;
+  R.RM = R.RM1 + R.RM2;
+  R.RV = R.RV1 + R.RV2;
+  R.RW = R.RW1 + R.RW2;
+  R.RZ = R.RZ1 + R.RZ2;
+
+  // R1, R2 (jaotis 6.3.2, valemid 7-8)
+  R.R1 = R.RAT + R.RAD + R.RB1 + R.RC1 + R.RM1 + R.RU + R.RV1 + R.RW1 + R.RZ1;
+  R.R2 = R.RB2 + R.RC2 + R.RM2 + R.RV2 + R.RW2 + R.RZ2;
+  R.R = R.R1 + R.R2;
+
+  return R;
+}
+
+// =============================================================================
+// KASUTAJALIIDESE LOOGIKA
+// =============================================================================
+
+// Täida select-elemendid (võimalus näidata ka arvulisi väärtusi sulgudes)
+function täidaSelect(id, valikud, vaikimisi, naitaArve = false) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.innerHTML = '';
+  for (const k of Object.keys(valikud)) {
+    const o = document.createElement('option');
+    o.value = k;
+    if (naitaArve && typeof valikud[k] === 'number') {
+      o.textContent = `${k}  (= ${valikud[k]})`;
+    } else {
+      o.textContent = k;
+    }
+    if (k === vaikimisi) o.selected = true;
+    el.appendChild(o);
+  }
+}
+
+// CD selgituse näitamine valitud variandi järgi
+function naita_CD_selgitus() {
+  const sel = document.getElementById('CD_valik');
+  const div = document.getElementById('CD_selgitus');
+  if (!sel || !div) return;
+  const tekst = CD_SELGITUSED[sel.value] || '';
+  div.innerHTML = tekst;
+}
+
+// RAD: PO välja aktiveerimine ainult kasuta_RAD valitud
+function lulita_RAD() {
+  const cb = document.getElementById('kasuta_RAD');
+  const po = document.getElementById('PO');
+  if (!cb || !po) return;
+  if (cb.checked) {
+    po.disabled = false;
+  } else {
+    po.disabled = true;
+    po.value = '0';
+  }
+}
+
+// LO1 ja LO2 lülitamine - aktiveeruvad ainult eriliste ehitiste puhul
+function lulita_LO() {
+  const useRC1 = document.getElementById('kasuta_RC1');
+  const useRC2 = document.getElementById('kasuta_RC2');
+  const lo1Block = document.getElementById('LO1_block');
+  const lo2Block = document.getElementById('LO2_block');
+
+  // LO1 (haigla või plahvatusoht)
+  if (lo1Block) {
+    if (useRC1 && useRC1.checked) {
+      lo1Block.classList.remove('disabled-section');
+      const lo1 = document.getElementById('LO1_in');
+      if (lo1) lo1.disabled = false;
+    } else {
+      lo1Block.classList.add('disabled-section');
+      const lo1 = document.getElementById('LO1_in');
+      if (lo1) lo1.disabled = true;
+    }
+  }
+
+  // LO2 (plahvatusoht)
+  if (lo2Block) {
+    if (useRC2 && useRC2.checked) {
+      lo2Block.classList.remove('disabled-section');
+      const lo2 = document.getElementById('LO2_in');
+      if (lo2) lo2.disabled = false;
+    } else {
+      lo2Block.classList.add('disabled-section');
+      const lo2 = document.getElementById('LO2_in');
+      if (lo2) lo2.disabled = true;
+    }
+  }
+
+  // Uuenda abitekste vastavalt sellele, kas aktiveerivad
+  const lo1abi = document.getElementById('LO1_abi');
+  const lo2abi = document.getElementById('LO2_abi');
+  if (lo1abi) {
+    lo1abi.textContent = (useRC1 && useRC1.checked)
+      ? '✓ Aktiveeritud (vahekaardil "Ehitis" valitud plahvatusoht/haigla)'
+      : '⊘ Mitteaktiivne – aktiveerub vahekaardil "Ehitis" valikuga "Plahvatusoht või haigla"';
+  }
+  if (lo2abi) {
+    lo2abi.textContent = (useRC2 && useRC2.checked)
+      ? '✓ Aktiveeritud (vahekaardil "Ehitis" valitud plahvatusohtlik ehitis)'
+      : '⊘ Mitteaktiivne – aktiveerub vahekaardil "Ehitis" valikuga "Plahvatusohtlik ehitis"';
+  }
+}
+
+// Lae vaikevalikud kõikidesse select-idesse
+function laeVaikevalikud() {
+  // CD näitame koos arvuliste väärtustega
+  täidaSelect('CD_valik', CD_VALIKUD, 'Eraldiseisev ehitis (läheduses pole teisi objekte)', true);
+  täidaSelect('CDJ_valik', CD_VALIKUD, 'Eraldiseisev ehitis (läheduses pole teisi objekte)', true);
+
+  // Muud valikud
+  täidaSelect('PS_valik', PS_VALIKUD, 'Puit ja müüritis');
+  täidaSelect('kategooria', EHITISE_KATEGOORIA, 'Väikese kahjuga (eluhoone, talu)');
+  täidaSelect('CE_valik', CE_VALIKUD, 'Maakeskkond');
+  täidaSelect('rt_valik', RT_VALIKUD, 'Asfalt, linoleum, puit (≥100 kΩ)');
+  täidaSelect('Pam_valik', PAM_VALIKUD, 'Kaitsemeetmeid pole');
+  täidaSelect('rf_valik', RF_VALIKUD, 'Tulekahju: Madal (<400 MJ/m²)');
+  täidaSelect('rp_valik', RP_VALIKUD, 'Abinõud puuduvad');
+  täidaSelect('KS3P_valik', KS3_VALIKUD, 'Varjestamata kaabel, head abinõud (silmused ~10 m²)');
+  täidaSelect('KS3T_valik', KS3_VALIKUD, 'Varjestamata kaabel, silmuste vältimine pole rakendatud');
+  täidaSelect('CIP_valik', CI_VALIKUD, 'Õhus (õhuliin)');
+  täidaSelect('CTP_valik', CT_VALIKUD, 'LV-elektriliin, side- või andmesideliin');
+  täidaSelect('CIT_valik', CI_VALIKUD, 'Õhus (õhuliin)');
+  täidaSelect('CTT_valik', CT_VALIKUD, 'LV-elektriliin, side- või andmesideliin');
+  täidaSelect('kaabli_tüüp_P', KAABLI_TÜÜP_VALIKUD, 'Kaitsmata või varje ühendamata');
+  täidaSelect('kaabli_tüüp_T', KAABLI_TÜÜP_VALIKUD, 'Kaitsmata või varje ühendamata');
+  täidaSelect('CLD_CLI_P_valik', CLD_CLI_VALIKUD, 'Varjestamata õhuliin');
+  täidaSelect('CLD_CLI_T_valik', CLD_CLI_VALIKUD, 'Varjestamata õhuliin');
+  täidaSelect('PLPS_valik', PLPS_VALIKUD, 'LPS puudub (kaitsmata)');
+  täidaSelect('PSPD_P_valik', PSPD_VALIKUD, 'SPD-d puuduvad');
+  täidaSelect('PSPD_T_valik', PSPD_VALIKUD, 'SPD-d puuduvad');
+  täidaSelect('PEB_P_valik', PEB_VALIKUD, 'SPD-d puuduvad');
+  täidaSelect('PEB_T_valik', PEB_VALIKUD, 'SPD-d puuduvad');
+
+  // Kahjud (LT ja LD on standardi tüüpväärtused, sõltumatud kategooriast)
+  täidaSelect('LT_in', LT_VALIKUD, 'Standardväärtus 10⁻² (kõik ehitised)');
+  täidaSelect('LD_in', LD_VALIKUD, 'Standardväärtus 10⁻¹ (kõik ehitised)');
+
+  // LF1, LF2, LO1, LO2 - täidetakse kategooria järgi
+  uuenda_kahju_valikud();
+
+  // Näita CD selgitust
+  naita_CD_selgitus();
+}
+
+// Uuenda LF1, LF2, LO1, LO2 valikuid kategooria järgi
+function uuenda_kahju_valikud() {
+  const katEl = document.getElementById('kategooria');
+  if (!katEl) return;
+  const kat = EHITISE_KATEGOORIA[katEl.value];
+  if (kat === undefined) return;
+
+  const lfValikud = LF_VAHEMIKUD[kat];
+  const loValikud = LO_VAHEMIKUD[kat];
+
+  // Vaikimisi valitakse esimene (suurim, soovituslik) väärtus
+  const lf_default = Object.keys(lfValikud)[0];
+  const lo_default = Object.keys(loValikud)[0];
+
+  täidaSelect('LF1_in', lfValikud, lf_default);
+  täidaSelect('LF2_in', lfValikud, lf_default);
+  täidaSelect('LO1_in', loValikud, lo_default);
+  täidaSelect('LO2_in', loValikud, lo_default);
+
+  // Uuenda abitekste, et selgitada, mis kategoorias kasutaja on
+  const katNimed = ['Väga suur kahju', 'Suur kahju', 'Tavaline kahju', 'Väike kahju'];
+  const katNimi = katNimed[kat];
+  const lf1abi = document.getElementById('LF1_abi');
+  const lf2abi = document.getElementById('LF2_abi');
+  if (lf1abi) lf1abi.innerHTML = `Kategooria: <b>${katNimi}</b>. Standardvalik on suurim (soovituslik) väärtus.`;
+  if (lf2abi) lf2abi.innerHTML = `Kategooria: <b>${katNimi}</b>. Standardvalik on suurim (soovituslik) väärtus.`;
+}
+
+// Vahekaardid - event listenerid lisatakse DOMContentLoaded sees
+
+// Kategooria muutus → uuenda kahjude valikud (kasutab uut funktsiooni)
+function kategooriaUuenda() {
+  uuenda_kahju_valikud();
+}
+
+// Vaikeväärtused (näide F.2 - Maja)
+function laeVaikevaartused() {
+  laeVaikevalikud();
+
+  // Üldine
+  document.getElementById('projekt_nimi').value = 'Näide F.2 - Maja';
+  document.getElementById('asukoht').value = 'Eestis';
+  document.getElementById('koostaja').value = '';
+  const kp = new Date();
+  document.getElementById('kuupaev').value =
+    `${String(kp.getDate()).padStart(2,'0')}.${String(kp.getMonth()+1).padStart(2,'0')}.${kp.getFullYear()}`;
+
+  document.getElementById('NG').value = '4.0';
+  document.getElementById('k_tegur_sg').value = '2';
+  document.getElementById('NSG').value = '8.0';
+  document.getElementById('RT').value = '1e-5';
+  document.getElementById('tZ').value = '4380';
+  document.getElementById('te').value = '8760';
+
+  // Ehitis
+  document.getElementById('L').value = '15';
+  document.getElementById('W').value = '20';
+  document.getElementById('H').value = '6';
+  document.getElementById('KS1').value = '1.0';
+  document.getElementById('KS2').value = '1.0';
+  document.getElementById('PO').value = '0';
+  document.getElementById('kasuta_RAD').checked = false;
+  document.getElementById('kasuta_RC1').checked = false;
+  document.getElementById('kasuta_RC2').checked = false;
+
+  // Liinid
+  document.getElementById('kasuta_elektriliin').checked = true;
+  document.getElementById('LL_P').value = '1000';
+  document.getElementById('UWP').value = '2.5';
+  document.getElementById('kasuta_sideliin').checked = true;
+  document.getElementById('LL_T').value = '800';
+  document.getElementById('UWT').value = '1.5';
+  document.getElementById('kasuta_naaber').checked = false;
+  document.getElementById('L_J').value = '0';
+  document.getElementById('W_J').value = '0';
+  document.getElementById('H_J').value = '0';
+
+  document.getElementById('PTWS').value = '1.0';
+
+  // Kahjud täidetakse automaatselt kategooria kaudu (uuenda_kahju_valikud)
+
+  document.getElementById('status').textContent = 'Vaikeväärtused laaditud (näide F.2 - Maja)';
+}
+
+// Numbri lugemine inputist (toetab nii "1e-5" kui "1.5")
+function getNum(id, vaikimisi = 0) {
+  const el = document.getElementById(id);
+  if (!el) return vaikimisi;
+  const v = el.value.trim().replace(',', '.');
+  const n = parseFloat(v);
+  return isNaN(n) ? vaikimisi : n;
+}
+
+function getStr(id, vaikimisi = '') {
+  const el = document.getElementById(id);
+  return el ? el.value : vaikimisi;
+}
+
+function getBool(id) {
+  const el = document.getElementById(id);
+  return el ? el.checked : false;
+}
+
+function getSel(id) {
+  const el = document.getElementById(id);
+  return el ? el.value : '';
+}
+
+// Vorming
+function fmt(x, n = 3) {
+  if (x === 0) return '0';
+  if (Math.abs(x) < 1e-3 || Math.abs(x) > 1e4) {
+    return x.toExponential(n).replace('e', '·10').replace(/\+/g, '');
+  }
+  return x.toPrecision(n);
+}
+
+function fmtSci(x, n = 3) {
+  if (x === 0) return '0';
+  return x.toExponential(n);
+}
+
+// =============================================================================
+// PEAMINE ARVUTUS
+// =============================================================================
+
+function koguArvutus(P, override = {}) {
+  // Override: PLPS, PSPD_P, PSPD_T, PEB_P, PEB_T
+  const PLPS = override.PLPS !== undefined ? override.PLPS : P.PLPS;
+  const PSPD_P = override.PSPD_P !== undefined ? override.PSPD_P : P.PSPD_P;
+  const PSPD_T = override.PSPD_T !== undefined ? override.PSPD_T : P.PSPD_T;
+  const PEB_P = override.PEB_P !== undefined ? override.PEB_P : P.PEB_P;
+  const PEB_T = override.PEB_T !== undefined ? override.PEB_T : P.PEB_T;
+
+  // Haardealad
+  const AD = arvutaAD(P.L, P.W, P.H);
+
+  // AM kasutab madalaimat UW (kõige rangem juhtum)
+  const UWs = [];
+  if (P.kasuta_elektriliin) UWs.push(P.UWP);
+  if (P.kasuta_sideliin) UWs.push(P.UWT);
+  const UW_min = UWs.length ? Math.min(...UWs) : 1.5;
+  const AM = arvutaAM(P.L, P.W, UW_min);
+
+  const ALP = P.kasuta_elektriliin ? arvutaAL(P.LL_P) : 0;
+  const AIP = P.kasuta_elektriliin ? arvutaAI(P.LL_P, P.UWP) : 0;
+  const ALT = P.kasuta_sideliin ? arvutaAL(P.LL_T) : 0;
+  const AIT = P.kasuta_sideliin ? arvutaAI(P.LL_T, P.UWT) : 0;
+
+  const ADJ = (P.kasuta_naaber && P.L_J > 0) ? arvutaAD(P.L_J, P.W_J, P.H_J) : 0;
+
+  // Sagedused
+  const ND = arvutaND(P.NSG, AD, P.CD);
+  const NM = arvutaNM(P.NSG, AM, P.k_tegur);
+  const NL_P = P.kasuta_elektriliin ? arvutaNL(P.NSG, ALP, P.CIP, P.CE, P.CTP) : 0;
+  const NI_P = P.kasuta_elektriliin ? arvutaNI(P.NSG, AIP, P.CIP, P.CE, P.CTP, P.k_tegur) : 0;
+  const NL_T = P.kasuta_sideliin ? arvutaNL(P.NSG, ALT, P.CIT, P.CE, P.CTT) : 0;
+  const NI_T = P.kasuta_sideliin ? arvutaNI(P.NSG, AIT, P.CIT, P.CE, P.CTT, P.k_tegur) : 0;
+
+  let NDJ_P = 0, NDJ_T = 0;
+  if (P.kasuta_naaber && ADJ > 0) {
+    if (P.kasuta_elektriliin) NDJ_P = P.NSG * ADJ * P.CDJ * P.CTP * 1e-6;
+    if (P.kasuta_sideliin) NDJ_T = P.NSG * ADJ * P.CDJ * P.CTT * 1e-6;
+  }
+
+  // Tõenäosused
+  const PLD_P = P.kasuta_elektriliin ? arvutaPLD(P.kaabli_tüüp_P, P.UWP) : 0;
+  const PLD_T = P.kasuta_sideliin ? arvutaPLD(P.kaabli_tüüp_T, P.UWT) : 0;
+
+  const PAT = arvutaPAT(PLPS, P.Pam, P.rt, P.PTWS);
+  const PAD = P.kasuta_RAD ? arvutaPAD(P.PTWS, P.Pam, P.PO, PLPS) : 0;
+  const PB = arvutaPB(P.PS, PLPS, P.rf, P.rp);
+
+  const PC_P = P.kasuta_elektriliin ? arvutaPC(PSPD_P, P.CLD_P) : 0;
+  const PC_T = P.kasuta_sideliin ? arvutaPC(PSPD_T, P.CLD_T) : 0;
+  // Valem 10
+  const PC = (PC_P > 0 && PC_T > 0) ? (1 - (1 - PC_P) * (1 - PC_T)) : Math.max(PC_P, PC_T);
+
+  const PM_P = P.kasuta_elektriliin ? arvutaPM(PSPD_P, P.KS1, P.KS2, P.KS3_P) : 0;
+  const PM_T = P.kasuta_sideliin ? arvutaPM(PSPD_T, P.KS1, P.KS2, P.KS3_T) : 0;
+  const PM = (PM_P > 0 && PM_T > 0) ? (1 - (1 - PM_P) * (1 - PM_T)) : Math.max(PM_P, PM_T);
+
+  let PU_P = 0, PV_P = 0, PW_P = 0, PZ_P = 0;
+  if (P.kasuta_elektriliin) {
+    PU_P = arvutaPU(P.Pam, PEB_P, PLD_P, P.CLD_P, P.rt, P.PTWS);
+    PV_P = arvutaPV(PEB_P, PLD_P, P.CLD_P, P.rf, P.rp, P.PTWS);
+    PW_P = arvutaPW(PSPD_P, PLD_P, P.CLD_P, P.PTWS);
+    PZ_P = arvutaPZ(PSPD_P, P.CLI_P, P.PTWS);
+  }
+  let PU_T = 0, PV_T = 0, PW_T = 0, PZ_T = 0;
+  if (P.kasuta_sideliin) {
+    PU_T = arvutaPU(P.Pam, PEB_T, PLD_T, P.CLD_T, P.rt, P.PTWS);
+    PV_T = arvutaPV(PEB_T, PLD_T, P.CLD_T, P.rf, P.rp, P.PTWS);
+    PW_T = arvutaPW(PSPD_T, PLD_T, P.CLD_T, P.PTWS);
+    PZ_T = arvutaPZ(PSPD_T, P.CLI_T, P.PTWS);
+  }
+
+  const riskParam = {
+    ND, NM, NL_P, NL_T, NI_P, NI_T, NDJ_P, NDJ_T,
+    PAT, PAD, PB, PC, PM,
+    PU_P, PU_T, PV_P, PV_T, PW_P, PW_T, PZ_P, PZ_T,
+    PP: P.PP, Pe: P.Pe,
+    LT: P.LT, LD: P.LD, LF1: P.LF1, LF2: P.LF2, LO1: P.LO1, LO2: P.LO2,
+    kasuta_RC1: P.plahvatus_haigla_L1, kasuta_RM1: P.plahvatus_haigla_L1,
+    kasuta_RW1: P.plahvatus_haigla_L1, kasuta_RZ1: P.plahvatus_haigla_L1,
+    kasuta_RC2: P.plahvatus_L2, kasuta_RM2: P.plahvatus_L2,
+    kasuta_RW2: P.plahvatus_L2, kasuta_RZ2: P.plahvatus_L2,
+    kasuta_RAD: P.kasuta_RAD,
+  };
+
+  const R = arvutaRiskid(riskParam);
+
+  return {
+    P, AD, AM, ALP, AIP, ALT, AIT, ADJ, UW_min,
+    ND, NM, NL_P, NI_P, NL_T, NI_T, NDJ_P, NDJ_T,
+    PLD_P, PLD_T, PAT, PAD, PB, PC, PM,
+    PU_P, PV_P, PW_P, PZ_P, PU_T, PV_T, PW_T, PZ_T,
+    PLPS, PSPD_P, PSPD_T, PEB_P, PEB_T, R,
+  };
+}
+
+// Kogu kasutajaliidesest sisendid
+function koguSisendid() {
+  const P = {};
+
+  // Üldine
+  // NG sisestab kasutaja, NSG arvutatakse automaatselt
+  P.NG = getNum('NG', 4.0);
+  P.k_tegur = getNum('k_tegur_sg', 2);  // NG → NSG tegur
+  P.NSG = getNum('NSG', P.NG * P.k_tegur);
+  P.RT = getNum('RT', 1e-5);
+  P.tZ = getNum('tZ', 8760);
+  P.te = getNum('te', 8760);
+  P.PP = Math.min(1.0, P.tZ / 8760);
+  P.Pe = Math.min(1.0, P.te / 8760);
+
+  // Ehitis
+  P.L = getNum('L', 10);
+  P.W = getNum('W', 10);
+  P.H = getNum('H', 6);
+  P.CD = CD_VALIKUD[getSel('CD_valik')] ?? 1.0;
+  P.PS = PS_VALIKUD[getSel('PS_valik')] ?? 1.0;
+  P.KS1 = getNum('KS1', 1.0);
+  P.KS2 = getNum('KS2', 1.0);
+
+  P.kasuta_RAD = getBool('kasuta_RAD');
+  P.PO = getNum('PO', 0);
+  P.plahvatus_haigla_L1 = getBool('kasuta_RC1');
+  P.plahvatus_L2 = getBool('kasuta_RC2');
+
+  // Keskkond
+  P.CE = CE_VALIKUD[getSel('CE_valik')] ?? 1.0;
+  P.rt = RT_VALIKUD[getSel('rt_valik')] ?? 1e-5;
+  P.Pam = PAM_VALIKUD[getSel('Pam_valik')] ?? 1.0;
+  P.rf = RF_VALIKUD[getSel('rf_valik')] ?? 0;
+  P.rp = RP_VALIKUD[getSel('rp_valik')] ?? 1.0;
+  P.KS3_P = KS3_VALIKUD[getSel('KS3P_valik')] ?? 1.0;
+  P.KS3_T = KS3_VALIKUD[getSel('KS3T_valik')] ?? 1.0;
+  P.PTWS = getNum('PTWS', 1.0);
+
+  // Liinid
+  P.kasuta_elektriliin = getBool('kasuta_elektriliin');
+  P.LL_P = getNum('LL_P', 1000);
+  P.CIP = CI_VALIKUD[getSel('CIP_valik')] ?? 1.0;
+  P.CTP = CT_VALIKUD[getSel('CTP_valik')] ?? 1.0;
+  P.UWP = getNum('UWP', 2.5);
+  P.kaabli_tüüp_P = KAABLI_TÜÜP_VALIKUD[getSel('kaabli_tüüp_P')] ?? 'kaitsmata';
+  const cldP = CLD_CLI_VALIKUD[getSel('CLD_CLI_P_valik')] ?? [1.0, 1.0];
+  P.CLD_P = cldP[0]; P.CLI_P = cldP[1];
+
+  P.kasuta_sideliin = getBool('kasuta_sideliin');
+  P.LL_T = getNum('LL_T', 1000);
+  P.CIT = CI_VALIKUD[getSel('CIT_valik')] ?? 1.0;
+  P.CTT = CT_VALIKUD[getSel('CTT_valik')] ?? 1.0;
+  P.UWT = getNum('UWT', 1.5);
+  P.kaabli_tüüp_T = KAABLI_TÜÜP_VALIKUD[getSel('kaabli_tüüp_T')] ?? 'kaitsmata';
+  const cldT = CLD_CLI_VALIKUD[getSel('CLD_CLI_T_valik')] ?? [1.0, 1.0];
+  P.CLD_T = cldT[0]; P.CLI_T = cldT[1];
+
+  P.kasuta_naaber = getBool('kasuta_naaber');
+  P.L_J = getNum('L_J', 0);
+  P.W_J = getNum('W_J', 0);
+  P.H_J = getNum('H_J', 0);
+  P.CDJ = CD_VALIKUD[getSel('CDJ_valik')] ?? 1.0;
+
+  // Kahjud (loetakse nüüd dropdownidest)
+  P.LT = LT_VALIKUD[getSel('LT_in')] ?? 1e-2;
+  P.LD = LD_VALIKUD[getSel('LD_in')] ?? 1e-1;
+
+  // LF1, LF2, LO1, LO2 - vahemikud sõltuvad kategooriast
+  const katEl = document.getElementById('kategooria');
+  const kat = katEl ? EHITISE_KATEGOORIA[katEl.value] : 3;
+  const lfV = LF_VAHEMIKUD[kat] || LF_VAHEMIKUD[3];
+  const loV = LO_VAHEMIKUD[kat] || LO_VAHEMIKUD[3];
+
+  P.LF1 = lfV[getSel('LF1_in')] ?? Object.values(lfV)[0];
+  P.LF2 = lfV[getSel('LF2_in')] ?? Object.values(lfV)[0];
+  P.LO1 = loV[getSel('LO1_in')] ?? Object.values(loV)[0];
+  P.LO2 = loV[getSel('LO2_in')] ?? Object.values(loV)[0];
+
+  // Kaitsemeetmed
+  P.PLPS = PLPS_VALIKUD[getSel('PLPS_valik')] ?? 1.0;
+  P.PSPD_P = PSPD_VALIKUD[getSel('PSPD_P_valik')] ?? 1.0;
+  P.PSPD_T = PSPD_VALIKUD[getSel('PSPD_T_valik')] ?? 1.0;
+  P.PEB_P = PEB_VALIKUD[getSel('PEB_P_valik')] ?? 1.0;
+  P.PEB_T = PEB_VALIKUD[getSel('PEB_T_valik')] ?? 1.0;
+
+  return P;
+}
+
+// Hindab erinevaid kaitseklasse
+function hindaKlassid(P) {
+  const klassid = [
+    { nimi: 'Kaitse puudub', PLPS: 1.0, PSPD: 1.0, PEB: 1.0 },
+    { nimi: 'LPS IV + SPD/PEB LPL IV', PLPS: 0.2, PSPD: 0.05, PEB: 0.05 },
+    { nimi: 'LPS III + SPD/PEB LPL III', PLPS: 0.1, PSPD: 0.05, PEB: 0.05 },
+    { nimi: 'LPS II + SPD/PEB LPL II', PLPS: 0.05, PSPD: 0.02, PEB: 0.02 },
+    { nimi: 'LPS I + SPD/PEB LPL I', PLPS: 0.02, PSPD: 0.01, PEB: 0.01 },
+  ];
+
+  return klassid.map(k => {
+    const t = koguArvutus(P, {
+      PLPS: k.PLPS, PSPD_P: k.PSPD, PSPD_T: k.PSPD,
+      PEB_P: k.PEB, PEB_T: k.PEB,
+    });
+    return {
+      ...k,
+      R1: t.R.R1, R2: t.R.R2, R: t.R.R,
+      vastab_R1: t.R.R1 <= P.RT,
+    };
+  });
+}
+
+// =============================================================================
+// PEAMINE ARVUTAMIS- JA KUVAMISFUNKTSIOON
+// =============================================================================
+
+function arvuta() {
+  try {
+    const P = koguSisendid();
+
+    // Sisendite kontroll
+    if (P.L <= 0 || P.W <= 0 || P.H <= 0) {
+      alert('Ehitise mõõtmed peavad olema positiivsed!');
+      return;
+    }
+    if (P.NSG <= 0) {
+      alert('NSG peab olema positiivne!');
+      return;
+    }
+
+    const t = koguArvutus(P);
+    const klassid = hindaKlassid(P);
+
+    kuvaTulemused(P, t, klassid);
+    document.getElementById('status').textContent =
+      'Arvutatud: ' + new Date().toLocaleTimeString('et-EE');
+
+  } catch (e) {
+    alert('Arvutuse viga: ' + e.message);
+    console.error(e);
+  }
+}
+
+function kuvaTulemused(P, t, klassid) {
+  const R = t.R;
+  const RT = P.RT;
+  const out = document.getElementById('tulemused');
+
+  let html = '';
+
+  // Peamine tulemus
+  const onOk = R.R1 <= RT;
+  html += `<div class="results-summary ${onOk ? 'ok' : 'fail'}">`;
+  html += `<h3>${onOk ? '✓ Risk on lubatud tasemest madalam' : '✗ Risk on lubatud tasemest kõrgem'}</h3>`;
+  html += `<div class="result-row"><span>Vastuvõetav risk R<sub>T</sub>:</span><span class="val">${fmtSci(RT)}</span></div>`;
+  html += `<div class="result-row"><span>R<sub>1</sub> (inimelu kaotus):</span><span class="val">${fmtSci(R.R1)}</span></div>`;
+  html += `<div class="result-row"><span>R<sub>2</sub> (ehitis ja sisu):</span><span class="val">${fmtSci(R.R2)}</span></div>`;
+  html += `<div class="result-row"><span><b>R kogurisk:</b></span><span class="val">${fmtSci(R.R)}</span></div>`;
+
+  if (onOk) {
+    html += `<p style="margin-top:10px;">Hetkeolukorras on R<sub>1</sub> ≤ R<sub>T</sub> – piksekaitse pole inimelu kaotuse riski vähendamiseks vajalik (jaotis 7.3, MÄRKUS 3).</p>`;
+  } else {
+    const suhe = R.R1 / RT;
+    html += `<p style="margin-top:10px;"><b>Piksekaitse on VAJALIK!</b> R<sub>1</sub> ületab R<sub>T</sub>-d ${suhe.toFixed(1)}-kordselt.</p>`;
+  }
+  html += `</div>`;
+
+  // Kaitseklasside hindamine
+  html += `<h3 style="color:#0a4080; margin-top:20px; margin-bottom:8px;">Kaitseklassi hindamine</h3>`;
+  html += `<p style="font-size:12px; color:#666; margin-bottom:8px;">Tabel näitab, milline minimaalne kaitseklass viib R<sub>1</sub> väärtuse alla R<sub>T</sub>.</p>`;
+  html += `<table class="results-table">`;
+  html += `<thead><tr><th>Kaitseklass</th><th>P<sub>LPS</sub></th><th class="num">R<sub>1</sub></th><th class="num">R<sub>1</sub>/R<sub>T</sub></th><th>Vastab?</th></tr></thead>`;
+  html += `<tbody>`;
+
+  let leitud_minimaalne = false;
+  for (const k of klassid) {
+    let cls = k.vastab_R1 ? 'ok' : 'fail';
+    if (k.vastab_R1 && !leitud_minimaalne && k.nimi !== 'Kaitse puudub') {
+      cls = 'recommended';
+      leitud_minimaalne = true;
+    }
+    html += `<tr class="${cls}">`;
+    html += `<td>${k.nimi}${cls === 'recommended' ? ' ★' : ''}</td>`;
+    html += `<td class="num">${k.PLPS}</td>`;
+    html += `<td class="num">${fmtSci(k.R1, 2)}</td>`;
+    html += `<td class="num">${(k.R1 / RT).toFixed(2)}</td>`;
+    html += `<td>${k.vastab_R1 ? '✓' : '✗'}</td>`;
+    html += `</tr>`;
+  }
+  html += `</tbody></table>`;
+
+  if (R.R1 <= RT) {
+    html += `<div class="info-box"><b>★ Käesolev olukord juba vastab nõuetele</b> – piksekaitse pole vajalik (kuid võib olla soovitatav).</div>`;
+  } else {
+    const minK = klassid.find(k => k.vastab_R1 && k.nimi !== 'Kaitse puudub');
+    if (minK) {
+      html += `<div class="info-box" style="background:#e8f5e9; border-left-color:#1a7f1a;"><b>★ MINIMAALNE PIISAV KLASS:</b> ${minK.nimi}<br>R<sub>1</sub> = ${fmtSci(minK.R1)} (R<sub>T</sub> = ${fmtSci(RT)})</div>`;
+    } else {
+      html += `<div class="warning-box"><b>⚠ Isegi parim klass (LPS I) ei vähenda riski piisavalt!</b> Vaja võib olla erimeetmeid (vt standardi MÄRKUS 5).</div>`;
+    }
+  }
+
+  // Peamised panustajad
+  const komponendid = [
+    ['RAT', R.RAT], ['RAD', R.RAD], ['RB1', R.RB1],
+    ['RC1', R.RC1], ['RM1', R.RM1], ['RU', R.RU],
+    ['RV1', R.RV1], ['RW1', R.RW1], ['RZ1', R.RZ1],
+  ].filter(c => c[1] > 0).sort((a, b) => b[1] - a[1]);
+
+  if (komponendid.length && R.R1 > 0) {
+    html += `<h3 style="color:#0a4080; margin-top:20px; margin-bottom:8px;">Peamised panustajad R<sub>1</sub>-le</h3>`;
+    html += `<table class="results-table">`;
+    html += `<thead><tr><th>Komponent</th><th class="num">Väärtus</th><th class="num">Osakaal</th></tr></thead><tbody>`;
+    for (const [nimi, v] of komponendid.slice(0, 5)) {
+      const pct = (100 * v / R.R1).toFixed(1);
+      html += `<tr><td>${nimi}</td><td class="num">${fmtSci(v)}</td><td class="num">${pct} %</td></tr>`;
+    }
+    html += `</tbody></table>`;
+  }
+
+  // Üksikasjad - kokkuvõlditavad
+  html += `<details style="margin-top:20px;"><summary style="cursor:pointer; color:#0a4080; font-weight:600; padding:8px;">Üksikasjalik aruanne (vajuta laiendamiseks)</summary>`;
+  html += `<div style="padding:8px;">`;
+
+  // Sisendid
+  html += `<h4 style="color:#0a4080; margin:12px 0 6px;">Sisendparameetrid</h4>`;
+  html += `<div class="summary-card">`;
+  html += `<div class="label">Pikselöökide tihedus N<sub>SG</sub>:</div><div class="value">${P.NSG} 1/(km²·a)</div>`;
+  html += `<div class="label">Vastuvõetav risk R<sub>T</sub>:</div><div class="value">${fmtSci(RT)} 1/a</div>`;
+  html += `<div class="label">Ehitise mõõtmed L×W×H:</div><div class="value">${P.L}×${P.W}×${P.H} m</div>`;
+  html += `<div class="label">Inimeste viibimine P<sub>P</sub>:</div><div class="value">${P.PP.toFixed(3)}</div>`;
+  html += `<div class="label">Tuleoht r<sub>f</sub>:</div><div class="value">${fmtSci(P.rf, 1)}</div>`;
+  html += `<div class="label">Tulekaitse r<sub>p</sub>:</div><div class="value">${P.rp}</div>`;
+  html += `<div class="label">Pinnasekate r<sub>t</sub>:</div><div class="value">${fmtSci(P.rt, 1)}</div>`;
+  html += `</div>`;
+
+  // Haardealad
+  html += `<h4 style="color:#0a4080; margin:16px 0 6px;">Haardealad ja sagedused (Lisa A)</h4>`;
+  html += `<table class="results-table">`;
+  html += `<thead><tr><th>Tähis</th><th>Kirjeldus</th><th class="num">Väärtus</th><th>Valem</th></tr></thead><tbody>`;
+  html += `<tr><td>A<sub>D</sub></td><td>Ehitis</td><td class="num">${fmtSci(t.AD)} m²</td><td>A.3</td></tr>`;
+  html += `<tr><td>A<sub>M</sub></td><td>Ehitise lähedus (rM=350/UW, UW=${t.UW_min} kV)</td><td class="num">${fmtSci(t.AM)} m²</td><td>A.8</td></tr>`;
+  if (P.kasuta_elektriliin) {
+    html += `<tr><td>A<sub>L,P</sub></td><td>Elektriliin</td><td class="num">${fmtSci(t.ALP)} m²</td><td>A.10</td></tr>`;
+    html += `<tr><td>A<sub>I,P</sub></td><td>Elektriliini lähedus (rI=2000/UW^1.8)</td><td class="num">${fmtSci(t.AIP)} m²</td><td>A.12</td></tr>`;
+  }
+  if (P.kasuta_sideliin) {
+    html += `<tr><td>A<sub>L,T</sub></td><td>Sideliin</td><td class="num">${fmtSci(t.ALT)} m²</td><td>A.10</td></tr>`;
+    html += `<tr><td>A<sub>I,T</sub></td><td>Sideliini lähedus</td><td class="num">${fmtSci(t.AIT)} m²</td><td>A.12</td></tr>`;
+  }
+  html += `<tr><td>N<sub>D</sub></td><td>Otselöögi sagedus ehitisse</td><td class="num">${fmtSci(t.ND)}</td><td>A.5</td></tr>`;
+  html += `<tr><td>N<sub>M</sub></td><td>Lähedusele löögi sagedus</td><td class="num">${fmtSci(t.NM)}</td><td>A.7</td></tr>`;
+  if (P.kasuta_elektriliin) {
+    html += `<tr><td>N<sub>L,P</sub></td><td>Otselöök elektriliini</td><td class="num">${fmtSci(t.NL_P)}</td><td>A.9</td></tr>`;
+    html += `<tr><td>N<sub>I,P</sub></td><td>Elektriliini lähedusele</td><td class="num">${fmtSci(t.NI_P)}</td><td>A.11</td></tr>`;
+  }
+  if (P.kasuta_sideliin) {
+    html += `<tr><td>N<sub>L,T</sub></td><td>Otselöök sideliini</td><td class="num">${fmtSci(t.NL_T)}</td><td>A.9</td></tr>`;
+    html += `<tr><td>N<sub>I,T</sub></td><td>Sideliini lähedusele</td><td class="num">${fmtSci(t.NI_T)}</td><td>A.11</td></tr>`;
+  }
+  html += `</tbody></table>`;
+
+  // Tõenäosused
+  html += `<h4 style="color:#0a4080; margin:16px 0 6px;">Tõenäosused (Lisa B)</h4>`;
+  html += `<table class="results-table">`;
+  html += `<thead><tr><th>Tähis</th><th>Kirjeldus</th><th class="num">Väärtus</th></tr></thead><tbody>`;
+  html += `<tr><td>P<sub>AT</sub></td><td>Puute/sammupinge ehitises</td><td class="num">${fmtSci(t.PAT)}</td></tr>`;
+  if (P.kasuta_RAD) html += `<tr><td>P<sub>AD</sub></td><td>Välk avatud alal</td><td class="num">${fmtSci(t.PAD)}</td></tr>`;
+  html += `<tr><td>P<sub>B</sub></td><td>Tulekahju ehitises</td><td class="num">${fmtSci(t.PB)}</td></tr>`;
+  html += `<tr><td>P<sub>C</sub></td><td>Sisesüsteemi rike (ehitisest)</td><td class="num">${fmtSci(t.PC)}</td></tr>`;
+  html += `<tr><td>P<sub>M</sub></td><td>Sisesüsteemi rike (lähedusest)</td><td class="num">${fmtSci(t.PM)}</td></tr>`;
+  if (P.kasuta_elektriliin) {
+    html += `<tr><td>P<sub>U,P</sub></td><td>Elektriliini puutepinge</td><td class="num">${fmtSci(t.PU_P)}</td></tr>`;
+    html += `<tr><td>P<sub>V,P</sub></td><td>Elektriliini tulekahju</td><td class="num">${fmtSci(t.PV_P)}</td></tr>`;
+    html += `<tr><td>P<sub>W,P</sub></td><td>Elektriliini rike</td><td class="num">${fmtSci(t.PW_P)}</td></tr>`;
+    html += `<tr><td>P<sub>Z,P</sub></td><td>Elektriliini lähedus</td><td class="num">${fmtSci(t.PZ_P)}</td></tr>`;
+    html += `<tr><td>P<sub>LD,P</sub></td><td>Elektriliini PLD</td><td class="num">${fmtSci(t.PLD_P)}</td></tr>`;
+  }
+  if (P.kasuta_sideliin) {
+    html += `<tr><td>P<sub>U,T</sub></td><td>Sideliini puutepinge</td><td class="num">${fmtSci(t.PU_T)}</td></tr>`;
+    html += `<tr><td>P<sub>V,T</sub></td><td>Sideliini tulekahju</td><td class="num">${fmtSci(t.PV_T)}</td></tr>`;
+    html += `<tr><td>P<sub>W,T</sub></td><td>Sideliini rike</td><td class="num">${fmtSci(t.PW_T)}</td></tr>`;
+    html += `<tr><td>P<sub>Z,T</sub></td><td>Sideliini lähedus</td><td class="num">${fmtSci(t.PZ_T)}</td></tr>`;
+    html += `<tr><td>P<sub>LD,T</sub></td><td>Sideliini PLD</td><td class="num">${fmtSci(t.PLD_T)}</td></tr>`;
+  }
+  html += `</tbody></table>`;
+
+  // Riskikomponendid
+  html += `<h4 style="color:#0a4080; margin:16px 0 6px;">Riskikomponendid (väärtused × 10⁻⁵)</h4>`;
+  html += `<table class="results-table">`;
+  html += `<thead><tr><th>Komponent</th><th>Kirjeldus</th><th class="num">L1 (inimoht)</th><th class="num">L2 (ehitis)</th></tr></thead><tbody>`;
+  html += `<tr><td>R<sub>AT</sub></td><td>Puute/sammupinge ehitises</td><td class="num">${(R.RAT/1e-5).toFixed(3)}</td><td class="num">–</td></tr>`;
+  if (P.kasuta_RAD) html += `<tr><td>R<sub>AD</sub></td><td>Välk inimesele avatud alal</td><td class="num">${(R.RAD/1e-5).toFixed(3)}</td><td class="num">–</td></tr>`;
+  html += `<tr><td>R<sub>B</sub></td><td>Tulekahju ehitises</td><td class="num">${(R.RB1/1e-5).toFixed(3)}</td><td class="num">${(R.RB2/1e-5).toFixed(3)}</td></tr>`;
+  if (P.plahvatus_haigla_L1 || P.plahvatus_L2) {
+    html += `<tr><td>R<sub>C</sub></td><td>Sisesüsteemi rike (ehitisest)</td><td class="num">${(R.RC1/1e-5).toFixed(3)}</td><td class="num">${(R.RC2/1e-5).toFixed(3)}</td></tr>`;
+    html += `<tr><td>R<sub>M</sub></td><td>Sisesüsteemi rike (lähedusest)</td><td class="num">${(R.RM1/1e-5).toFixed(3)}</td><td class="num">${(R.RM2/1e-5).toFixed(3)}</td></tr>`;
+  }
+  html += `<tr><td>R<sub>U</sub></td><td>Puutepinge liinilt</td><td class="num">${(R.RU/1e-5).toFixed(3)}</td><td class="num">–</td></tr>`;
+  html += `<tr><td>R<sub>V</sub></td><td>Tulekahju liinilt</td><td class="num">${(R.RV1/1e-5).toFixed(3)}</td><td class="num">${(R.RV2/1e-5).toFixed(3)}</td></tr>`;
+  if (P.plahvatus_haigla_L1 || P.plahvatus_L2) {
+    html += `<tr><td>R<sub>W</sub></td><td>Sisesüsteemi rike liinilt</td><td class="num">${(R.RW1/1e-5).toFixed(3)}</td><td class="num">${(R.RW2/1e-5).toFixed(3)}</td></tr>`;
+    html += `<tr><td>R<sub>Z</sub></td><td>Sisesüsteemi rike liini lähedusest</td><td class="num">${(R.RZ1/1e-5).toFixed(3)}</td><td class="num">${(R.RZ2/1e-5).toFixed(3)}</td></tr>`;
+  }
+  html += `<tr style="background:#e3f2fd; font-weight:600;"><td colspan="2">KOKKU</td><td class="num">${(R.R1/1e-5).toFixed(3)}</td><td class="num">${(R.R2/1e-5).toFixed(3)}</td></tr>`;
+  html += `</tbody></table>`;
+
+  html += `</div></details>`;
+
+  // Allmärkus
+  html += `<div style="margin-top:20px; padding-top:12px; border-top:1px solid #e5e7eb; font-size:11px; color:#666;">`;
+  html += `Standard: <b>EVS-EN IEC 62305-2:2025</b> · Riskianalüüs jaotis 7-8 · `;
+  html += `Arvutatud: ${new Date().toLocaleString('et-EE')}`;
+  html += `</div>`;
+
+  out.innerHTML = html;
+}
+
+// =============================================================================
+// SALVESTAMINE / LAADIMINE / ABI
+// =============================================================================
+
+function salvestaSisendid() {
+  const data = {};
+  document.querySelectorAll('input, select').forEach(el => {
+    if (el.id) {
+      if (el.type === 'checkbox') data[el.id] = el.checked;
+      else data[el.id] = el.value;
+    }
+  });
+
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const nimi = (data.projekt_nimi || 'piksekaitse').replace(/[^a-zA-Z0-9_-]/g, '_');
+  a.href = url; a.download = `${nimi}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  document.getElementById('status').textContent = 'Sisendid salvestatud';
+}
+
+function laeFailist() {
+  const inp = document.createElement('input');
+  inp.type = 'file';
+  inp.accept = '.json,application/json';
+  inp.onchange = e => {
+    const fail = e.target.files[0];
+    if (!fail) return;
+    const r = new FileReader();
+    r.onload = ev => {
+      try {
+        const data = JSON.parse(ev.target.result);
+        for (const [k, v] of Object.entries(data)) {
+          const el = document.getElementById(k);
+          if (!el) continue;
+          if (el.type === 'checkbox') el.checked = v;
+          else el.value = v;
+        }
+        document.getElementById('status').textContent = `Laaditud: ${fail.name}`;
+      } catch (err) {
+        alert('Vigane JSON fail: ' + err.message);
+      }
+    };
+    r.readAsText(fail);
+  };
+  inp.click();
+}
+
+function kuvaAbi() {
+  alert(`PIKSEKAITSE RISKIANALÜÜS - Kasutusjuhend
+
+Vahekaardid täidetakse järjekorras:
+
+1. ÜLDINFO
+   • Projekti nimi, asukoht, koostaja
+   • NSG - pikselöökide tihedus (Eestis 2-4)
+   • RT - vastuvõetav risk (tüüpiliselt 10⁻⁵)
+   • tZ - inimeste kohaolu aeg (h/a)
+
+2. EHITIS
+   • Mõõtmed L, W, H
+   • Paiknemine (CD)
+   • Ehitusmaterjal (PS)
+   • Kategooria (mõjutab kahju vaikeväärtuseid)
+   • RAD - kui on avatud alad inimestele
+   • Plahvatus/haigla erijuhud
+
+3. KESKKOND
+   • Keskkonnategur CE
+   • Pinnasekate rt
+   • Tuleoht rf, tulekaitse rp
+   • Sisekaabelduse omadused KS3
+
+4. LIINID
+   • Elektri- ja sideliinid
+   • UW (impulsstaluvuspinge)
+   • Kaabli tüüp ja varjestus
+
+5. KAHJUD
+   • LX väärtused (vaikimisi kategooria järgi)
+
+6. KAITSE
+   • Olemasolevad kaitsemeetmed
+
+TULEMUSTE TÕLGENDAMINE:
+   R1 ≤ RT - piksekaitse pole vajalik
+   R1 > RT - piksekaitse on VAJALIK!
+
+Tabel "Kaitseklassi hindamine" näitab,
+milline minimaalne klass viib riski lubatud
+tasemest madalamale.
+
+Vajaduse korral salvesta sisendid JSON-i.
+Tulemuste prindiks vajuta "🖨️ Prindi".
+
+Standard: EVS-EN IEC 62305-2:2025`);
+}
+
+// =============================================================================
+// KÄIVITAMINE
+// =============================================================================
+
+document.addEventListener('DOMContentLoaded', () => {
+  laeVaikevaartused();
+
+  // Kategooria muutus → uuenda kahjude valikud
+  const katEl = document.getElementById('kategooria');
+  if (katEl) katEl.addEventListener('change', kategooriaUuenda);
+
+  // Vahekaardid - klikkimisel vahetage aktiivset tabi
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      tab.classList.add('active');
+      const sihttab = document.getElementById(tab.dataset.tab);
+      if (sihttab) sihttab.classList.add('active');
+    });
+  });
+
+  // NG või k_tegur_sg muutus → uuenda NSG automaatselt
+  function uuendaNSG() {
+    const ng = parseFloat(document.getElementById('NG').value.replace(',', '.'));
+    const k = parseFloat(document.getElementById('k_tegur_sg').value.replace(',', '.'));
+    if (!isNaN(ng) && !isNaN(k)) {
+      const nsg = ng * k;
+      document.getElementById('NSG').value = parseFloat(nsg.toFixed(3));
+    }
+  }
+  const ngEl = document.getElementById('NG');
+  const kEl = document.getElementById('k_tegur_sg');
+  if (ngEl) ngEl.addEventListener('input', uuendaNSG);
+  if (kEl) kEl.addEventListener('input', uuendaNSG);
+
+  // RAD - PO välja aktiveerimine
+  const radCb = document.getElementById('kasuta_RAD');
+  if (radCb) radCb.addEventListener('change', lulita_RAD);
+
+  // LO1 ja LO2 lülitamine vastavalt erijuhtude checkboxidele
+  const rc1Cb = document.getElementById('kasuta_RC1');
+  const rc2Cb = document.getElementById('kasuta_RC2');
+  if (rc1Cb) rc1Cb.addEventListener('change', lulita_LO);
+  if (rc2Cb) rc2Cb.addEventListener('change', lulita_LO);
+
+  // Käivita esmane lülitus
+  lulita_RAD();
+  lulita_LO();
+});
+</script>
+</body>
+</html>
