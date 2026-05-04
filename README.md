@@ -6,12 +6,24 @@ Iseseisev HTML-rakendus piksekaitse riskianalüüsi tegemiseks vastavalt standar
 Rakendus arvutab piksetabamuste põhjustatud riski ehitisele ja annab soovituse:
 kas piksekaitse on vajalik ning millise klassiga (LPS I–IV).
 
+## 🌐 Live rakendus
+
+**👉 https://tuletark.github.io/Piksekaitse-RA/**
+
+Avaneb otse brauseris, ei vaja installimist ega registreerimist.
+
 ## Kiirstart
 
-1. Ava `piksekaitse.html` brauseris (kahe-klikk failil — server ei ole vajalik).
-2. Sisesta ehitise andmed seitsmel vahekaardil vasakpoolsel paneelil.
-3. Vajuta nuppu **„Arvuta”** — tulemus ilmub parempoolsele paneelile.
-4. Vajadusel salvesta sisendid JSON-faili (rakenduses olev nupp), et sama juhtum
+**Online:** ava brauseris https://tuletark.github.io/Piksekaitse-RA/
+
+**Lokaalselt (offline):** ava `piksekaitse.html` brauseris (kahe-klikk failil
+— server ei ole vajalik).
+
+Seejärel:
+
+1. Sisesta ehitise andmed seitsmel vahekaardil vasakpoolsel paneelil.
+2. Vajuta nuppu **„Arvuta”** — tulemus ilmub parempoolsele paneelile.
+3. Vajadusel salvesta sisendid JSON-faili (rakenduses olev nupp), et sama juhtum
    hiljem uuesti laadida.
 
 > Rakendus on üks fail (`piksekaitse.html`), kogu loogika on selles. Internetiühendust
@@ -43,6 +55,7 @@ piksekaitse_project/
 ├── README.md               ← see fail
 ├── HANDOFF.md              ← üleandmise kontekst (claude.ai sessioonist)
 ├── CHANGELOG.md            ← versioonide ajalugu
+├── index.html              ← suunab juurURL-ilt rakendusele (GitHub Pages)
 ├── piksekaitse.html        ← rakendus (HTML + CSS + JS samas failis)
 ├── tests/
 │   └── test_validation.js  ← Node.js test, mis kontrollib standardi näidet F.2

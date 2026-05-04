@@ -8,8 +8,13 @@ projekt järgib [semantilist versioneerimist](https://semver.org/lang/et/).
 ## [Avaldamata]
 
 ### Lisatud
-- Versioonihaldus (Git)
+- Versioonihaldus (Git) — repositoorium [Tuletark/Piksekaitse-RA](https://github.com/Tuletark/Piksekaitse-RA)
+- **Live-rakendus:** https://tuletark.github.io/Piksekaitse-RA/ (GitHub Pages)
+- `index.html` — suunab juurURL-ilt automaatselt `piksekaitse.html`-le, et live-link
+  oleks lühike ja mäluvõimekas
 - Dokumentatsioon: README, CHANGELOG, docs/DECISIONS, docs/arhitektuur, docs/standardiviited
+- JSDoc-kommentaarid kõikidele JS-funktsioonidele (haardealade, sageduste,
+  tõenäosuste, riskikomponentide arvutused + UI-loogika)
 - `.gitignore`
 
 ### Muudetud
