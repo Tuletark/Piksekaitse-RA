@@ -940,11 +940,31 @@ const KAHJU_VAIKEVÄÄRTUSED = {
 // HAARDEALADE ARVUTUSVALEMID (Lisa A)
 // =============================================================================
 
+/**
+ * Otselöögi haardeala A_D (m²) ehk ehitise „varjuala”.
+ * Standardi valem A.3.
+ * @param {number} L - Ehitise pikkus (m)
+ * @param {number} W - Ehitise laius (m)
+ * @param {number} H - Ehitise kõrgus (m)
+ * @returns {number} A_D ruutmeetrites
+ */
 function arvutaAD(L, W, H) {
   // Valem A.3: AD = L*W + 2*(3H)*(L+W) + π*(3H)²
   return L * W + 2 * (3 * H) * (L + W) + Math.PI * Math.pow(3 * H, 2);
 }
 
+/**
+ * Lähedusvälgu haardeala A_M (m²) — magnetväljast tingitud sisesüsteemide rike.
+ * Standardi valem A.8: AM = 2·rM·(L+W) + π·rM², kus rM = 350/UW.
+ *
+ * AM kasutab kõige madalamat seadme UW-d (kõige rangem juhtum) — vt
+ * docs/DECISIONS.md §3 ja standardi näide F.2 (rMT = 233 m = 350/1,5).
+ *
+ * @param {number} L - Ehitise pikkus (m)
+ * @param {number} W - Ehitise laius (m)
+ * @param {number} UW_kV - Sisesüsteemi seadme isolatsiooni nimitalumispinge (kV)
+ * @returns {number} A_M ruutmeetrites
+ */
 function arvutaAM(L, W, UW_kV) {
   // Valem A.8: AM = 2*rM*(L+W) + π*rM², kus rM = 350/UW
   if (!UW_kV || UW_kV <= 0.1) UW_kV = 1.5;
@@ -952,11 +972,24 @@ function arvutaAM(L, W, UW_kV) {
   return 2 * rM * (L + W) + Math.PI * rM * rM;
 }
 
+/**
+ * Liini otselöögi haardeala A_L (m²).
+ * Standardi valem A.10.
+ * @param {number} LL - Liini pikkus (m, max 1000)
+ * @returns {number} A_L ruutmeetrites
+ */
 function arvutaAL(LL) {
   // Valem A.10: AL = 40*LL
   return 40 * LL;
 }
 
+/**
+ * Liini lähedusvälgu haardeala A_I (m²) — induktsiooni teel mõjuv löök.
+ * Standardi valem A.12: AI = 2·rI·LL, kus rI = 2000/UW^1.8.
+ * @param {number} LL - Liini pikkus (m)
+ * @param {number} UW_kV - Liini lõpus oleva seadme UW (kV)
+ * @returns {number} A_I ruutmeetrites
+ */
 function arvutaAI(LL, UW_kV) {
   // Valem A.12: AI = 2*rI*LL, kus rI = 2000/UW^1.8
   if (!UW_kV || UW_kV <= 0.1) UW_kV = 1.5;
@@ -964,21 +997,51 @@ function arvutaAI(LL, UW_kV) {
   return 2 * rI * LL;
 }
 
+/**
+ * Otselöögi sagedus ehitisse N_D (1/a). Valem A.5.
+ * @param {number} NSG - Pikselöökide tihedus pinnale (1/(km²·a))
+ * @param {number} AD - Haardeala (m²)
+ * @param {number} CD - Paiknemistegur (Tabel A.1)
+ */
 function arvutaND(NSG, AD, CD) {
   // Valem A.5: ND = NSG * AD * CD * 1e-6
   return NSG * AD * CD * 1e-6;
 }
 
+/**
+ * Lähedusvälgu sagedus N_M (1/a). Valem A.7.
+ * Tegur k arvestab maa↔pilv vs. pilv↔pilv löökide jaotust (vaikimisi 2).
+ * @param {number} NSG
+ * @param {number} AM
+ * @param {number} [k=2] - NG → NSG tegur (kui LLS andmeid pole, k = 2)
+ */
 function arvutaNM(NSG, AM, k = 2) {
   // Valem A.7: NM = (1/k) * NSG * AM * 1e-6
   return (1.0 / k) * NSG * AM * 1e-6;
 }
 
+/**
+ * Liini otselöögi sagedus N_L (1/a). Valem A.9.
+ * @param {number} NSG
+ * @param {number} AL
+ * @param {number} CI - Liini paigaldustegur (Tabel A.2)
+ * @param {number} CE - Keskkonnategur (Tabel A.4)
+ * @param {number} CT - Liini tüübitegur (Tabel A.3)
+ */
 function arvutaNL(NSG, AL, CI, CE, CT) {
   // Valem A.9: NL = NSG * AL * CI * CE * CT * 1e-6
   return NSG * AL * CI * CE * CT * 1e-6;
 }
 
+/**
+ * Liini lähedusvälgu sagedus N_I (1/a). Valem A.11.
+ * @param {number} NSG
+ * @param {number} AI
+ * @param {number} CI - Liini paigaldustegur
+ * @param {number} CE - Keskkonnategur
+ * @param {number} CT - Liini tüübitegur
+ * @param {number} [k=2]
+ */
 function arvutaNI(NSG, AI, CI, CE, CT, k = 2) {
   // Valem A.11: NI = (1/k) * NSG * AI * CI * CE * CT * 1e-6
   return (1.0 / k) * NSG * AI * CI * CE * CT * 1e-6;
@@ -988,44 +1051,89 @@ function arvutaNI(NSG, AI, CI, CE, CT, k = 2) {
 // TÕENÄOSUSED (Lisa B)
 // =============================================================================
 
+/**
+ * P_AT — puutepinge / sammupinge tõenäosus ehitise sees (otselöök).
+ * Valem B.1.
+ */
 function arvutaPAT(PLPS, Pam, rt, PTWS = 1.0) {
   return PLPS * Pam * rt * PTWS;
 }
 
+/**
+ * P_AD — välk inimesele avatud alal (RAD komponent, ainult kui kasuta_RAD).
+ * Valem B.3.
+ */
 function arvutaPAD(PTWS, Pam, PO, PLPS) {
   return PTWS * Pam * PO * PLPS;
 }
 
+/**
+ * P_B — tulekahju tõenäosus otselöögist ehitisse.
+ * Valem B.4.
+ */
 function arvutaPB(PS, PLPS, rf, rp) {
   return PS * PLPS * rf * rp;
 }
 
+/**
+ * P_C — sisesüsteemi rikke tõenäosus liini kaudu (otse).
+ * Valem B.5.
+ */
 function arvutaPC(PSPD, CLD) {
   return PSPD * CLD;
 }
 
+/**
+ * P_M — sisesüsteemi rikke tõenäosus lähedusvälgust (induktsioon).
+ * Valem B.6: PM = PSPD · (KS1·KS2·KS3)².
+ *
+ * KS1 ja KS2 vaikimisi 1,0 (vt docs/DECISIONS.md §5) — vajalikud ainult
+ * LPS-metallekraani või raudbetoonelementide võrgu olemasolul.
+ */
 function arvutaPM(PSPD, KS1, KS2, KS3) {
   const PMS = Math.pow(KS1 * KS2 * KS3, 2);
   return PSPD * PMS;
 }
 
+/**
+ * P_U — puutepinge liinilt sisenedes. Valem B.7.
+ */
 function arvutaPU(Pam, PEB, PLD, CLD, rt, PTWS = 1.0) {
   return Pam * PEB * PLD * PTWS * CLD * rt;
 }
 
+/**
+ * P_V — tulekahju liini kaudu. Valem B.8.
+ */
 function arvutaPV(PEB, PLD, CLD, rf, rp, PTWS = 1.0) {
   return PEB * PLD * PTWS * CLD * rf * rp;
 }
 
+/**
+ * P_W — sisesüsteemi rike liini otselöögist. Valem B.9.
+ */
 function arvutaPW(PSPD, PLD, CLD, PTWS = 1.0) {
   return PSPD * PTWS * PLD * CLD;
 }
 
+/**
+ * P_Z — sisesüsteemi rike liini lähedusvälgust. Valem B.10.
+ */
 function arvutaPZ(PSPD, CLI, PTWS = 1.0) {
   return PSPD * PTWS * CLI;
 }
 
-// PLD - Tabelid B.11/B.12
+/**
+ * P_LD — liinikatkestuse tõenäosus, sõltub kaabli tüübist (RS) ja seadme UW-st.
+ * Standardi tabelid B.11 (UW ≤ 12 kV) ja B.12 (UW ≥ 16 kV).
+ *
+ * Kasutame standardi diskreetseid väärtusi otse, ilma interpolatsioonita —
+ * vt docs/DECISIONS.md §6.
+ *
+ * @param {string} kaabli_tüüp - 'kaitsmata' | 'rs_alla_1' | 'rs_1_5' | 'rs_5_20'
+ * @param {number} uw_kV - Seadme UW (kV)
+ * @returns {number} P_LD ∈ [0, 1]
+ */
 function arvutaPLD(kaabli_tüüp, uw_kV) {
   if (kaabli_tüüp === 'kaitsmata' || !uw_kV || uw_kV <= 0) return 1.0;
 
@@ -1058,6 +1166,21 @@ function arvutaPLD(kaabli_tüüp, uw_kV) {
 // RISKIKOMPONENDID (jaotis 8, Tabel 3)
 // =============================================================================
 
+/**
+ * Arvutab kõik riskikomponendid (RA, RB, RC, RM, RU, RV, RW, RZ) ja
+ * koondab need riskideks R1 (inimelu kaotus, L1) ja R2 (füüsikalised
+ * vigastused, L2). Standardi jaotis 8, Tabel 3.
+ *
+ * Sageduskomponendid (N_*) ja tõenäosused (P_*) tuleb sisendina ette anda —
+ * see funktsioon ainult kombineerib need kahjude (L_*) ja viibimisteguritega.
+ *
+ * Komponendid RC1, RM1, RW1, RZ1 (kasutavad LO1) aktiveeruvad ainult
+ * plahvatusohu / haigla puhul; RC2, RM2, RW2, RZ2 (LO2) ainult plahvatusohu
+ * puhul. Vt docs/DECISIONS.md §9.
+ *
+ * @param {object} p - Sageduste, tõenäosuste, kahjude ja kasuta_*-lülitite kogum
+ * @returns {object} R - kõik komponendid + R1, R2, R (kogurisk)
+ */
 function arvutaRiskid(p) {
   const R = {};
 
@@ -1127,7 +1250,16 @@ function arvutaRiskid(p) {
 // KASUTAJALIIDESE LOOGIKA
 // =============================================================================
 
-// Täida select-elemendid (võimalus näidata ka arvulisi väärtusi sulgudes)
+/**
+ * Täidab `<select>` elemendi võtmetega objektist `valikud`. Võimaldab valida
+ * vaikimisi väärtuse ning lisada kuvatekstile arvulise väärtuse sulgudes
+ * (kasulik nt CD = 0,25 / 0,5 / 1,0 puhul).
+ *
+ * @param {string} id - select-i `id` atribuut
+ * @param {object} valikud - { kuvatav_nimi: arvuline_väärtus | string }
+ * @param {string} vaikimisi - võti, mis valitakse vaikimisi
+ * @param {boolean} [naitaArve=false] - kui true, lisatakse "(= väärtus)" iga rea järele
+ */
 function täidaSelect(id, valikud, vaikimisi, naitaArve = false) {
   const el = document.getElementById(id);
   if (!el) return;
@@ -1145,7 +1277,7 @@ function täidaSelect(id, valikud, vaikimisi, naitaArve = false) {
   }
 }
 
-// CD selgituse näitamine valitud variandi järgi
+/** Näitab kasutajale CD valitud variandi juures selgituse (nt millise objekti vahetus läheduses). */
 function naita_CD_selgitus() {
   const sel = document.getElementById('CD_valik');
   const div = document.getElementById('CD_selgitus');
@@ -1154,7 +1286,10 @@ function naita_CD_selgitus() {
   div.innerHTML = tekst;
 }
 
-// RAD: PO välja aktiveerimine ainult kasuta_RAD valitud
+/**
+ * Aktiveerib / deaktiveerib PO välja vastavalt `kasuta_RAD` lülitile.
+ * Kui RAD ei ole kasutusel, nullitakse PO väärtus, et see ei panustaks arvutusse.
+ */
 function lulita_RAD() {
   const cb = document.getElementById('kasuta_RAD');
   const po = document.getElementById('PO');
@@ -1167,7 +1302,11 @@ function lulita_RAD() {
   }
 }
 
-// LO1 ja LO2 lülitamine - aktiveeruvad ainult eriliste ehitiste puhul
+/**
+ * Aktiveerib / deaktiveerib LO1 ja LO2 sisendid vastavalt sellele, kas
+ * kasutaja on märkinud "plahvatusoht/haigla" (LO1) või "plahvatusohtlik
+ * ehitis" (LO2). Vt docs/DECISIONS.md §9.
+ */
 function lulita_LO() {
   const useRC1 = document.getElementById('kasuta_RC1');
   const useRC2 = document.getElementById('kasuta_RC2');
@@ -1215,7 +1354,14 @@ function lulita_LO() {
   }
 }
 
-// Lae vaikevalikud kõikidesse select-idesse
+/**
+ * Initsialiseerib kõik `<select>` elemendid standardi tabelite väärtustega
+ * (CD, PS, CE, rt, Pam, rf, rp, KS3, CI, CT, kaabli tüübid, CLD/CLI, PLPS,
+ * PSPD, PEB, kahjud LT/LD/LF/LO).
+ *
+ * Käivitatakse `DOMContentLoaded` ajal ja iga kategooria muutmise järel
+ * (LF, LO väärtused sõltuvad kategooriast).
+ */
 function laeVaikevalikud() {
   // CD näitame koos arvuliste väärtustega
   täidaSelect('CD_valik', CD_VALIKUD, 'Eraldiseisev ehitis (läheduses pole teisi objekte)', true);
@@ -1256,7 +1402,11 @@ function laeVaikevalikud() {
   naita_CD_selgitus();
 }
 
-// Uuenda LF1, LF2, LO1, LO2 valikuid kategooria järgi
+/**
+ * Uuendab LF1, LF2, LO1, LO2 dropdownide sisu valitud ehitise kategooria järgi
+ * (Tabel C.2 vahemikud). Vaikimisi pakutakse vahemiku suurim väärtus —
+ * standard soovitab nii (vt docs/DECISIONS.md §8).
+ */
 function uuenda_kahju_valikud() {
   const katEl = document.getElementById('kategooria');
   if (!katEl) return;
@@ -1286,12 +1436,16 @@ function uuenda_kahju_valikud() {
 
 // Vahekaardid - event listenerid lisatakse DOMContentLoaded sees
 
-// Kategooria muutus → uuenda kahjude valikud (kasutab uut funktsiooni)
+/** Kategooria-select-i `onchange` handler. */
 function kategooriaUuenda() {
   uuenda_kahju_valikud();
 }
 
-// Vaikeväärtused (näide F.2 - Maja)
+/**
+ * Laeb vormi standardi näite F.2 (Maja) väärtustega.
+ * Kasutatakse rakenduse esmaavamisel ja "Lae näide" nupu vajutusel —
+ * annab kasutajale töötava lähtepunkti, mida saab oma juhtumiks kohandada.
+ */
 function laeVaikevaartused() {
   laeVaikevalikud();
 
@@ -1340,7 +1494,11 @@ function laeVaikevaartused() {
   document.getElementById('status').textContent = 'Vaikeväärtused laaditud (näide F.2 - Maja)';
 }
 
-// Numbri lugemine inputist (toetab nii "1e-5" kui "1.5")
+/**
+ * Loeb arvulise sisendi väljalt. Toetab nii koma- kui ka punktiga komakohti
+ * ("1,5" ja "1.5") ning teaduslikku vormingut ("1e-5"). Tagastab `vaikimisi`,
+ * kui väärtus on tühi või mittenumeeriline.
+ */
 function getNum(id, vaikimisi = 0) {
   const el = document.getElementById(id);
   if (!el) return vaikimisi;
@@ -1349,22 +1507,28 @@ function getNum(id, vaikimisi = 0) {
   return isNaN(n) ? vaikimisi : n;
 }
 
+/** Loeb stringi väärtuse väljalt. */
 function getStr(id, vaikimisi = '') {
   const el = document.getElementById(id);
   return el ? el.value : vaikimisi;
 }
 
+/** Loeb checkbox-i `checked` oleku. */
 function getBool(id) {
   const el = document.getElementById(id);
   return el ? el.checked : false;
 }
 
+/** Loeb `<select>` valitud `value` (võtmestring tabelist). */
 function getSel(id) {
   const el = document.getElementById(id);
   return el ? el.value : '';
 }
 
-// Vorming
+/**
+ * Vormindab arvu kasutaja jaoks loetavalt. Väikesed (<10⁻³) ja suured (>10⁴)
+ * arvud teaduslikus vormingus "·10" tähistusega; muud `toPrecision`-iga.
+ */
 function fmt(x, n = 3) {
   if (x === 0) return '0';
   if (Math.abs(x) < 1e-3 || Math.abs(x) > 1e4) {
@@ -1373,6 +1537,7 @@ function fmt(x, n = 3) {
   return x.toPrecision(n);
 }
 
+/** Vormindab arvu alati teaduslikus vormingus (1.234e-5). */
 function fmtSci(x, n = 3) {
   if (x === 0) return '0';
   return x.toExponential(n);
@@ -1382,6 +1547,24 @@ function fmtSci(x, n = 3) {
 // PEAMINE ARVUTUS
 // =============================================================================
 
+/**
+ * Peamine arvutusahela orkestreerija. Võtab sisendparameetrid `P` ja arvutab:
+ *   1. haardealad (A_D, A_M, A_L, A_I)
+ *   2. sagedused (N_D, N_M, N_L, N_I, NDJ — kui naaberehitis)
+ *   3. tõenäosused (P_AT, P_AD, P_B, P_C, P_M, P_U, P_V, P_W, P_Z, P_LD)
+ *   4. riskikomponendid (`arvutaRiskid` kaudu)
+ *
+ * AM kasutab madalaimat UW-d (vt docs/DECISIONS.md §3). PC ja PM kombineeritakse
+ * elektri- ja sideliini vahel valemi (10) järgi.
+ *
+ * `override` on mõeldud `hindaKlassid`-le, mis testib erinevaid kaitseklasse —
+ * see asendab P_LPS, P_SPD ja P_EB selle klassi väärtusteks ilma kasutaja sisendit
+ * muutmata.
+ *
+ * @param {object} P - Kogu sisendparameetrid (`koguSisendid` tagastusväärtus)
+ * @param {object} [override={}] - Kaitsetegurite asendused (PLPS, PSPD_*, PEB_*)
+ * @returns {object} Vahetulemused (haardealad, sagedused, tõenäosused) + R-objekt
+ */
 function koguArvutus(P, override = {}) {
   // Override: PLPS, PSPD_P, PSPD_T, PEB_P, PEB_T
   const PLPS = override.PLPS !== undefined ? override.PLPS : P.PLPS;
@@ -1477,7 +1660,18 @@ function koguArvutus(P, override = {}) {
   };
 }
 
-// Kogu kasutajaliidesest sisendid
+/**
+ * Kogub kogu vormi sisendi DOM-ist ja koostab `P` objekti, mis on
+ * `koguArvutus`-le sobivas kujus. Iga väli leitakse oma `id` järgi;
+ * puuduv väli annab vaikimisi väärtuse (vt iga `getNum` / `getSel`
+ * teist argumenti).
+ *
+ * NSG-välja arvutab kasutaja jaoks varem `NG × k_tegur`, kuid see
+ * funktsioon loeb NSG otse väljalt (mitte uuesti ei arvuta), nii et kui
+ * kasutaja on käsitsi NSG-d muutnud, kasutatakse seda.
+ *
+ * @returns {object} P — kõik arvutusparameetrid
+ */
 function koguSisendid() {
   const P = {};
 
@@ -1566,7 +1760,18 @@ function koguSisendid() {
   return P;
 }
 
-// Hindab erinevaid kaitseklasse
+/**
+ * Hindab, milline minimaalne LPS-klass viib R₁ alla R_T piiri.
+ * Käivitab `koguArvutus` viiel korral — iga klassi (puudub, IV, III, II, I)
+ * tegurikomplektiga — ja tagastab tabeli, kus iga rida sisaldab klassi
+ * P_LPS / P_SPD / P_EB väärtusi ja vastavat R₁-i.
+ *
+ * Tegurikomplektid pärinevad standardi tabelitest B.3 (P_LPS), B.7 (P_SPD)
+ * ja B.13 (P_EB) LPL klasside lõikes.
+ *
+ * @param {object} P - sisendparameetrid (`koguSisendid` tagastusväärtus)
+ * @returns {Array<object>} viit klassi koos R₁, R₂, R ja vastab_R1 lipuga
+ */
 function hindaKlassid(P) {
   const klassid = [
     { nimi: 'Kaitse puudub', PLPS: 1.0, PSPD: 1.0, PEB: 1.0 },
@@ -1593,6 +1798,12 @@ function hindaKlassid(P) {
 // PEAMINE ARVUTAMIS- JA KUVAMISFUNKTSIOON
 // =============================================================================
 
+/**
+ * "Arvuta"-nupu peamine click-handler. Kogub sisendid, kontrollib põhilised
+ * mõõdupiirangud (mõõtmed, NSG positiivsed) ja kutsub `koguArvutus` ja
+ * `hindaKlassid`. Tulemus renderdatakse `kuvaTulemused` kaudu paremasse paneeli.
+ * Veaolukorras kuvab `alert`-iga teate.
+ */
 function arvuta() {
   try {
     const P = koguSisendid();
@@ -1620,6 +1831,19 @@ function arvuta() {
   }
 }
 
+/**
+ * Renderdab arvutustulemused parempoolsesse paneeli.
+ * Sisaldab:
+ *   - peamist staatust (R₁ vs R_T)
+ *   - kaitseklasside hindamise tabelit (LPS I–IV)
+ *   - peamiste panustajate top 5
+ *   - üksikasjalikku aruannet `<details>` plokis (sisendid, haardealad,
+ *     sagedused, tõenäosused, riskikomponendid)
+ *
+ * @param {object} P - sisendparameetrid
+ * @param {object} t - `koguArvutus` vahetulemused
+ * @param {Array}  klassid - `hindaKlassid` tulemus
+ */
 function kuvaTulemused(P, t, klassid) {
   const R = t.R;
   const RT = P.RT;
@@ -1799,6 +2023,11 @@ function kuvaTulemused(P, t, klassid) {
 // SALVESTAMINE / LAADIMINE / ABI
 // =============================================================================
 
+/**
+ * Ekspordib kõik vormi `<input>` ja `<select>` väärtused JSON-faili,
+ * mille kasutaja saab oma arvutisse alla laadida. Faili nimi tuletatakse
+ * "Projekti nimi" väljast (mittesobivad tähed asendatakse `_`-iga).
+ */
 function salvestaSisendid() {
   const data = {};
   document.querySelectorAll('input, select').forEach(el => {
@@ -1819,6 +2048,12 @@ function salvestaSisendid() {
   document.getElementById('status').textContent = 'Sisendid salvestatud';
 }
 
+/**
+ * Laeb kasutaja JSON-faili (`salvestaSisendid` formaat) ja taastab vormi
+ * väärtused. Pärast laadimist käivitab `laeVaikevalikud`, et select-id
+ * uuendaks ka oma valikud, ja `lulita_RAD` / `lulita_LO`, et tingimuslike
+ * väljade nähtavus oleks õige.
+ */
 function laeFailist() {
   const inp = document.createElement('input');
   inp.type = 'file';
@@ -1846,6 +2081,7 @@ function laeFailist() {
   inp.click();
 }
 
+/** Avab abimaterjalide modaali (selgitused parameetritele ja standardile). */
 function kuvaAbi() {
   alert(`PIKSEKAITSE RISKIANALÜÜS - Kasutusjuhend
 
