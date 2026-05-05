@@ -33,11 +33,13 @@ Seejärel:
 
 1. **Üldine** — välgutiheduse andmed (NSG, k), vastuvõetav risk RT.
 2. **Ehitis** — mõõtmed (L, W, H), paiknemistegur CD, kategooria, kahjud (LT, LD, LF, LO).
-3. **Kaitsemeetmed** — PB ja PM komponentide tegurid (rf, rp, PS, KS1–KS3, RAD).
-4. **Elektriliin** — pikkus, paigaldus (CI), keskkond (CE), tüüp (CT), seadme UW, kaabli tüüp.
-5. **Sideliin** — sama, aga sideliini jaoks.
-6. **Naaberehitis** — kui liin ühendab kahte ehitist (Lisa A.6).
-7. **Plahvatusoht / haigla** — L1 ja L2 plahvatus-/haiglate tingimuslikud kaod.
+3. **Keskkond** — Pam, rt, rf, rp, KS3.
+4. **Liinid** — elektriliin ja sideliin (pikkus, CI, CT, UW, kaabli tüüp); naaberehitis.
+5. **Kahjud** — kahjuväärtused tabeli C.2 vahemikest kategooria järgi.
+6. **Kaitse** — olemasolev LPS, SPD, PEB.
+7. **Tsoonid** — *(uus, v1.4)* mitme tsooni režiim büroohoonete, koolide jt
+   keeruliste ehitiste jaoks, kus eri ruumide tuleoht/kohaloleku aeg erineb.
+   Sisaldab nuppu **„Lae F.3 büroohoone näide”**.
 
 ## Väljund
 

@@ -7,7 +7,19 @@ projekt järgib [semantilist versioneerimist](https://semver.org/lang/et/).
 
 ## [Avaldamata]
 
-### Lisatud
+### Lisatud — v1.4 mitme tsooni tugi
+- **Mitme tsooni arvutamine** (vahekaart 7 „Tsoonid”). Kasutaja saab jaotada
+  ehitise eraldi tsoonideks omade kahjudega, kohaloleku aegadega ja
+  riskikomponentide valikuga. Kogu R = Σ R_tsoon.
+- **F.3 büroohoone näide** üks-klõpsuga laadimine — 5 tsooni (sissepääsuala,
+  katus, arhiiv, kontorid, arvutuskeskus).
+- **`arvutaEhitis(shared, tsoonid)`** funktsioon JS-mootoris — orkestreerib
+  per-tsooni `koguArvutus` ja koondab tulemused.
+- **Test `tests/test_examples.js`** asendab varasema `test_validation.js` —
+  sisaldab nii F.2 (üks tsoon) kui F.3 (5 tsooni) valideerimist.
+- **Tulemustes per-tsooni tabel** (sarnane standardi tabelile F.21).
+
+### Lisatud — varasem
 - Versioonihaldus (Git) — repositoorium [Tuletark/Piksekaitse-RA](https://github.com/Tuletark/Piksekaitse-RA)
 - **Live-rakendus:** https://tuletark.github.io/Piksekaitse-RA/ (GitHub Pages)
 - `index.html` — suunab juurURL-ilt automaatselt `piksekaitse.html`-le, et live-link
@@ -16,6 +28,14 @@ projekt järgib [semantilist versioneerimist](https://semver.org/lang/et/).
 - JSDoc-kommentaarid kõikidele JS-funktsioonidele (haardealade, sageduste,
   tõenäosuste, riskikomponentide arvutused + UI-loogika)
 - `.gitignore`
+
+### Teadaolevad piirangud
+- Mitme tsooni režiimis kasutame **ühte elektriliini segmenti** (kõrgepinge).
+  Standardi näide F.3 modelleerib elektriliini kahesegmendilisena (kõrgepinge
+  1000 m + madalpinge 100 m). Sellest tulenevalt jäävad RV ja RU komponendid
+  Z3-Z5 tsoonides standardi väärtustest umbes 30% madalamaks. Tervikriski R
+  erinevus on ~3–4%. RB ja RAT/RAD vastavad standardile täpselt.
+- Vigastumise sageduse F arvutust (jaotis 9) pole rakendatud.
 
 ### Muudetud
 - `tests/test_validation.js` — kõvakodeeritud Linuxi tee (`/home/claude/...`) asendatud

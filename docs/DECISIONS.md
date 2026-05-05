@@ -159,9 +159,35 @@ naaberehitise mõõtmed ja CDJ (selle paiknemistegur).
 
 ---
 
+## 11. Mitme tsooni režiim — ühesegmendiline elektriliin
+
+**Otsus:** Mitme tsooni režiimis (vahekaart „Tsoonid”, v1.4+) jagatakse ehitis
+eri tsoonideks omade kahjudega ja kohaloleku aegadega, kuid kogu ehitisele
+kasutame **ühte elektriliini segmenti** ja **ühte sideliini segmenti**.
+
+**Põhjendus:** Standard lubab modelleerida liini mitme segmendina (nt
+F.3 näites: kõrgepinge 1000 m + madalpinge 100 m). Kahesegmendiline mudel
+nõuab oluliselt suurema UI-keerukust (segment-segmendi kaupa CI, CT, UW,
+kaabli tüüp). Ühesegmendiline mudel katab tüüpilised juhtumid hästi —
+suurem segment domineerib niikuinii.
+
+**Mõju:** Standardi näide F.3 valideerimisel jäävad RV ja RU komponendid
+~30% standardi väärtustest madalamaks, kogurisk R aga 3–4% madalam. RB ja
+RAT komponendid (mis ei sõltu liinist) vastavad standardile täpselt.
+
+**Tähendus kasutajale:** Tüüpiliste büroohoonete jaoks piisav. Kui projektis
+on liin tõsiselt mitmesegmendiline (kõrgepingest madalpingele), arvutage
+mõlema segmendi NL ja NI käsitsi ja võrrelge eraldi.
+
+---
+
 ## Otsused, mida me **ei** teinud
 
 - **Vigastumise sageduse F (jaotis 9) arvutus** — pole praegu rakenduses.
   Materjal on standardis olemas, kui kasutaja seda hiljem küsib.
 - **Majandusliku riski R4 arvutus** — keskendume L1 (inimelu kaotus) riskile,
   mis on projekteerija jaoks kõige sagedasem nõue.
+- **Mitmesegmendiline liini mudel** (vt §11) — võiks olla tulevane laiendus
+  keerukamate büroohoonete jaoks.
+- **Haigla tüüp ehitis (F.4 standardis)** — vajab täiendavaid tsoonipõhiseid
+  riskikomponente, mis pole praegu rakendatud. Lisame kui vajadus tekib.

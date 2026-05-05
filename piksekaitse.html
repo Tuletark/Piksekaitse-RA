@@ -151,6 +151,56 @@ header .sub { font-size: 12px; opacity: 0.85; margin-top: 2px; }
   font-style: italic;
 }
 
+/* Tsoonikaart (mitme tsooni režiim) */
+.tsoon-card {
+  border: 1px solid #cfd4da;
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 12px;
+  background: #fafbfc;
+}
+.tsoon-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e5e7eb;
+}
+.tsoon-card-header input[type="text"] {
+  flex: 1;
+  padding: 6px 8px;
+  border: 1px solid #cfd4da;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+}
+.tsoon-card .field { margin-bottom: 6px; padding: 2px 0; }
+.tsoon-card .field label { font-size: 12px; }
+.tsoon-komponendid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px 12px;
+  margin-top: 8px;
+  padding: 8px;
+  background: #f0f3f7;
+  border-radius: 4px;
+}
+.tsoon-komponendid label {
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.btn-danger {
+  background: #fee;
+  border-color: #f4a;
+  color: #c0392b;
+}
+.btn-danger:hover { background: #fdd; }
+
 /* Nupud */
 .btn-row {
   display: flex;
@@ -339,6 +389,7 @@ footer {
       <div class="tab" data-tab="t4">4. Liinid</div>
       <div class="tab" data-tab="t5">5. Kahjud</div>
       <div class="tab" data-tab="t6">6. Kaitse</div>
+      <div class="tab" data-tab="t7">7. Tsoonid</div>
     </div>
 
     <div class="panel-body">
@@ -653,6 +704,35 @@ footer {
         <div class="field">
           <label>P<sub>EB</sub> sideliinil:</label>
           <select id="PEB_T_valik"></select>
+        </div>
+      </div>
+
+      <!-- VAHEKAART 7: TSOONID -->
+      <div class="tab-content" id="t7">
+        <div class="section-title">Mitme tsooni režiim</div>
+        <div class="info-box">
+          Vaikimisi käsitleme ehitist <b>ühe tsoonina</b> — kasutatakse vahekaartide
+          „Ehitis”, „Keskkond”, „Kahjud” väärtusi. Sobib tüüpiliste eluhoonete jaoks (näide F.2).
+          <br><br>
+          Mitme tsooni režiim on vajalik, kui ehitise eri osadel on
+          <b>erinev tuleoht, kohaloleku aeg või kahjud</b> — näiteks büroohoones
+          arhiiv (kõrge tuleoht) vs kontorid (madal tuleoht). Standardi näide F.3.
+          <br><br>
+          <b>Piirangud:</b> ühesegmendiline elektriliin (kõrgepinge + madalpinge eraldi
+          segmendid pole toetatud); kogu ehitisele ühised on mõõtmed, NSG, liinid ja LPS.
+        </div>
+
+        <div class="field-checkbox">
+          <input type="checkbox" id="kasuta_tsoonid" onchange="lulita_tsoonid_režiim()">
+          <label for="kasuta_tsoonid">Aktiveeri mitme tsooni režiim</label>
+        </div>
+
+        <div id="tsoonid_block" style="display:none;">
+          <div class="btn-row" style="margin: 12px 0;">
+            <button class="btn" onclick="lisa_tsoon()">+ Lisa tsoon</button>
+            <button class="btn" onclick="laeF3Näide()">📋 Lae F.3 büroohoone näide</button>
+          </div>
+          <div id="tsoonid_list"></div>
         </div>
       </div>
 
@@ -1494,6 +1574,202 @@ function laeVaikevaartused() {
   document.getElementById('status').textContent = 'Vaikeväärtused laaditud (näide F.2 - Maja)';
 }
 
+// =============================================================================
+// MITME TSOONI HALDUS (vahekaart 7)
+// =============================================================================
+
+/** Olek: tsoonide massiiv. Iga element on tsooni-objekt (vt lisa_tsoon). */
+let TSOONID = [];
+
+/** Lülitab mitme tsooni režiimi sisse/välja. Sisselülitamisel loob esimese tsooni vaikeväärtustega. */
+function lulita_tsoonid_režiim() {
+  const cb = document.getElementById('kasuta_tsoonid');
+  const block = document.getElementById('tsoonid_block');
+  if (!cb || !block) return;
+  if (cb.checked) {
+    block.style.display = 'block';
+    if (TSOONID.length === 0) lisa_tsoon();
+  } else {
+    block.style.display = 'none';
+  }
+}
+
+/** Lisab uue tsooni vaikeväärtustega ja renderdab loendi uuesti. */
+function lisa_tsoon() {
+  const id = 'ts_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
+  TSOONID.push({
+    id,
+    nimi: 'Tsoon ' + (TSOONID.length + 1),
+    tZ: 8760,
+    rt: 1e-5, Pam: 1.0, PO: 0,
+    rf: 1e-3, rp: 1.0,
+    KS3_P: 0.2, KS3_T: 1.0,
+    PSPD_P: 1.0, PSPD_T: 1.0,
+    LT: 1e-2, LD: 1e-1, LF1: 5e-2, LF2: 5e-2, LO1: 0, LO2: 0,
+    kasuta_RAT: true, kasuta_RAD: false, kasuta_RB: true,
+    kasuta_RC: false, kasuta_RM: false,
+    kasuta_RU: true, kasuta_RV: true,
+    kasuta_RW: false, kasuta_RZ: false,
+  });
+  renderTsoonid();
+}
+
+/** Eemaldab tsooni id järgi. */
+function eemalda_tsoon(id) {
+  TSOONID = TSOONID.filter(t => t.id !== id);
+  renderTsoonid();
+}
+
+/** Uuendab tsooni välja väärtust kasutaja sisendi põhjal. Kutsutakse `oninput` / `onchange` käigus. */
+function uuenda_tsoon(el) {
+  const id = el.dataset.tsoon;
+  const key = el.dataset.key;
+  const tsoon = TSOONID.find(t => t.id === id);
+  if (!tsoon) return;
+  if (el.type === 'checkbox') {
+    tsoon[key] = el.checked;
+  } else if (el.type === 'number') {
+    tsoon[key] = parseFloat(el.value.replace(',', '.')) || 0;
+  } else {
+    tsoon[key] = el.value;
+  }
+}
+
+/** Vorming: number → loetav string (toetab teaduslikku vormingut). */
+function fmtNumber(x) {
+  if (x === 0) return '0';
+  if (Math.abs(x) < 1e-3 || Math.abs(x) > 1e4) return x.toExponential(1);
+  return x.toString();
+}
+
+/** Renderdab tsoonide loendi DOM-i. Iga tsoon on iseseisev kaart. */
+function renderTsoonid() {
+  const list = document.getElementById('tsoonid_list');
+  if (!list) return;
+  list.innerHTML = '';
+  TSOONID.forEach((tsoon) => {
+    const c = document.createElement('div');
+    c.className = 'tsoon-card';
+    const ts = tsoon.id;
+    c.innerHTML = `
+      <div class="tsoon-card-header">
+        <input type="text" value="${tsoon.nimi}" data-tsoon="${ts}" data-key="nimi" oninput="uuenda_tsoon(this)">
+        <button class="btn btn-danger" onclick="eemalda_tsoon('${ts}')">Eemalda</button>
+      </div>
+      <div class="field">
+        <label>Kohaloleku aeg t<sub>Z</sub> (h/aastas):</label>
+        <input type="number" min="0" max="8760" step="1" value="${tsoon.tZ}" data-tsoon="${ts}" data-key="tZ" oninput="uuenda_tsoon(this)">
+      </div>
+      <div class="field">
+        <label>Tuleoht r<sub>f</sub>:</label>
+        <input type="number" step="any" value="${fmtNumber(tsoon.rf)}" data-tsoon="${ts}" data-key="rf" oninput="uuenda_tsoon(this)">
+      </div>
+      <div class="field">
+        <label>Tulekaitse r<sub>p</sub>:</label>
+        <input type="number" step="any" value="${fmtNumber(tsoon.rp)}" data-tsoon="${ts}" data-key="rp" oninput="uuenda_tsoon(this)">
+      </div>
+      <div class="field">
+        <label>Pinnasekate r<sub>t</sub>:</label>
+        <input type="number" step="any" value="${fmtNumber(tsoon.rt)}" data-tsoon="${ts}" data-key="rt" oninput="uuenda_tsoon(this)">
+      </div>
+      <div class="field">
+        <label>Avatud ala P<sub>O</sub> (RAD jaoks):</label>
+        <input type="number" step="any" value="${fmtNumber(tsoon.PO)}" data-tsoon="${ts}" data-key="PO" oninput="uuenda_tsoon(this)">
+      </div>
+      <div class="field">
+        <label>L<sub>T</sub>:</label>
+        <input type="number" step="any" value="${fmtNumber(tsoon.LT)}" data-tsoon="${ts}" data-key="LT" oninput="uuenda_tsoon(this)">
+      </div>
+      <div class="field">
+        <label>L<sub>D</sub>:</label>
+        <input type="number" step="any" value="${fmtNumber(tsoon.LD)}" data-tsoon="${ts}" data-key="LD" oninput="uuenda_tsoon(this)">
+      </div>
+      <div class="field">
+        <label>L<sub>F1</sub> (inimoht):</label>
+        <input type="number" step="any" value="${fmtNumber(tsoon.LF1)}" data-tsoon="${ts}" data-key="LF1" oninput="uuenda_tsoon(this)">
+      </div>
+      <div class="field">
+        <label>L<sub>F2</sub> (ehitis):</label>
+        <input type="number" step="any" value="${fmtNumber(tsoon.LF2)}" data-tsoon="${ts}" data-key="LF2" oninput="uuenda_tsoon(this)">
+      </div>
+      <div style="font-size: 12px; font-weight: 600; margin-top: 8px;">Arvutatavad riskikomponendid:</div>
+      <div class="tsoon-komponendid">
+        ${['RAT','RAD','RB','RC','RM','RU','RV','RW','RZ'].map(k => `
+          <label><input type="checkbox" ${tsoon['kasuta_'+k] ? 'checked' : ''} data-tsoon="${ts}" data-key="kasuta_${k}" onchange="uuenda_tsoon(this)"> R<sub>${k.substring(1)}</sub></label>
+        `).join('')}
+      </div>
+    `;
+    list.appendChild(c);
+  });
+}
+
+/** Laeb F.3 büroohoone näite — 5 tsooni (sissepääs, katus, arhiiv, kontorid, arvutuskeskus). */
+function laeF3Näide() {
+  // Eelnevalt täida ehitise üldparameetrid (vahekaart 1, 2, 3, 4)
+  document.getElementById('projekt_nimi').value = 'Näide F.3 - Büroohoone';
+  document.getElementById('NG').value = '2.0';
+  document.getElementById('k_tegur_sg').value = '2';
+  document.getElementById('NSG').value = '4.0';
+  document.getElementById('L').value = '20';
+  document.getElementById('W').value = '40';
+  document.getElementById('H').value = '25';
+  document.getElementById('LL_P').value = '1000';
+  document.getElementById('UWP').value = '2.5';
+  document.getElementById('kasuta_sideliin').checked = false;
+  document.getElementById('LL_T').value = '0';
+
+  // Tsoonid
+  TSOONID = [
+    { id: 'ts_z1_' + Date.now(), nimi: 'Z1 — Hooneväline sissepääsuala',
+      tZ: 175, rt: 1e-3, Pam: 1.0, PO: 0, rf: 0, rp: 1.0,
+      KS3_P: 0.2, KS3_T: 1.0, PSPD_P: 1.0, PSPD_T: 1.0,
+      LT: 1e-2, LD: 0, LF1: 0, LF2: 0, LO1: 0, LO2: 0,
+      kasuta_RAT: true, kasuta_RAD: false, kasuta_RB: false,
+      kasuta_RC: false, kasuta_RM: false, kasuta_RU: false,
+      kasuta_RV: false, kasuta_RW: false, kasuta_RZ: false },
+    { id: 'ts_z2_' + Date.now(), nimi: 'Z2 — Katus (hooldusbrigaad)',
+      tZ: 18, rt: 1e-5, Pam: 1.0, PO: 1.0, rf: 0, rp: 1.0,
+      KS3_P: 0.2, KS3_T: 1.0, PSPD_P: 1.0, PSPD_T: 1.0,
+      LT: 1e-2, LD: 1e-1, LF1: 0, LF2: 0, LO1: 0, LO2: 0,
+      kasuta_RAT: false, kasuta_RAD: true, kasuta_RB: false,
+      kasuta_RC: false, kasuta_RM: false, kasuta_RU: false,
+      kasuta_RV: false, kasuta_RW: false, kasuta_RZ: false },
+    { id: 'ts_z3_' + Date.now(), nimi: 'Z3 — Arhiiv (kõrge tuleoht)',
+      tZ: 440, rt: 1e-5, Pam: 1.0, PO: 0, rf: 1e-1, rp: 0.2,
+      KS3_P: 0.2, KS3_T: 1.0, PSPD_P: 1.0, PSPD_T: 1.0,
+      LT: 1e-2, LD: 0, LF1: 5e-2, LF2: 5e-2, LO1: 0, LO2: 0,
+      kasuta_RAT: true, kasuta_RAD: false, kasuta_RB: true,
+      kasuta_RC: false, kasuta_RM: false, kasuta_RU: false,
+      kasuta_RV: true, kasuta_RW: false, kasuta_RZ: false },
+    { id: 'ts_z4_' + Date.now(), nimi: 'Z4 — Kontorid',
+      tZ: 2630, rt: 1e-5, Pam: 1.0, PO: 0, rf: 1e-3, rp: 0.5,
+      KS3_P: 0.2, KS3_T: 1.0, PSPD_P: 1.0, PSPD_T: 1.0,
+      LT: 1e-2, LD: 0, LF1: 5e-2, LF2: 5e-2, LO1: 0, LO2: 0,
+      kasuta_RAT: true, kasuta_RAD: false, kasuta_RB: true,
+      kasuta_RC: false, kasuta_RM: false, kasuta_RU: false,
+      kasuta_RV: true, kasuta_RW: false, kasuta_RZ: false },
+    { id: 'ts_z5_' + Date.now(), nimi: 'Z5 — Arvutuskeskus',
+      tZ: 2200, rt: 1e-5, Pam: 1.0, PO: 0, rf: 1e-3, rp: 0.2,
+      KS3_P: 0.2, KS3_T: 1.0, PSPD_P: 1.0, PSPD_T: 1.0,
+      LT: 1e-2, LD: 0, LF1: 1e-1, LF2: 1e-1, LO1: 0, LO2: 0,
+      kasuta_RAT: true, kasuta_RAD: false, kasuta_RB: true,
+      kasuta_RC: false, kasuta_RM: false, kasuta_RU: false,
+      kasuta_RV: true, kasuta_RW: false, kasuta_RZ: false },
+  ];
+
+  // Veendu et ka muud parameetrid on F.3 jaoks õiged (CD = 1, CE = 0,5, raudbetoon → PS = 0,5)
+  document.getElementById('CD_valik').value = 'Eraldiseisev ehitis (läheduses pole teisi objekte)';
+  document.getElementById('CE_valik').value = 'Äärelinnaline (alla 5 m kõrgused ehitised, hooned)';
+  document.getElementById('PS_valik').value = 'Raudbetoonist või terasraamiga ehitis';
+
+  // Aktiveeri mitme tsooni režiim
+  document.getElementById('kasuta_tsoonid').checked = true;
+  lulita_tsoonid_režiim();
+  renderTsoonid();
+
+  document.getElementById('status').textContent = 'Laaditud F.3 büroohoone näide (5 tsooni)';
+}
+
 /**
  * Loeb arvulise sisendi väljalt. Toetab nii koma- kui ka punktiga komakohti
  * ("1,5" ja "1.5") ning teaduslikku vormingut ("1e-5"). Tagastab `vaikimisi`,
@@ -1900,17 +2176,110 @@ function arvuta() {
       return;
     }
 
-    const t = koguArvutus(P);
-    const klassid = hindaKlassid(P);
+    const cb = document.getElementById('kasuta_tsoonid');
+    const mitmeTsooni = cb && cb.checked && TSOONID.length > 0;
 
-    kuvaTulemused(P, t, klassid);
-    document.getElementById('status').textContent =
-      'Arvutatud: ' + new Date().toLocaleTimeString('et-EE');
+    if (mitmeTsooni) {
+      const tulem = arvutaEhitis(P, TSOONID);
+      kuvaTulemusedTsoonid(P, tulem);
+      document.getElementById('status').textContent =
+        `Arvutatud (${TSOONID.length} tsooni): ${new Date().toLocaleTimeString('et-EE')}`;
+    } else {
+      const t = koguArvutus(P);
+      const klassid = hindaKlassid(P);
+      kuvaTulemused(P, t, klassid);
+      document.getElementById('status').textContent =
+        'Arvutatud: ' + new Date().toLocaleTimeString('et-EE');
+    }
 
   } catch (e) {
     alert('Arvutuse viga: ' + e.message);
     console.error(e);
   }
+}
+
+/**
+ * Renderdab mitme tsooni tulemused parempoolsesse paneeli — sisaldab
+ * tsoonipõhist riskitabelit (nagu standardi tabel F.21) ja koguriski R.
+ *
+ * @param {object} P - jagatud sisendparameetrid
+ * @param {object} tulem - `arvutaEhitis` tagastusväärtus { tsoonid, R }
+ */
+function kuvaTulemusedTsoonid(P, tulem) {
+  const out = document.getElementById('tulemused');
+  const RT = P.RT;
+  const R_total = tulem.R;
+  const onOk = R_total.R1 <= RT;
+
+  let html = '';
+
+  // Peamine kokkuvõte
+  html += `<div class="results-summary ${onOk ? 'ok' : 'fail'}">`;
+  html += `<h3>${onOk ? '✓ Risk on lubatud tasemest madalam' : '✗ Risk on lubatud tasemest kõrgem'}</h3>`;
+  html += `<div class="result-row"><span>Vastuvõetav risk R<sub>T</sub>:</span><span class="val">${fmtSci(RT)}</span></div>`;
+  html += `<div class="result-row"><span>R<sub>1</sub> (inimoht, kõik tsoonid):</span><span class="val">${fmtSci(R_total.R1)}</span></div>`;
+  html += `<div class="result-row"><span>R<sub>2</sub> (ehitis, kõik tsoonid):</span><span class="val">${fmtSci(R_total.R2)}</span></div>`;
+  html += `<div class="result-row"><span><b>R kogurisk:</b></span><span class="val">${fmtSci(R_total.R)}</span></div>`;
+  if (onOk) {
+    html += `<p style="margin-top:10px;">Kõik tsoonid kokku — R<sub>1</sub> ≤ R<sub>T</sub>. Piksekaitse pole inimohu vähendamiseks vajalik.</p>`;
+  } else {
+    const suhe = R_total.R1 / RT;
+    html += `<p style="margin-top:10px;"><b>Piksekaitse on VAJALIK!</b> R<sub>1</sub> ületab R<sub>T</sub>-d ${suhe.toFixed(1)}-kordselt.</p>`;
+  }
+  html += `</div>`;
+
+  // Tsoonide tabel — nagu standardi tabel F.21
+  html += `<h3 style="color:#0a4080; margin-top:20px; margin-bottom:8px;">Risk tsoonide kaupa (väärtused × 10⁻⁵)</h3>`;
+  html += `<table class="results-table">`;
+  html += `<thead><tr><th>Komponent</th>`;
+  for (const ts of tulem.tsoonid) {
+    html += `<th class="num" title="${ts.nimi}">${ts.nimi.split('—')[0].trim() || ts.nimi.substring(0, 8)}</th>`;
+  }
+  html += `<th class="num">Σ</th></tr></thead><tbody>`;
+
+  const komponendid = ['RAT', 'RAD', 'RB', 'RC', 'RM', 'RU', 'RV', 'RW', 'RZ'];
+  for (const k of komponendid) {
+    // Näita ainult kui mõnes tsoonis on > 0
+    const sum = tulem.tsoonid.reduce((a, ts) => a + (ts.R[k] || 0), 0);
+    if (sum < 1e-10) continue;
+    html += `<tr><td>R<sub>${k.substring(1)}</sub></td>`;
+    for (const ts of tulem.tsoonid) {
+      const v = ts.R[k] || 0;
+      html += `<td class="num">${v < 1e-10 ? '–' : (v / 1e-5).toFixed(3)}</td>`;
+    }
+    html += `<td class="num"><b>${(sum / 1e-5).toFixed(3)}</b></td></tr>`;
+  }
+
+  // R rida — per-tsooni kogu R
+  html += `<tr style="background:#e3f2fd; font-weight:600;"><td>R</td>`;
+  for (const ts of tulem.tsoonid) {
+    html += `<td class="num">${(ts.R.R / 1e-5).toFixed(3)}</td>`;
+  }
+  html += `<td class="num">${(R_total.R / 1e-5).toFixed(3)}</td></tr>`;
+  html += `</tbody></table>`;
+
+  // Tsoonipõhine kohaloleku aeg viitena
+  html += `<details style="margin-top:12px;"><summary style="cursor:pointer; color:#0a4080; font-weight:600; padding:6px;">Tsoonide parameetrid</summary>`;
+  html += `<table class="results-table" style="margin-top:8px;">`;
+  html += `<thead><tr><th>Tsoon</th><th class="num">t<sub>Z</sub> (h)</th><th class="num">P<sub>P</sub></th><th class="num">r<sub>f</sub></th><th class="num">r<sub>p</sub></th><th class="num">L<sub>F1</sub></th></tr></thead><tbody>`;
+  for (const ts of tulem.tsoonid) {
+    html += `<tr><td>${ts.nimi}</td>`;
+    html += `<td class="num">${ts.P.tZ}</td>`;
+    html += `<td class="num">${ts.P.PP.toFixed(3)}</td>`;
+    html += `<td class="num">${fmtSci(ts.P.rf, 1)}</td>`;
+    html += `<td class="num">${ts.P.rp}</td>`;
+    html += `<td class="num">${fmtSci(ts.P.LF1, 1)}</td>`;
+    html += `</tr>`;
+  }
+  html += `</tbody></table></details>`;
+
+  // Allmärkus
+  html += `<div style="margin-top:20px; padding-top:12px; border-top:1px solid #e5e7eb; font-size:11px; color:#666;">`;
+  html += `Standard: <b>EVS-EN IEC 62305-2:2025</b> · Mitme tsooni analüüs · `;
+  html += `Arvutatud: ${new Date().toLocaleString('et-EE')}`;
+  html += `</div>`;
+
+  out.innerHTML = html;
 }
 
 /**
