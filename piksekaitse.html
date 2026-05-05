@@ -1661,6 +1661,88 @@ function koguArvutus(P, override = {}) {
 }
 
 /**
+ * Mitme tsooni arvutus. Iga tsoon kasutab jagatud ehitise ja liinide
+ * parameetreid, kuid omab oma kohaloleku aega, kahjusid (LF1, LF2, LO1, LO2,
+ * LT, LD), tuleohu / tulekaitse tegureid (rf, rp, rt, Pam) ning otsustab
+ * iseseisvalt, milliseid riskikomponente arvutada (`kasuta_RX` lipud).
+ *
+ * Standardi näide F.3 (Büroohoone, Lisa F) — projekteerija jaotab ehitise
+ * tsoonideks (nt arhiiv, kontorid, arvutuskeskus) eri tuleohuga ja eri
+ * kohaloleku ajaga. Iga tsoon panustab koguriski R = Σ R_tsoon.
+ *
+ * Tsoonipõhised lipud (kõik `undefined` korral kaasatud, kui pole välja
+ * lülitatud — välja arvatud `kasuta_RAD`, mis vaikimisi `false`):
+ *   kasuta_RAT, kasuta_RAD, kasuta_RB, kasuta_RC, kasuta_RM,
+ *   kasuta_RU, kasuta_RV, kasuta_RW, kasuta_RZ
+ *
+ * @param {object} shared - Ehitise ja liinide üldparameetrid (jagatud)
+ * @param {Array<object>} tsoonid - Tsoonide massiiv, igal vähemalt `nimi`
+ * @returns {object} { tsoonid: [{nimi, R, ...}, ...], R: kogusumma }
+ */
+function arvutaEhitis(shared, tsoonid) {
+  const R_total = {
+    RAT: 0, RAD: 0,
+    RB1: 0, RB2: 0, RB: 0,
+    RC1: 0, RC2: 0, RC: 0,
+    RM1: 0, RM2: 0, RM: 0,
+    RU: 0,
+    RV1: 0, RV2: 0, RV: 0,
+    RW1: 0, RW2: 0, RW: 0,
+    RZ1: 0, RZ2: 0, RZ: 0,
+    R1: 0, R2: 0, R: 0,
+  };
+  const tulemused = [];
+
+  for (const tsoon of tsoonid) {
+    // Ehita P, kombineerides shared + tsooni-spetsiifilised
+    const P = {
+      ...shared,
+      ...tsoon,
+      // Arvuta PP, Pe vajadusel uuesti, kui tsoonis on antud tZ/te
+      PP: tsoon.tZ != null
+        ? Math.min(1.0, tsoon.tZ / 8760)
+        : (shared.PP != null ? shared.PP : 1.0),
+      Pe: tsoon.te != null
+        ? Math.min(1.0, tsoon.te / 8760)
+        : (shared.Pe != null ? shared.Pe : 1.0),
+      // RAD ainult kui tsoon on selle eksplitsiitselt sisse lülitanud
+      kasuta_RAD: tsoon.kasuta_RAD === true,
+      // Sunni L1 ja L2 komponentide arvutamine; vajadusel maskime hiljem
+      plahvatus_haigla_L1: true,
+      plahvatus_L2: true,
+    };
+
+    const t = koguArvutus(P);
+    const R = { ...t.R };
+
+    // Maskeeri välja need komponendid, mida tsoon ei kasuta
+    if (tsoon.kasuta_RAT === false) R.RAT = 0;
+    // RAD on juba välja lülitatud, kui kasuta_RAD ei olnud true
+    if (tsoon.kasuta_RB === false) { R.RB1 = R.RB2 = R.RB = 0; }
+    if (tsoon.kasuta_RC === false) { R.RC1 = R.RC2 = R.RC = 0; }
+    if (tsoon.kasuta_RM === false) { R.RM1 = R.RM2 = R.RM = 0; }
+    if (tsoon.kasuta_RU === false) { R.RU = 0; }
+    if (tsoon.kasuta_RV === false) { R.RV1 = R.RV2 = R.RV = 0; }
+    if (tsoon.kasuta_RW === false) { R.RW1 = R.RW2 = R.RW = 0; }
+    if (tsoon.kasuta_RZ === false) { R.RZ1 = R.RZ2 = R.RZ = 0; }
+
+    // Arvuta R1, R2, R uuesti maskeerimise järel
+    R.R1 = R.RAT + R.RAD + R.RB1 + R.RC1 + R.RM1 + R.RU + R.RV1 + R.RW1 + R.RZ1;
+    R.R2 = R.RB2 + R.RC2 + R.RM2 + R.RV2 + R.RW2 + R.RZ2;
+    R.R = R.R1 + R.R2;
+
+    tulemused.push({ nimi: tsoon.nimi || `Tsoon ${tulemused.length + 1}`, P, t, R });
+
+    // Akumuleeri kogusummasse
+    for (const key of Object.keys(R_total)) {
+      R_total[key] += R[key] || 0;
+    }
+  }
+
+  return { tsoonid: tulemused, R: R_total };
+}
+
+/**
  * Kogub kogu vormi sisendi DOM-ist ja koostab `P` objekti, mis on
  * `koguArvutus`-le sobivas kujus. Iga väli leitakse oma `id` järgi;
  * puuduv väli annab vaikimisi väärtuse (vt iga `getNum` / `getSel`

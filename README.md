@@ -71,18 +71,14 @@ Testi käivitamiseks on vaja **Node.js** (versioon ≥ 14 piisab).
 Projekti juurkaustast:
 
 ```bash
-node tests/test_validation.js
+node tests/test_examples.js
 ```
 
-Oodatud väljund:
+Test käivitab kaks standardi näidet:
+- **F.2 Maja** (üks tsoon, R = 1,793 × 10⁻⁵)
+- **F.3 Büroohoone** (viis tsooni: sissepääs, katus, arhiiv, kontorid, arvutuskeskus)
 
-```
-===== Standardi näide F.2 (Maja) - valideerimine =====
-
-R = 1.793 × 10⁻⁵   (oodatud: 1.793)
-Erinevus: 0.000%
-✓ TÄPSED TULEMUSED!
-```
+Oodatud kokkuvõte: **9 läbi, 0 luhtus.**
 
 **Iga arvutusi puudutava muudatuse järel tuleb test läbi käia.**
 
