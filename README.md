@@ -21,32 +21,46 @@ Avaneb otse brauseris, ei vaja installimist ega registreerimist.
 
 Seejärel:
 
-1. Sisesta ehitise andmed seitsmel vahekaardil vasakpoolsel paneelil.
-2. Vajuta nuppu **„Arvuta”** — tulemus ilmub parempoolsele paneelile.
+1. Täida vahekaart **„Põhiandmed”** (tavahoone jaoks piisab sellest).
+2. Vajuta nuppu **„Arvuta risk”** — tulemus ilmub parempoolsele paneelile koos
+   kopeeritavate aruandeplokkidega (kokkuvõte, arvutuskäik, algandmete tabel).
 3. Vajadusel salvesta sisendid JSON-faili (rakenduses olev nupp), et sama juhtum
    hiljem uuesti laadida.
 
 > Rakendus on üks fail (`piksekaitse.html`), kogu loogika on selles. Internetiühendust
 > ega lisapakette ei ole vaja.
 
-## Sisend-vahekaardid
+## Sisend — lihtsamast täpsemani
 
-1. **Üldine** — välgutiheduse andmed (NSG, k), vastuvõetav risk RT.
-2. **Ehitis** — mõõtmed (L, W, H), paiknemistegur CD, kategooria, kahjud (LT, LD, LF, LO).
-3. **Keskkond** — Pam, rt, rf, rp, KS3.
-4. **Liinid** — elektriliin ja sideliin (pikkus, CI, CT, UW, kaabli tüüp); vajadusel
-   **lisalõigud** (nt LV-kaabel + HV-liin trafoga, jaotis 8.4); naaberehitis.
-5. **Kahjud** — kahjuväärtused tabeli C.2 vahemikest kategooria järgi.
-6. **Kaitse** — olemasolev LPS, SPD, PEB.
-7. **Tsoonid** — *(uus, v1.4)* mitme tsooni režiim büroohoonete, koolide jt
-   keeruliste ehitiste jaoks, kus eri ruumide tuleoht/kohaloleku aeg erineb.
-   Sisaldab nuppu **„Lae F.3 büroohoone näide”**.
+**Põhiandmed** (alati aktiivne) — objekt, välk (N<sub>G</sub>, k), hoone (L, W, H,
+C<sub>D</sub>, P<sub>S</sub>), kasutus ja kahjud (t<sub>z</sub>, tabel C.2, r<sub>f</sub>,
+r<sub>p</sub>, r<sub>t</sub>, P<sub>am</sub>), keskkond C<sub>E</sub>, elektri- ja
+sideliin, olemasolev kaitse ning **Erijuhud**.
+
+Täpsemad vahekaardid on **hallid ja lukus**, kuni mõni „Erijuhud” valik neid eeldab:
+
+| Vahekaart | Aktiveerub, kui |
+|---|---|
+| Liinid (täpsem) — U<sub>W</sub>, kaabli varje, lisalõigud, naaberehitis | liin mitmest lõigust, naaberhoone, varjestatud kaabel (varje ühendatud), plahvatusoht/haigla |
+| Sisesüsteemid — L<sub>O1</sub>, L<sub>O2</sub>, t<sub>e</sub>, K<sub>S1–S3</sub> | plahvatusoht või haigla |
+| Avatud alad — P<sub>O</sub>, L<sub>D</sub> | hoonel on avatud alad, kus viibivad inimesed |
+| Tsoonid | hoone jaotatakse tsoonideks (näide F.3) |
+
+**Ekspertrežiim** (lüliti paneeli päises) avab kõik vahekaardid.
+
+Iga valiku juures on näha tähendus, sümbol ja väärtus (nt „Süvistatud — CI = 0,3”).
+Kolmanda osapoole andmetel (liinid, olemasolev kaitse, P<sub>am</sub>, P<sub>S</sub>)
+on valik **„Teadmata”** → kasutatakse ebasoodsaimat väärtust ja see märgitakse
+tulemustes ning algandmete tabelis eeldusena.
 
 ## Väljund
 
 Parempoolne paneel näitab:
 
-- **R** — kogurisk (peab olema ≤ RT, vaikimisi 10⁻⁵)
+- **R = R<sub>L1</sub> + R<sub>L2</sub>** — kogurisk, võrreldakse R<sub>T</sub> = 10⁻⁵-ga
+  (jaotis 7.3; tsoonide korral igas tsoonis)
+- **Aruande plokid** — kokkuvõte, arvutuskäik ja tabel „Algandmed”, igaüks nupuga
+  „Kopeeri Wordi”
 - **R<sub>D</sub>**, **R<sub>I</sub>** — riskikomponentide vahesummad
 - **Üksikkomponendid** RA, RB, RU, RV, RC, RM, RW, RZ
 - **Soovitus** — kas piksekaitse on vajalik ja millise LPS-klassiga
@@ -82,8 +96,10 @@ Test käivitab kaks standardi näidet:
 - **F.3 Büroohoone** (viis tsooni: sissepääs, katus, arhiiv, kontorid, arvutuskeskus;
   kahelõiguline elektriliin)
 - Liinilõikude sisemine kooskõla (1 × 1000 m == 400 m + 600 m)
+- Praktiline näide (ärihoone): võrdlus varasema Exceli arvutusega ning
+  otsustuskriteerium R = R<sub>L1</sub> + R<sub>L2</sub>
 
-Oodatud kokkuvõte: **21 läbi, 0 luhtus.**
+Oodatud kokkuvõte: **26 läbi, 0 luhtus.**
 
 **Iga arvutusi puudutava muudatuse järel tuleb test läbi käia.**
 

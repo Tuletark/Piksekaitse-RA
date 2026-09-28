@@ -40,6 +40,8 @@ otsi funktsiooni nime järgi).
 | **TÕENÄOSUSED**                     | Lisa B: `arvutaPAT`, `arvutaPAD`, `arvutaPB`, `arvutaPC`, `arvutaPM`, `arvutaPU`, `arvutaPV`, `arvutaPW`, `arvutaPZ`, `arvutaPLD`. |
 | **RISKIKOMPONENDID**                | `arvutaRiskid` — jaotis 8, Tabel 3: arvutab RA, RB, RU, RV, RC, RM, RW, RZ ning R1, R2 ja kogurisk R. |
 | **Liinilõigud (v1.5)**              | Olek `LISALÕIGUD`; `lisa_lõik`, `eemalda_lõik`, `uuenda_lõik`, `renderLõigud`, `lõigudArvudeks`. |
+| **Vahekaardid ja „teadmata”**       | `uuendaVahekaardid` (lukus/aktiivsed vahekaardid, tingimuslikud plokid), `lulita_LL_teadmata`, `TEADMATA_VALIK`, `valik()`, `teadmataLL()`, `uuendaValikuMärk`, `fmtTegur`. |
+| **Aruande plokid**                  | `aruandePlokidHTML` → `aruanneKokkuvõte`, `aruanneArvutuskäik`, `aruanneAlgandmed`; `kohalduvadKomponendid`, `fmtRisk`, `kopeeriPlokk`. |
 | **UI loogika**                      | `täidaSelect`, `naita_CD_selgitus`, `lulita_RAD`, `lulita_LO`, `laeVaikevalikud`, `uuenda_kahju_valikud`, `kategooriaUuenda`, `laeVaikevaartused`. |
 | **Tsoonid (v1.4)**                  | `lulita_tsoonid_režiim`, `lisa_tsoon`, `eemalda_tsoon`, `uuenda_tsoon`, `renderTsoonid`, `laeF3Näide`. |
 | **Abifunktsioonid**                 | `getNum`/`getStr`/`getBool`/`getSel`, `fmt`/`fmtSci`/`fmtNumber`. |

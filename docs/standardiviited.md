@@ -66,7 +66,9 @@ valem või jaotis. Standard: **EVS-EN IEC 62305-2:2025**.
 | Jaotis 7.3       | R<sub>T</sub> = 10⁻⁵               | RT input (lukus, vt DECISIONS §1) |
 | Tabel 3, Jaotis 8| RA, RB, RU, RV, RC, RM, RW, RZ     | `arvutaRiskid`      |
 | Jaotis 8         | R<sub>D</sub> = R<sub>A</sub>+R<sub>B</sub>; R<sub>I</sub> = R<sub>U</sub>+R<sub>V</sub>+R<sub>C</sub>+R<sub>M</sub>+R<sub>W</sub>+R<sub>Z</sub>; R = R<sub>D</sub> + R<sub>I</sub> | `arvutaRiskid` lõpp |
+| Jaotis 7.3, valem 6 | Kriteerium R = R<sub>L1</sub> + R<sub>L2</sub> ≤ R<sub>T</sub> (tsoonides igas tsoonis) | `kuvaTulemused`, `kuvaTulemusedTsoonid`, `hindaKlassid` |
 | Jaotis 6.1       | LPS klass I–IV soovitamine         | `hindaKlassid`      |
+| Valemid 7, 8, tabel 3 | Kohalduvad komponendid ja valemid aruandes | `kohalduvadKomponendid`, `KOMPONENDI_VALEM` |
 | Jaotis 8.2       | RU, RV, RW, RZ = Σ üle liinilõikude | `arvutaRiskid` (`p.lõigud`) |
 | Jaotis 8.4       | Liini jaotamine lõikudeks (CI, CT, CE, varjestus) | `koostaLiiniLõigud`, `LISALÕIGUD` (vahekaart 4) |
 | Lisa F.3 (tsoonid) | Ehitise jaotamine tsoonideks, R = Σ R<sub>tsoon</sub> | `arvutaEhitis` |

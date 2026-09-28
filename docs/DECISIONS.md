@@ -194,6 +194,51 @@ varasemaga (test: 1 × 1000 m == 400 m + 600 m; F.2 = 1,793 × 10⁻⁵).
 
 ---
 
+## 12. „Teadmata” = ebasoodsaim väärtus
+
+**Otsus:** „Teadmata” valik on ainult andmetel, mis tulevad kolmandalt
+osapoolelt või mida olemasoleva hoone puhul ei pruugi teada olla:
+
+| Parameeter | Teadmata → |
+|---|---|
+| Liini pikkus L<sub>L</sub> | 1000 m (jaotis A.4) |
+| Paigaldus C<sub>I</sub> | õhuliin, 1 |
+| Liini tüüp C<sub>T</sub> | madalpinge, 1 |
+| Varjestus C<sub>LD</sub>/C<sub>LI</sub> | varjestamata õhuliin, 1 / 1 |
+| P<sub>LPS</sub>, P<sub>SPD</sub>, P<sub>EB</sub> | kaitse puudub, 1 |
+| P<sub>am</sub> | kaitsemeetmed puuduvad, 1 |
+| P<sub>S</sub> | puit ja müüritis, 1 |
+| C<sub>E</sub> (ainult lisalõigud) | maakeskkond, 1 |
+
+**Põhjendus:** kasutaja (tuleohutusekspert) tööpraktika — aruandes märgitakse,
+et teadmata andmete korral võeti aluseks kõige ebasoodsamad väärtused.
+Ehitise enda omadusi (r<sub>f</sub>, C<sub>D</sub>, t<sub>z</sub>, kasutusviis,
+hoone C<sub>E</sub>) teab ekspert alati; nende absoluutne halvim väärtus
+(nt plahvatusoht, künka tipp) viiks absurdini — neil „teadmata” valikut pole.
+
+**Rakendus:** `TEADMATA_VALIK`, `valik()`, `teadmataLL()`; iga eeldus
+salvestatakse `P.eeldused` loendisse ja kuvatakse tulemustes ning tabelis
+„Algandmed” kommentaariga „andmed puuduvad – võetud ebasoodsaim: …”.
+
+---
+
+## 13. Kaitsevajaduse kriteerium: R = R<sub>L1</sub> + R<sub>L2</sub>
+
+**Otsus:** R<sub>T</sub>-ga võrreldakse koguriski R = R<sub>L1</sub> + R<sub>L2</sub>
+(valem 6); tsoonideks jaotatud ehitise korral R-i igas tsoonis eraldi.
+LPS-klassi hindamine (`hindaKlassid`) kasutab sama kriteeriumi.
+
+**Põhjendus:** jaotis 7.3 — piksekaitse on vajalik, kui R &gt; R<sub>T</sub>;
+R arvutatakse jaotise 6.3 järgi (valem 6). Tsoonide korral: „riski R võrdlemine
+vastuvõetava riskiga on vajalik tsoonideks jaotatud ehitise igas riskitsoonis”.
+Näide F.3: „risk on tsoonides Z2 ja Z3 suurem kui vastuvõetav väärtus”.
+
+**Ajalugu:** kuni v1.5 võrreldi ainult R<sub>1</sub>-e — see oli viga
+(R<sub>L2</sub> komponentides pole P<sub>P</sub>-d, seega R<sub>L2</sub> on sageli
+suurem kui R<sub>L1</sub>).
+
+---
+
 ## Otsused, mida me **ei** teinud
 
 - **Vigastumise sageduse F (jaotis 9) arvutus** — pole praegu rakenduses.

@@ -39,10 +39,14 @@
 6. **v1.4** (2026-05-05) - mitme tsooni tugi (`arvutaEhitis`, vahekaart „Tsoonid”), F.3 büroohoone näide, test `test_examples.js`
 7. **v1.5** (2026-09-28) - liini jaotamine lõikudeks (jaotis 8.4), F.3 täpne; F.3 nupu, JSON-salvestuse ja kitsa ekraani parandused
 
+**Liides (2026-09-28):** lihtsamast täpsemani — „Põhiandmed” + lukus täpsemad vahekaardid, „teadmata” = ebasoodsaim, aruande plokid Wordi. Kavand ja põhimõtted: , DECISIONS §12–13.
+
 ### Järgmised võimalikud sammud
+- Tsooniredaktorisse P<sub>am</sub>, K<sub>S3</sub>, P<sub>SPD</sub> (praegu tsoonirežiimis vaikimisi 1)
+- Aruande plokid tsoonirežiimile
 - A<sub>M</sub> arvestama ka sisesüsteemide U<sub>W</sub>-d, millel pole välist liini (vt DECISIONS „ei teinud”)
 - F.3 kaitstud ehitise valideerimine (tabel F.23)
-- Aruande eksport (PDF / print)
+- Terviklik aruanne (.docx/PDF) — etapp 2, kui vaja
 - Vigastumise sageduse F arvutus (jaotis 9)
 - Haigla näite valideerimine
 
@@ -128,7 +132,7 @@ Need on kohad, kus tegime **konkreetseid valikuid standardi rakendamisel** - nee
 
 `tests/test_examples.js` võtab HTML-failist välja JS-mootori ja arvutab näited F.2 (Maja, üks tsoon) ja F.3 (Büroohoone, 5 tsooni).
 
-**Oodatud tulemus:** 21 läbi, 0 luhtus. F.2: R = 1,793 × 10⁻⁵ (erinevus < 0,01 %).
+**Oodatud tulemus:** 26 läbi, 0 luhtus. F.2: R = 1,793 × 10⁻⁵ (erinevus < 0,01 %).
 
 Käivitamine: `node tests/test_examples.js`
 

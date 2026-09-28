@@ -1,6 +1,7 @@
 # Kavand: liides v2 — lihtsamast täpsemani
 
-> Staatus: **arutlusel** (2026-09-28). Koodi pole veel muudetud.
+> Staatus: **rakendatud** (2026-09-28). Kasutaja soovil jäid täpsemad vahekaardid
+> alles, kuid need on lukus, kuni „Erijuhud” valik neid eeldab; ekspertrežiim avab kõik.
 > Alus: kasutaja tööpraktika (Exceli kalkulaator + aruanne „Nortsu tee 26a”).
 
 ## Põhimõtted

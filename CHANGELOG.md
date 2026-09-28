@@ -7,6 +7,37 @@ projekt järgib [semantilist versioneerimist](https://semver.org/lang/et/).
 
 ## [Avaldamata]
 
+### Lisatud
+- **Liides lihtsamast täpsemani** (docs/KAVAND_liides_v2.md): üks „Põhiandmed”
+  vorm tavahoone jaoks; täpsemad vahekaardid (Liinid, Sisesüsteemid, Avatud alad,
+  Tsoonid) on lukus, kuni „Erijuhud” valik neid eeldab; ekspertrežiim avab kõik.
+- **Iga valik näitab tähendust, sümbolit ja väärtust** („Süvistatud — CI = 0,3”)
+  ning valitud väärtust rippmenüü all tervikuna.
+- **„Teadmata” valik** (ebasoodsaim väärtus) liiniandmetele, olemasolevale
+  kaitsele, P<sub>am</sub>-ile, P<sub>S</sub>-ile ja lisalõigu C<sub>E</sub>-le;
+  eeldused kuvatakse tulemustes ja algandmete tabelis. Vt DECISIONS §12.
+- **Aruande plokid** kopeerimiseks Wordi: kokkuvõte, arvutuskäik (ainult
+  kohalduvad komponendid) ja tabel „Algandmed” (parameeter | kommentaar |
+  sümbol | väärtus | viide). Esialgu ühe tsooni režiimis.
+- Uued väljad: töö nr, kasutusviis (määrus 17, ainult info).
+- Test: praktiline näide (ärihoone) võrdluses varasema Exceli arvutusega;
+  otsustuskriteeriumi test. Kokku 26 kontrolli.
+
+### Parandatud
+- **Kaitsevajaduse kriteerium oli vale.** Rakendus võrdles R<sub>T</sub>-ga ainult
+  R<sub>1</sub>-e; standard (jaotis 7.3, valem 6) nõuab R = R<sub>L1</sub> + R<sub>L2</sub>,
+  tsoonideks jaotatud ehitisel igas tsoonis. R<sub>L2</sub> komponentides pole
+  P<sub>P</sub>-d, mistõttu R<sub>L2</sub> on sageli suurem kui R<sub>L1</sub> —
+  juhul R<sub>1</sub> &lt; R<sub>T</sub> &lt; R andis rakendus vale järelduse
+  „piksekaitse pole vajalik”. Parandatud ka LPS-klassi hindamine. Vt DECISIONS §13.
+- JSON-faili laadimine: kahju valikud (L<sub>F</sub>, L<sub>O</sub>) taastuvad
+  õigesti ka siis, kui salvestatud kategooria erineb vaikimisi kategooriast.
+
+### Teadaolevad piirangud
+- Tsoonirežiimis on P<sub>am</sub>, K<sub>S3</sub> ja P<sub>SPD</sub> tsooni
+  vaikeväärtusega (1) — tsooniredaktoris neid veel muuta ei saa (kuvatakse märkus).
+- Aruande plokid on esialgu ainult ühe tsooni režiimis.
+
 ## [1.5] — 2026-09-28
 
 Liinilõikude tugi; näide F.3 vastab standardile täpselt.

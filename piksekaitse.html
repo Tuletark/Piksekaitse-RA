@@ -227,6 +227,12 @@ input.arvutatud { background: #f0f3f7; color: #0a4080; font-weight: 600; }
 .eeldused ul { margin: 4px 0 0 18px; }
 .valitud-väärtus { font-size: 11.5px; color: #0a4080; text-align: right; margin: -4px 0 8px; }
 .valitud-väärtus.teadmata { color: #8a5300; }
+.aruanne-plokk { border: 1px solid #d0dae6; border-radius: 6px; margin: 12px 0; background: #fff; }
+.aruanne-plokk-päis { display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; background: #f3f6fa; border-bottom: 1px solid #d0dae6; font-weight: 600; font-size: 13px; color: #0a4080; }
+.aruanne-plokk-sisu { padding: 10px 12px; font-size: 13px; line-height: 1.5; overflow-x: auto; }
+.aruanne-plokk-sisu table { border-collapse: collapse; width: 100%; font-size: 12px; }
+.aruanne-plokk-sisu td, .aruanne-plokk-sisu th { border: 1px solid #999; padding: 3px 6px; vertical-align: top; }
+.btn-väike { padding: 3px 10px; font-size: 12px; }
 .btn-danger {
   background: #fee;
   border-color: #f4a;
@@ -1047,6 +1053,19 @@ const TEADMATA_VALIK = {
   PSPD_P_valik: 'SPD-d puuduvad', PSPD_T_valik: 'SPD-d puuduvad',
   PEB_P_valik: 'SPD-d puuduvad', PEB_T_valik: 'SPD-d puuduvad',
 };
+/**
+ * Kuvanimed valikutele, mille võti (JSON-ühilduvuse tõttu muutmata) on
+ * eksitav. Võti jääb väärtuseks, kasutaja näeb kuvanime.
+ */
+const KUVANIMI = {
+  PEB_P_valik: { 'SPD-d puuduvad': 'Potentsiaaliühtlustus puudub' },
+  PEB_T_valik: { 'SPD-d puuduvad': 'Potentsiaaliühtlustus puudub' },
+};
+/** Valiku kuvanimi (vt KUVANIMI). */
+function kuvaNimi(id, k) {
+  return (KUVANIMI[id] && KUVANIMI[id][k]) || k;
+}
+
 /** Liini pikkus, kui see pole teada (jaotis A.4). */
 const TEADMATA_LL = 1000;
 /** Mis liini alla väli kuulub (eelduste loendi jaoks). */
@@ -1418,7 +1437,7 @@ function täidaSelect(id, valikud, vaikimisi) {
   for (const k of Object.keys(valikud)) {
     const o = document.createElement('option');
     o.value = k;
-    o.textContent = sümbol ? `${k} — ${sümbol} = ${fmtTegur(valikud[k])}` : k;
+    o.textContent = sümbol ? `${kuvaNimi(id, k)} — ${sümbol} = ${fmtTegur(valikud[k])}` : kuvaNimi(id, k);
     if (k === vaikimisi) o.selected = true;
     el.appendChild(o);
   }
@@ -1426,7 +1445,7 @@ function täidaSelect(id, valikud, vaikimisi) {
   if (halvim !== undefined) {
     const o = document.createElement('option');
     o.value = TEADMATA;
-    o.textContent = `Teadmata → ebasoodsaim: ${halvim}${sümbol ? ` (${sümbol} = ${fmtTegur(valikud[halvim])})` : ''}`;
+    o.textContent = `Teadmata → ebasoodsaim: ${kuvaNimi(id, halvim)}${sümbol ? ` (${sümbol} = ${fmtTegur(valikud[halvim])})` : ''}`;
     el.appendChild(o);
   }
 }
@@ -2413,8 +2432,9 @@ function valik(id, valikud, vaikimisi) {
   let k = getSel(id);
   if (k === TEADMATA) {
     k = TEADMATA_VALIK[id];
-    const liin = VÄLJA_LIIN[id] ? ` (${VÄLJA_LIIN[id]})` : '';
-    EELDUSED.push({ id, silt: väljaSilt(id) + liin, sümbol: VALIKU_SÜMBOL[id] || '', valik: k, väärtus: fmtTegur(valikud[k]) });
+    const silt = väljaSilt(id);
+    const liin = VÄLJA_LIIN[id] && !silt.includes(VÄLJA_LIIN[id].slice(0, 6)) ? ` (${VÄLJA_LIIN[id]})` : '';
+    EELDUSED.push({ id, silt: silt + liin, sümbol: VALIKU_SÜMBOL[id] || '', valik: kuvaNimi(id, k), väärtus: fmtTegur(valikud[k]) });
   }
   return valikud[k] ?? vaikimisi;
 }
@@ -2614,6 +2634,255 @@ function arvuta() {
   }
 }
 
+// =============================================================================
+// ARUANDE PLOKID (kopeeritavad Wordi) — kokkuvõte, arvutuskäik, algandmed
+// =============================================================================
+
+/** Riski väärtus aruande vormingus, 2 tüvenumbrit: „3,9 × 10⁻⁷”. */
+function fmtRisk(x) {
+  if (!x) return '0';
+  let e = Math.floor(Math.log10(x));
+  let m = (x / Math.pow(10, e)).toFixed(1);
+  if (+m >= 10) { m = '1.0'; e += 1; }
+  const aste = '10' + String(e).split('').map(c => ÜLAINDEKS[c]).join('');
+  return `${m.replace('.', ',')} × ${aste}`;
+}
+
+/** Arv eesti vormingus (koma), ilma liigsete nullideta. */
+function fmtArv(x, n = 3) {
+  return String(+(+x).toPrecision(n)).replace('.', ',');
+}
+
+/** Sümbol HTML-alaindeksiga: 'RAT' → R<sub>AT</sub>, 'LF1' → L<sub>F1</sub>. */
+function sümb(t) {
+  return t.length > 1 ? `${t[0]}<sub>${t.slice(1)}</sub>` : t;
+}
+
+/** Riskikomponentide valemid (tabel 3, jaotis 6.3). */
+const KOMPONENDI_VALEM = {
+  RAT: 'N<sub>D</sub> × P<sub>AT</sub> × P<sub>P</sub> × L<sub>T</sub>',
+  RAD: 'N<sub>D</sub> × P<sub>AD</sub> × P<sub>P</sub> × L<sub>D</sub>',
+  RB1: 'N<sub>D</sub> × P<sub>B</sub> × P<sub>P</sub> × L<sub>F1</sub>',
+  RC1: 'N<sub>D</sub> × P<sub>C</sub> × P<sub>P</sub> × P<sub>e</sub> × L<sub>O1</sub>',
+  RM1: 'N<sub>M</sub> × P<sub>M</sub> × P<sub>P</sub> × P<sub>e</sub> × L<sub>O1</sub>',
+  RU: '(N<sub>L</sub> + N<sub>DJ</sub>) × P<sub>U</sub> × P<sub>P</sub> × L<sub>T</sub>',
+  RV1: '(N<sub>L</sub> + N<sub>DJ</sub>) × P<sub>V</sub> × P<sub>P</sub> × L<sub>F1</sub>',
+  RW1: '(N<sub>L</sub> + N<sub>DJ</sub>) × P<sub>W</sub> × P<sub>P</sub> × P<sub>e</sub> × L<sub>O1</sub>',
+  RZ1: 'N<sub>I</sub> × P<sub>Z</sub> × P<sub>P</sub> × P<sub>e</sub> × L<sub>O1</sub>',
+  RB2: 'N<sub>D</sub> × P<sub>B</sub> × L<sub>F2</sub>',
+  RC2: 'N<sub>D</sub> × P<sub>C</sub> × P<sub>e</sub> × L<sub>O2</sub>',
+  RM2: 'N<sub>M</sub> × P<sub>M</sub> × P<sub>e</sub> × L<sub>O2</sub>',
+  RV2: '(N<sub>L</sub> + N<sub>DJ</sub>) × P<sub>V</sub> × L<sub>F2</sub>',
+  RW2: '(N<sub>L</sub> + N<sub>DJ</sub>) × P<sub>W</sub> × P<sub>e</sub> × L<sub>O2</sub>',
+  RZ2: 'N<sub>I</sub> × P<sub>Z</sub> × P<sub>e</sub> × L<sub>O2</sub>',
+};
+
+/**
+ * Antud objektile kohalduvad riskikomponendid (valemid 7 ja 8): R_C, R_M,
+ * R_W, R_Z ainult erijuhtudel, R_AD avatud ala korral, R_U/R_V/R_W/R_Z ainult
+ * kui ehitisega on ühendatud liin.
+ */
+function kohalduvadKomponendid(P) {
+  const liin = P.kasuta_elektriliin || P.kasuta_sideliin;
+  const L1 = ['RAT'];
+  if (P.kasuta_RAD) L1.push('RAD');
+  L1.push('RB1');
+  if (P.plahvatus_haigla_L1) L1.push('RC1', 'RM1');
+  if (liin) L1.push('RU', 'RV1');
+  if (liin && P.plahvatus_haigla_L1) L1.push('RW1', 'RZ1');
+  const L2 = ['RB2'];
+  if (P.plahvatus_L2) L2.push('RC2', 'RM2');
+  if (liin) L2.push('RV2');
+  if (liin && P.plahvatus_L2) L2.push('RW2', 'RZ2');
+  return { L1, L2 };
+}
+
+/** Plokk 1: kokkuvõte (aruande peatükk „Kokkuvõte”). */
+function aruanneKokkuvõte(P, t, klassid) {
+  const R = t.R;
+  const { L1, L2 } = kohalduvadKomponendid(P);
+  const loend = arr => arr.map(k => `${sümb(k)} = ${fmtRisk(R[k])}`).join('<br>');
+  const metoodika = 'Vastavalt standardis EVS-EN IEC 62305-2:2025 toodud arvutusmetoodikale ning lähtudes antud hoone parameetritest tuli riskikomponentide väärtusteks:';
+  let h = '';
+  h += `<p><b>R<sub>L1</sub> – inimese vigastusega seonduv risk</b></p>`;
+  h += `<p>Riski R<sub>L1</sub> arvutatakse vastavalt valemile:<br>R<sub>L1</sub> = ${L1.map(sümb).join(' + ')}</p>`;
+  h += `<p>${metoodika}<br>${loend(L1)}</p>`;
+  h += `<p>R<sub>L1</sub> koguväärtuseks on:<br><b>R<sub>L1</sub> = ${fmtRisk(R.R1)}</b></p>`;
+  h += `<p><b>R<sub>L2</sub> – ehitise ja selle sisu vigastustega seonduv risk</b></p>`;
+  h += `<p>Riski R<sub>L2</sub> arvutatakse vastavalt valemile:<br>R<sub>L2</sub> = ${L2.map(sümb).join(' + ')}</p>`;
+  h += `<p>${metoodika}<br>${loend(L2)}</p>`;
+  h += `<p>R<sub>L2</sub> koguväärtuseks on:<br><b>R<sub>L2</sub> = ${fmtRisk(R.R2)}</b></p>`;
+  h += `<p><b>Kogurisk R = R<sub>L1</sub> + R<sub>L2</sub> = ${fmtRisk(R.R)}</b> (valem 6)</p>`;
+  if (R.R <= P.RT) {
+    h += `<p><b>Järeldus:</b> R (${fmtRisk(R.R)}) &lt; R<sub>T</sub> (10⁻⁵) – piksekaitse ei ole põhjendatud.</p>`;
+  } else {
+    const minK = klassid.find(k => k.vastab && k.nimi !== 'Kaitse puudub');
+    h += `<p><b>Järeldus:</b> R (${fmtRisk(R.R)}) &gt; R<sub>T</sub> (10⁻⁵) – piksekaitse on vajalik.`;
+    h += minK
+      ? ` Riski vähendamiseks vastuvõetava tasemeni piisab: ${minK.nimi} (R = ${fmtRisk(minK.R)}).</p>`
+      : ' Ka LPS I ei vähenda riski piisavalt — vajalikud on täiendavad meetmed.</p>';
+  }
+  if (P.eeldused && P.eeldused.length) {
+    h += '<p>NB! Riskianalüüsis võeti juhul, kui andmed olid teadmata, aluseks kõige ebasoodsamad väärtused (vt tabel „Algandmed”).</p>';
+  }
+  return h;
+}
+
+/** Plokk 2: arvutuskäik (ainult kohalduvad komponendid). */
+function aruanneArvutuskäik(P) {
+  const { L1, L2 } = kohalduvadKomponendid(P);
+  let h = '';
+  h += `<p>R<sub>L1</sub> = ${L1.map(sümb).join(' + ')} (valem 7)<br>`;
+  h += `R<sub>L2</sub> = ${L2.map(sümb).join(' + ')} (valem 8)</p>`;
+  h += '<p>Iga riskikomponendi saab arvutada valemiga R<sub>X</sub> = N<sub>X</sub> × P<sub>X</sub> × L<sub>X</sub>, kus:<br>';
+  h += 'N<sub>X</sub> – ohtlike sündmuste arv aastas;<br>P<sub>X</sub> – ehitise vigastamise tõenäosus;<br>L<sub>X</sub> – vastav kahju.</p><p>';
+  h += [...L1, ...L2].map(k => `${sümb(k)} = ${KOMPONENDI_VALEM[k]}`).join('<br>');
+  h += '</p>';
+  return h;
+}
+
+/**
+ * Plokk 3: tabel „Algandmed” (parameeter | kommentaar | sümbol | väärtus | viide).
+ * Kommentaariks on rippmenüü valik; „teadmata” korral märge ebasoodsaimast väärtusest.
+ */
+function aruanneAlgandmed(P, t) {
+  const read = [];
+  const eeldus = id => (P.eeldused || []).find(e => e.id === id);
+  const kommentaar = id => {
+    const e = eeldus(id);
+    if (e) return `andmed puuduvad – võetud ebasoodsaim: ${e.valik}`;
+    return kuvaNimi(id, getSel(id));
+  };
+  const rida = (param, komm, sümbol, väärtus, viide) => read.push([param, komm, sümbol, väärtus, viide]);
+  const val = (param, id, sümbol, väärtus, viide) => rida(param, kommentaar(id), sümbol, fmtArv(väärtus), viide);
+
+  rida('Välgulöökide tihedus aastas km² kohta', '', 'N<sub>G</sub>', fmtArv(P.NG), 'Äikeseanalüüs');
+  rida('Välgu tabamispunktide arv aastas km² kohta', `Koefitsient k = ${fmtArv(P.k_tegur)}`, 'N<sub>SG</sub>', fmtArv(P.NSG), 'Lisa A.1');
+  rida('Ehitise pikkus, m', '', 'L', fmtArv(P.L), '');
+  rida('Ehitise laius, m', '', 'W', fmtArv(P.W), '');
+  rida('Ehitise kõrgus, m', '', 'H', fmtArv(P.H), '');
+  val('Ehitise paiknemistegur', 'CD_valik', 'C<sub>D</sub>', P.CD, 'Tabel A.1');
+  val('Ehitise tüüp (konstruktsioon)', 'PS_valik', 'P<sub>S</sub>', P.PS, 'Tabel B.4');
+  val('Piksekaitsesüsteem', 'PLPS_valik', 'P<sub>LPS</sub>', P.PLPS, 'Tabel B.3');
+  if (P.kasuta_elektriliin) {
+    val('Liigpingekaitse, elektrisüsteem', 'PSPD_P_valik', 'P<sub>SPD</sub>', P.PSPD_P, 'Tabel B.7');
+    val('Potentsiaaliühtlustus, elektriliin', 'PEB_P_valik', 'P<sub>EB</sub>', P.PEB_P, 'Tabel B.13');
+    const lõigud = t.lõigud_P || [];
+    const mitu = lõigud.length > 1;
+    lõigud.forEach((lg, i) => {
+      const nr = mitu ? `, lõik ${i + 1}` : '';
+      if (i === 0) {
+        rida(`Elektriliini pikkus, m${nr}`, eeldus('LL_P') ? 'andmed puuduvad – võetud 1000 m (jaotis A.4)' : '', 'L<sub>L</sub>', fmtArv(lg.LL), 'Jaotis A.4');
+        val(`Paigaldustegur${nr}`, 'CIP_valik', 'C<sub>I</sub>', lg.CI, 'Tabel A.2');
+        val(`Liini tüübitegur${nr}`, 'CTP_valik', 'C<sub>T</sub>', lg.CT, 'Tabel A.3');
+      } else {
+        const lisa = LISALÕIGUD.P[i - 1] || {};
+        rida(`Elektriliini pikkus, m${nr}`, '', 'L<sub>L</sub>', fmtArv(lg.LL), 'Jaotis A.4');
+        rida(`Paigaldustegur${nr}`, lisa.CI || '', 'C<sub>I</sub>', fmtArv(lg.CI), 'Tabel A.2');
+        rida(`Liini tüübitegur${nr}`, lisa.CT || '', 'C<sub>T</sub>', fmtArv(lg.CT), 'Tabel A.3');
+        rida(`Keskkonnategur${nr}`, lisa.CE === TEADMATA ? 'andmed puuduvad – võetud ebasoodsaim: Maakeskkond' : (lisa.CE || ''), 'C<sub>E</sub>', fmtArv(lg.CE), 'Tabel A.4');
+      }
+    });
+    val('Ekraneerimine, maandamine, isoleerimine (elektriliin)', 'CLD_CLI_P_valik', 'C<sub>LD</sub>', P.CLD_P, 'Tabel B.9');
+    rida('', '', 'C<sub>LI</sub>', fmtArv(P.CLI_P), 'Tabel B.9');
+  } else {
+    rida('Elektriliin', 'Ei ole ühendatud', '', '–', '');
+  }
+  if (P.kasuta_sideliin) {
+    val('Liigpingekaitse, sidesüsteem', 'PSPD_T_valik', 'P<sub>SPD</sub>', P.PSPD_T, 'Tabel B.7');
+    val('Potentsiaaliühtlustus, sideliin', 'PEB_T_valik', 'P<sub>EB</sub>', P.PEB_T, 'Tabel B.13');
+    rida('Sideliini pikkus, m', eeldus('LL_T') ? 'andmed puuduvad – võetud 1000 m (jaotis A.4)' : '', 'L<sub>L</sub>', fmtArv(P.LL_T), 'Jaotis A.4');
+    val('Paigaldustegur (sideliin)', 'CIT_valik', 'C<sub>I</sub>', P.CIT, 'Tabel A.2');
+    val('Liini tüübitegur (sideliin)', 'CTT_valik', 'C<sub>T</sub>', P.CTT, 'Tabel A.3');
+    val('Ekraneerimine, maandamine, isoleerimine (sideliin)', 'CLD_CLI_T_valik', 'C<sub>LD</sub>', P.CLD_T, 'Tabel B.9');
+    rida('', '', 'C<sub>LI</sub>', fmtArv(P.CLI_T), 'Tabel B.9');
+  } else {
+    rida('Sideliin', 'Vasest sideliin puudub (nt fiiberoptiline)', '', '0', '');
+  }
+  val('Keskkonnategur', 'CE_valik', 'C<sub>E</sub>', P.CE, 'Tabel A.4');
+  val('Põranda tüüp', 'rt_valik', 'r<sub>t</sub>', P.rt, 'Tabel B.2');
+  val('Kaitse elektrilöögi eest (välk ehitisse)', 'Pam_valik', 'P<sub>am</sub>', P.Pam, 'Tabel B.1');
+  val('Tule- ja plahvatusoht', 'rf_valik', 'r<sub>f</sub>', P.rf, 'Tabel B.6');
+  val('Ettevaatusabinõud', 'rp_valik', 'r<sub>p</sub>', P.rp, 'Tabel B.5');
+  rida('Inimeste viibimistegur', `t<sub>z</sub> = ${fmtArv(P.tZ, 6)} h/a`, 'P<sub>P</sub>', fmtArv(P.PP), 'Valem B.14');
+  rida('Äikesehoiatussüsteem', getBool('kasuta_TWS') ? 'On' : 'Ei ole', 'P<sub>TWS</sub>', fmtArv(P.PTWS), 'Jaotis B.1');
+  const kat = getSel('kategooria');
+  rida('Kahju väärtus', kat, 'L<sub>T</sub>', fmtArv(P.LT), 'Tabel C.2');
+  rida('Kahju väärtus', kat, 'L<sub>B1</sub> = L<sub>V1</sub> = L<sub>F1</sub>', fmtArv(P.LF1), 'Tabel C.2');
+  rida('Kahju väärtus', kat, 'L<sub>B2</sub> = L<sub>V2</sub> = L<sub>F2</sub>', fmtArv(P.LF2), 'Tabel C.2');
+  if (P.kasuta_RAD) {
+    rida('Inimesed avatud alal', '', 'P<sub>O</sub>', fmtArv(P.PO), 'Jaotis B.3');
+    rida('Kahju väärtus (otselöök avatud alal)', kat, 'L<sub>D</sub>', fmtArv(P.LD), 'Tabel C.2');
+  }
+  if (P.plahvatus_haigla_L1) rida('Kahju väärtus (sisesüsteemide rike)', kat, 'L<sub>O1</sub>', fmtArv(P.LO1), 'Tabel C.2');
+  if (P.plahvatus_L2) rida('Kahju väärtus (sisesüsteemide rike)', kat, 'L<sub>O2</sub>', fmtArv(P.LO2), 'Tabel C.2');
+  if (P.plahvatus_haigla_L1 || P.plahvatus_L2) {
+    rida('Seadmestiku tööaeg', `t<sub>e</sub> = ${fmtArv(P.te, 6)} h/a`, 'P<sub>e</sub>', fmtArv(P.Pe), 'Valem B.15');
+    rida('Ehitise ja tsooni varjestus', '', 'K<sub>S1</sub>, K<sub>S2</sub>', `${fmtArv(P.KS1)}; ${fmtArv(P.KS2)}`, 'Valemid B.8, B.9');
+  }
+  if (P.kasuta_naaber) {
+    rida('Naaberehitise mõõtmed L<sub>J</sub> × W<sub>J</sub> × H<sub>J</sub>, m', '', '', `${fmtArv(P.L_J)} × ${fmtArv(P.W_J)} × ${fmtArv(P.H_J)}`, 'Jaotis A.2.5');
+    val('Naaberehitise paiknemistegur', 'CDJ_valik', 'C<sub>DJ</sub>', P.CDJ, 'Tabel A.1');
+  }
+
+  let h = '<p><b>Tabel 1. Algandmed</b></p><table><thead><tr>';
+  h += ['Algparameetrid', 'Kommentaar', 'Sümbol', 'Väärtus', 'Viide'].map(x => `<th>${x}</th>`).join('');
+  h += '</tr></thead><tbody>';
+  for (const r of read) h += '<tr>' + r.map(x => `<td>${x}</td>`).join('') + '</tr>';
+  return h + '</tbody></table>';
+}
+
+/** Kolm kopeeritavat aruandeplokki tulemuste paneeli jaoks. */
+function aruandePlokidHTML(P, t, klassid) {
+  const plokk = (id, pealkiri, sisu) => `
+    <div class="aruanne-plokk">
+      <div class="aruanne-plokk-päis"><span>${pealkiri}</span>
+        <button class="btn btn-väike" type="button" onclick="kopeeriPlokk('${id}', this)">📋 Kopeeri Wordi</button></div>
+      <div class="aruanne-plokk-sisu" id="${id}">${sisu}</div>
+    </div>`;
+  let h = '<h3 style="color:#0a4080; margin-top:20px; margin-bottom:4px;">Aruande jaoks</h3>';
+  h += '<p style="font-size:12px; color:#666;">Kopeeri plokk ja kleebi oma aruande malli (vormindus säilib).</p>';
+  h += plokk('ar_kokkuvõte', 'Kokkuvõte', aruanneKokkuvõte(P, t, klassid));
+  h += plokk('ar_arvutuskäik', 'Arvutuskäik', aruanneArvutuskäik(P));
+  h += plokk('ar_algandmed', 'Lähteandmed — tabel 1', aruanneAlgandmed(P, t));
+  return h;
+}
+
+/**
+ * Kopeerib ploki sisu lõikelauale HTML-ina (Word säilitab vorminduse) ja
+ * lihttekstina. Kui Clipboard API pole saadaval, kasutab valiku kopeerimist.
+ */
+async function kopeeriPlokk(id, nupp) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const html = `<div style="font-family: Arial, sans-serif; font-size: 11pt;">${el.innerHTML
+    .replace(/<table>/g, '<table style="border-collapse:collapse;" border="1" cellpadding="4">')}</div>`;
+  let ok = false;
+  try {
+    if (navigator.clipboard && window.ClipboardItem) {
+      await navigator.clipboard.write([new ClipboardItem({
+        'text/html': new Blob([html], { type: 'text/html' }),
+        'text/plain': new Blob([el.innerText], { type: 'text/plain' }),
+      })]);
+      ok = true;
+    }
+  } catch (e) { /* proovime varuvarianti */ }
+  if (!ok) {
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+    ok = document.execCommand('copy');
+    sel.removeAllRanges();
+  }
+  if (nupp) {
+    const vana = nupp.textContent;
+    nupp.textContent = ok ? '✓ Kopeeritud' : '✗ Ei õnnestunud';
+    setTimeout(() => { nupp.textContent = vana; }, 1500);
+  }
+}
+
 /**
  * „Teadmata” eeldused tulemuste paneelis — iga parameeter, mille puhul
  * andmed puudusid ja kasutati ebasoodsaimat väärtust.
@@ -2808,6 +3077,9 @@ function kuvaTulemused(P, t, klassid) {
     }
     html += `</tbody></table>`;
   }
+
+  // Aruande plokid (kopeeritavad)
+  html += aruandePlokidHTML(P, t, klassid);
 
   // Üksikasjad - kokkuvõlditavad
   html += `<details style="margin-top:20px;"><summary style="cursor:pointer; color:#0a4080; font-weight:600; padding:8px;">Üksikasjalik aruanne (vajuta laiendamiseks)</summary>`;
