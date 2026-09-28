@@ -7,6 +7,8 @@ projekt järgib [semantilist versioneerimist](https://semver.org/lang/et/).
 
 ## [Avaldamata]
 
+## [1.7] — 2026-09-28
+
 Standardi audit — vt `docs/AUDIT_2026-09.md`.
 
 ### Parandatud
