@@ -7,6 +7,10 @@ projekt järgib [semantilist versioneerimist](https://semver.org/lang/et/).
 
 ## [Avaldamata]
 
+## [1.6] — 2026-09-28
+
+Liides lihtsamast täpsemani, aruande plokid; kaitsevajaduse kriteeriumi parandus.
+
 ### Lisatud
 - **Liides lihtsamast täpsemani** (docs/KAVAND_liides_v2.md): üks „Põhiandmed”
   vorm tavahoone jaoks; täpsemad vahekaardid (Liinid, Sisesüsteemid, Avatud alad,

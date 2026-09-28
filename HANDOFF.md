@@ -22,7 +22,7 @@
 
 ## 🎯 Praegune staatus (üleandmise hetkel)
 
-**Versioon:** v1.5 (Git-silt `v1.5`) — liinilõikude tugi
+**Versioon:** v1.6 (Git-silt `v1.6`) — liides lihtsamast täpsemani, aruande plokid, R-kriteeriumi parandus
 **Repositoorium:** https://github.com/Tuletark/Piksekaitse-RA (haru `main`)
 **Live:** https://tuletark.github.io/Piksekaitse-RA/ (GitHub Pages, avaldub `main`-ist)
 **Olek:** ✅ F.2 (Maja) ja F.3 (Büroohoone, 5 tsooni, kahelõiguline elektriliin) vastavad standardile (tabelid F.14, F.21)
@@ -38,6 +38,7 @@
 5. **Töökord** (2026-04-30 … 05-04) - Git, GitHub, GitHub Pages, README/CHANGELOG/docs, JSDoc
 6. **v1.4** (2026-05-05) - mitme tsooni tugi (`arvutaEhitis`, vahekaart „Tsoonid”), F.3 büroohoone näide, test `test_examples.js`
 7. **v1.5** (2026-09-28) - liini jaotamine lõikudeks (jaotis 8.4), F.3 täpne; F.3 nupu, JSON-salvestuse ja kitsa ekraani parandused
+8. **v1.6** (2026-09-28) - Põhiandmed + lukus täpsemad vahekaardid, „teadmata” = ebasoodsaim, aruande plokid Wordi; PARANDUS: kriteerium R = R_L1 + R_L2 (varem ainult R1)
 
 **Liides (2026-09-28):** lihtsamast täpsemani — „Põhiandmed” + lukus täpsemad vahekaardid, „teadmata” = ebasoodsaim, aruande plokid Wordi. Kavand ja põhimõtted: `docs/KAVAND_liides_v2.md`, DECISIONS §12–13.
 
