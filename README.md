@@ -60,7 +60,7 @@ piksekaitse_project/
 ├── index.html              ← suunab juurURL-ilt rakendusele (GitHub Pages)
 ├── piksekaitse.html        ← rakendus (HTML + CSS + JS samas failis)
 ├── tests/
-│   └── test_validation.js  ← Node.js test, mis kontrollib standardi näidet F.2
+│   └── test_examples.js    ← Node.js test, mis kontrollib standardi näiteid F.2 ja F.3
 └── docs/
     ├── DECISIONS.md        ← standardi tõlgenduse otsused
     ├── arhitektuur.md      ← rakenduse sisemine struktuur

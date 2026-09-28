@@ -2,6 +2,10 @@
 
 > **See dokument on mõeldud Claude Code'is alustavale Claude'ile.**
 > Loe see esimese asjana läbi, et saada kogu konteksti, mis seni on välja arendatud.
+>
+> **Viimati ajakohastatud: 2026-09-28 (v1.4 seis).** Algne üleandmine tehti
+> 2026-04-30 claude.ai sessiooni lõpus; allolevad sammud „Mida teha esmalt” on
+> praeguseks tehtud.
 
 ---
 
@@ -18,9 +22,11 @@
 
 ## 🎯 Praegune staatus (üleandmise hetkel)
 
-**Versioon:** v1.3 (sisemine, pole veel Git'i pandud)
-**Olek:** ✅ Töötab täpselt vastavalt standardile (valideeritud näite F.2 põhjal: R = 1,793 × 10⁻⁵)
-**Kasutusvalmidus:** Saab kohe kasutusele võtta, edasiarendus on järkjärguline
+**Versioon:** v1.4 (Git-silt `v1.4`)
+**Repositoorium:** https://github.com/Tuletark/Piksekaitse-RA (haru `main`)
+**Live:** https://tuletark.github.io/Piksekaitse-RA/ (GitHub Pages, avaldub `main`-ist)
+**Olek:** ✅ F.2 (Maja) vastab standardile täpselt (R = 1,793 × 10⁻⁵); F.3 (Büroohoone, 5 tsooni) vastab RB osas täpselt, kogurisk R Z3–Z5 tsoonides ~4 % madalam (ühe lõiguga elektriliin — vt CHANGELOG „Teadaolevad piirangud”)
+**Kasutusvalmidus:** Kasutusel, edasiarendus on järkjärguline
 
 ### Mis on tehtud (ajaline järjestus)
 
@@ -28,15 +34,14 @@
 2. **v1.1** - HTML rakendus (asendas algselt plaanitud Pythoni GUI)
 3. **v1.2** - NG → NSG automaatne arvutus, vahekaardid töötavad (CORS-iprobleemi tõttu kogu JS sai HTML-i sisse)
 4. **v1.3** - UX parandused: RT lukus, te peidetud, CD selgitused, KS1/KS2 expander-i alla, RAD tingimuslik aktiveerimine, kahjud dropdownidena tabeli C.2 vahemikest
+5. **Töökord** (2026-04-30 … 05-04) - Git, GitHub, GitHub Pages, README/CHANGELOG/docs, JSDoc
+6. **v1.4** (2026-05-05) - mitme tsooni tugi (`arvutaEhitis`, vahekaart „Tsoonid”), F.3 büroohoone näide, test `test_examples.js`
 
-### Mis on järgmiste sammude **ootel**
-
-Kasutaja tellis järgmiste sammude jaoks:
-- ✅ Versioonihaldus (Git)
-- ✅ Dokumenteerimine (README, CHANGELOG, koodikommentaarid)
-- ✅ Muudatuste logimine
-- ✅ Testimine
-- 🔄 **Praegu siin oleme - Claude Code'i alustamine**
+### Järgmised võimalikud sammud
+- Elektriliini **mitme lõigu tugi** (kõrgepinge + madalpinge) — kõrvaldaks F.3 ~4 % erinevuse. Vajab standardi 2025 teksti (liini lõikude käsitlus + F.3 liiniandmete tabel).
+- Aruande eksport (PDF / print)
+- Vigastumise sageduse F arvutus (jaotis 9)
+- Haigla näite valideerimine
 
 ### Tunnetuslik olek
 
@@ -51,11 +56,15 @@ Kasutaja on **rahul praegu valmis olnud rakendusega**. Edasi tahab teha asju **p
 ```
 piksekaitse_project/
 ├── HANDOFF.md              ← see fail (loe esimesena)
-├── piksekaitse.html        ← rakendus (1716 rida, kogu JS sees)
+├── README.md, CHANGELOG.md
+├── index.html              ← suunab GitHub Pagesi juurest rakendusele
+├── piksekaitse.html        ← rakendus (~2640 rida, kogu JS sees)
 ├── tests/
-│   └── test_validation.js  ← Node.js test, mis kontrollib F.2 näidet
+│   └── test_examples.js    ← Node.js test, näited F.2 ja F.3
 └── docs/
-    └── (tühi - tuleb täita)
+    ├── DECISIONS.md        ← standardi tõlgenduse otsused
+    ├── arhitektuur.md      ← HTML/JS struktuur, andmevoog
+    └── standardiviited.md  ← standardi tabel/valem ↔ kood
 ```
 
 ### Rakenduse struktuur HTML-i sees
@@ -70,7 +79,8 @@ piksekaitse_project/
    - **TÕENÄOSUSED** (Lisa B) - `arvutaPAT`, `arvutaPB`, `arvutaPC`, `arvutaPM`, `arvutaPU`, `arvutaPV`, `arvutaPW`, `arvutaPZ`, `arvutaPLD`
    - **RISKIKOMPONENDID** - `arvutaRiskid` arvutab kõik R-id (jaotis 8, Tabel 3)
    - **UI loogika** - vahekaartide vahetus, CD selgitused, RAD lülitus, LO1/LO2 lülitus, kahjude vahemikud kategooria järgi
-   - **PEAMINE arvutus** - `koguArvutus` ja `hindaKlassid`
+   - **Tsoonid** (v1.4) - tsoonide redaktor, `laeF3Näide`
+   - **PEAMINE arvutus** - `koguArvutus` (üks tsoon), `arvutaEhitis` (mitu tsooni) ja `hindaKlassid`
    - **TULEMUSTE kuvamine** - `kuvaTulemused` koostab HTML-aruande
 
 ---
@@ -113,12 +123,11 @@ Need on kohad, kus tegime **konkreetseid valikuid standardi rakendamisel** - nee
 
 ## 🧪 Testimine
 
-`tests/test_validation.js` võtab HTML-failist välja JS-mootori ja arvutab näite F.2 (Maja).
+`tests/test_examples.js` võtab HTML-failist välja JS-mootori ja arvutab näited F.2 (Maja, üks tsoon) ja F.3 (Büroohoone, 5 tsooni).
 
-**Oodatud tulemus:** R = 1,793 × 10⁻⁵
-**Erinevus standardist:** < 0,01%
+**Oodatud tulemus:** 9 läbi, 0 luhtus. F.2: R = 1,793 × 10⁻⁵ (erinevus < 0,01 %).
 
-Käivitamine: `node tests/test_validation.js`
+Käivitamine: `node tests/test_examples.js`
 
 **Iga muudatuse järel see test tuleb läbi käia.** Kui muudatus mõjutab arvutusi, peab test endiselt töötama.
 
@@ -139,7 +148,10 @@ Kasutaja on:
 
 ## 🚀 Mida teha esmalt Claude Code'is
 
-Soovitatav järjekord:
+> ✅ **Tehtud** (2026-04-30 … 2026-05-04). Jäetud ajaloo jaoks alles; uus
+> sessioon võib alustada otse kasutajalt küsimisest, kuidas edasi minna.
+
+Algne soovitatav järjekord:
 
 ### 1. Tutvu olukorraga
 ```bash
@@ -183,16 +195,16 @@ Pärast neid samme küsi kasutajalt, kas ta tahab:
 
 ## ⚠️ Olulised "ärka üles" momendid
 
-1. **HTML-fail on 75 KB / 1716 rida** - kui peaksid kogu faili korraga lugema, siis ole tähelepanelik. Soovitatav: kasuta `view` koos `view_range`-ga osade kaupa.
+1. **HTML-fail on ~104 KB / ~2640 rida** - kui peaksid kogu faili korraga lugema, siis ole tähelepanelik. Soovitatav: kasuta `view` koos `view_range`-ga osade kaupa.
 
 2. **JS-kood on `<script>...</script>` plokis** HTML-i sees. Editeerimine `str_replace`-iga töötab korralikult, aga muudatuse järel kontrolli süntaksit:
    ```bash
-   # eralda JS, kontrolli node-iga
-   python3 -c "import re; html=open('piksekaitse.html').read(); m=re.search(r'<script>(.*?)</script>', html, re.DOTALL); open('/tmp/x.js','w').write(m.group(1))"
-   node -c /tmp/x.js
+   # eralda JS ja kontrolli süntaksit (Pythonit sellel masinal pole — kasuta node'i)
+   node -e "const h=require('fs').readFileSync('piksekaitse.html','utf8');new Function(h.match(/<script>([\s\S]*?)<\/script>/)[1]);console.log('JS süntaks OK')"
    ```
+   (`node tests/test_examples.js` teeb sama kontrolli kaudselt — süntaksiviga jätab testi kohe katki.)
 
-3. **Iga arvutusi puudutava muudatuse järel jooksuta `node tests/test_validation.js`** - kui see katki läheb, on midagi viltu.
+3. **Iga arvutusi puudutava muudatuse järel jooksuta `node tests/test_examples.js`** - kui see katki läheb, on midagi viltu.
 
 4. **Standard on autoriõigustega kaitstud.** Ära kunagi reprodutseeri standardi teksti pikemalt - aga koodikommentaarid valemitele on OK (matemaatika ei ole autoriõigusega kaitstud).
 

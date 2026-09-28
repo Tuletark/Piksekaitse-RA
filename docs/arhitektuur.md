@@ -27,21 +27,25 @@ ja JavaScript on samas failis. See valik on tehtud teadlikult — vt
 Inline `<style>` blokis. Kasutatud CSS-grid 2-veeru layout, vasakul sisendid,
 paremal tulemused. Vahekaardid on tavaline `display: none/block` lülitus.
 
-## JavaScript — sektsioonid (rea-numbrid lähedased, võivad muutuda)
+## JavaScript — sektsioonid
 
-Skript on tükeldatud kommentaarpealkirjadega `// === SEKTSIOON ===`.
+Skript on tükeldatud kommentaarpealkirjadega `// === SEKTSIOON ===`. Sektsioonid
+on failis allolevas järjekorras (reanumbreid ei too, sest need muutuvad —
+otsi funktsiooni nime järgi).
 
-| Rea umbes | Sektsioon                           | Sisu |
-|----------:|-------------------------------------|------|
-|  705–937  | **TABELID**                         | Standardi tabelid A.1–A.4, B.1–B.13, C.1–C.2 — kõik dictionary'd. |
-|  941–984  | **HAARDEALAD ja SAGEDUSED**         | Lisa A: `arvutaAD`, `arvutaAM`, `arvutaAL`, `arvutaAI`, `arvutaND`, `arvutaNM`, `arvutaNL`, `arvutaNI`. |
-|  989–1055 | **TÕENÄOSUSED**                     | Lisa B: `arvutaPAT`, `arvutaPAD`, `arvutaPB`, `arvutaPC`, `arvutaPM`, `arvutaPU`, `arvutaPV`, `arvutaPW`, `arvutaPZ`, `arvutaPLD`. |
-| 1059–1124 | **RISKIKOMPONENDID**                | `arvutaRiskid` — jaotis 8, Tabel 3: arvutab RA, RB, RU, RV, RC, RM, RW, RZ ning RD, RI ja kogurisk R. |
-| 1128–1379 | **UI loogika**                      | `täidaSelect`, `naita_CD_selgitus`, `lulita_RAD`, `lulita_LO`, `laeVaikevalikud`, `uuenda_kahju_valikud`, `kategooriaUuenda`, `laeVaikevaartused`, `getNum`/`getStr`/`getBool`/`getSel`, `fmt`/`fmtSci`. |
-| 1383–1592 | **PEAMINE arvutus**                 | `koguArvutus(P, override)` — orkestreerib kogu arvutusahela; `koguSisendid()` — kogub kasutajalt; `hindaKlassid(P)` — hindab LPS I–IV vajadust. |
-| 1596–1796 | **TULEMUSTE kuvamine**              | `arvuta()` — peamine click-handler; `kuvaTulemused(P, t, klassid)` — koostab HTML-aruande paremasse paneeli. |
-| 1802–1898 | **Salvestamine / laadimine / abi** | `salvestaSisendid`, `laeFailist`, `kuvaAbi`. |
-| 1901+    | **Initsialiseerimine**              | `DOMContentLoaded` käivitab `laeVaikevalikud` ja `laeVaikevaartused`. |
+| Sektsioon                           | Sisu |
+|-------------------------------------|------|
+| **TABELID**                         | Standardi tabelid A.1–A.4, B.1–B.13, C.1–C.2 — kõik dictionary'd (`CD_VALIKUD`, `CI_VALIKUD`, …, `KAHJU_VAIKEVÄÄRTUSED`). |
+| **HAARDEALAD ja SAGEDUSED**         | Lisa A: `arvutaAD`, `arvutaAM`, `arvutaAL`, `arvutaAI`, `arvutaND`, `arvutaNM`, `arvutaNL`, `arvutaNI`. |
+| **TÕENÄOSUSED**                     | Lisa B: `arvutaPAT`, `arvutaPAD`, `arvutaPB`, `arvutaPC`, `arvutaPM`, `arvutaPU`, `arvutaPV`, `arvutaPW`, `arvutaPZ`, `arvutaPLD`. |
+| **RISKIKOMPONENDID**                | `arvutaRiskid` — jaotis 8, Tabel 3: arvutab RA, RB, RU, RV, RC, RM, RW, RZ ning R1, R2 ja kogurisk R. |
+| **UI loogika**                      | `täidaSelect`, `naita_CD_selgitus`, `lulita_RAD`, `lulita_LO`, `laeVaikevalikud`, `uuenda_kahju_valikud`, `kategooriaUuenda`, `laeVaikevaartused`. |
+| **Tsoonid (v1.4)**                  | `lulita_tsoonid_režiim`, `lisa_tsoon`, `eemalda_tsoon`, `uuenda_tsoon`, `renderTsoonid`, `laeF3Näide`. |
+| **Abifunktsioonid**                 | `getNum`/`getStr`/`getBool`/`getSel`, `fmt`/`fmtSci`/`fmtNumber`. |
+| **PEAMINE arvutus**                 | `koguArvutus(P, override)` — üks tsoon, kogu arvutusahel; `arvutaEhitis(shared, tsoonid)` — mitu tsooni, R = Σ R_tsoon; `koguSisendid()` — loeb DOM-ist; `hindaKlassid(P)` — hindab LPS I–IV vajadust. |
+| **TULEMUSTE kuvamine**              | `arvuta()` — peamine click-handler; `kuvaTulemused(P, t, klassid)` — ühe tsooni aruanne; `kuvaTulemusedTsoonid(P, tulem)` — tsoonipõhine tabel (sarnane standardi tabelile F.21). |
+| **Salvestamine / laadimine / abi**  | `salvestaSisendid`, `laeFailist`, `kuvaAbi`. |
+| **KÄIVITAMINE**                     | `DOMContentLoaded`: `laeVaikevaartused`, vahekaartide klikid, NSG automaatarvutus (`uuendaNSG`), RAD- ja LO-lülitid. |
 
 ## Andmevoog
 
@@ -57,6 +61,12 @@ arvuta()  ←──────────────────── ainus 
    ▼
 koguSisendid()  ←─── loeb DOM-ist, tagastab P-objekti
    │
+   ├── tsoonirežiim sees? ──► arvutaEhitis(shared, tsoonid)
+   │                            └─ iga tsooni jaoks koguArvutus(P_tsoon),
+   │                               maskeerib välja lülitatud komponendid,
+   │                               summeerib R = Σ R_tsoon
+   │                            ▼
+   │                          kuvaTulemusedTsoonid(P, tulem)
    ▼
 koguArvutus(P)  ←─── orkestreerib:
    │                  AD/AM/AL/AI  →  ND/NM/NL/NI
@@ -75,20 +85,21 @@ parem-paneel (DOM)
 
 ## Kus on loogika koondunud
 
-- **Standardi tabelid → JS-objektid** (rida ~705–937). Kui standardit
+- **Standardi tabelid → JS-objektid** (sektsioon TABELID). Kui standardit
   uuendatakse, on need esimesed kohad, kus muudatusi tehakse.
-- **Valemite arvutus → `arvuta*` funktsioonid** (rida ~941–1055). Kõik
+- **Valemite arvutus → `arvuta*` funktsioonid**. Kõik
   valemid on isoleeritud ühte funktsiooni, et neid oleks lihtne testida.
-- **Riskikomponentide kogumine → `arvutaRiskid`** (rida ~1061). Üks koht,
+- **Riskikomponentide kogumine → `arvutaRiskid`**. Üks koht,
   kus RA…RZ kogutakse RD ja RI vahesummadeks ja kogu R-iks.
 - **UI ↔ andmed → `koguSisendid` / `kuvaTulemused`**. Kogu DOM-iga
   suhtlemine on neis kahes funktsioonis.
 
 ## Testitavus
 
-Test [`tests/test_validation.js`](../tests/test_validation.js) eraldab `<script>`
-sisu HTML-st, käivitab selle Node.js-is `eval`-iga ja kutsub
-`koguArvutus(P)` otse standardi näite F.2 sisenditega.
+Test [`tests/test_examples.js`](../tests/test_examples.js) eraldab `<script>`
+sisu HTML-st, käivitab selle Node.js-is `eval`-iga ja kutsub otse
+`koguArvutus(P)` (näide F.2, üks tsoon) ning `arvutaEhitis(shared, tsoonid)`
+(näide F.3, viis tsooni).
 
 `document` ja `window` on testis stub'itud, et UI-koodi top-level read ei viskaks
 veaks (need ootavad DOM-i, mida Node-is pole).

@@ -7,7 +7,18 @@ projekt järgib [semantilist versioneerimist](https://semver.org/lang/et/).
 
 ## [Avaldamata]
 
-### Lisatud — v1.4 mitme tsooni tugi
+### Muudetud
+- Dokumentatsioon ajakohastatud v1.4 seisuga: HANDOFF.md, README failipuu,
+  `docs/arhitektuur.md` (tsoonide loogika, andmevoog) ja `docs/standardiviited.md`
+  (õige testifail, näidete F.2/F.3 numeratsioon). Aegunud reanumbrid
+  eemaldatud — viidatakse funktsiooni- ja konstandinimedele.
+
+## [1.4] — 2026-05-05
+
+Mitme tsooni tugi. Avaldatud GitHub Pagesis 2026-05-05; Git-silt `v1.4`
+lisati tagantjärele (2026-09-28).
+
+### Lisatud — mitme tsooni tugi
 - **Mitme tsooni arvutamine** (vahekaart 7 „Tsoonid”). Kasutaja saab jaotada
   ehitise eraldi tsoonideks omade kahjudega, kohaloleku aegadega ja
   riskikomponentide valikuga. Kogu R = Σ R_tsoon.
@@ -19,7 +30,7 @@ projekt järgib [semantilist versioneerimist](https://semver.org/lang/et/).
   sisaldab nii F.2 (üks tsoon) kui F.3 (5 tsooni) valideerimist.
 - **Tulemustes per-tsooni tabel** (sarnane standardi tabelile F.21).
 
-### Lisatud — varasem
+### Lisatud — projekti töökord
 - Versioonihaldus (Git) — repositoorium [Tuletark/Piksekaitse-RA](https://github.com/Tuletark/Piksekaitse-RA)
 - **Live-rakendus:** https://tuletark.github.io/Piksekaitse-RA/ (GitHub Pages)
 - `index.html` — suunab juurURL-ilt automaatselt `piksekaitse.html`-le, et live-link
