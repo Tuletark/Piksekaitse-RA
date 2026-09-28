@@ -133,7 +133,7 @@ Need on kohad, kus tegime **konkreetseid valikuid standardi rakendamisel** - nee
 
 `tests/test_examples.js` võtab HTML-failist välja JS-mootori ja arvutab näited F.2 (Maja, üks tsoon) ja F.3 (Büroohoone, 5 tsooni).
 
-**Oodatud tulemus:** 26 läbi, 0 luhtus. F.2: R = 1,793 × 10⁻⁵ (erinevus < 0,01 %).
+**Oodatud tulemus:** 120 läbi, 0 luhtus. Audit: `docs/AUDIT_2026-09.md`. F.2: R = 1,793 × 10⁻⁵ (erinevus < 0,01 %).
 
 Käivitamine: `node tests/test_examples.js`
 

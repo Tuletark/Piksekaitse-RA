@@ -99,7 +99,8 @@ Test käivitab kaks standardi näidet:
 - Praktiline näide (ärihoone): võrdlus varasema Exceli arvutusega ning
   otsustuskriteerium R = R<sub>L1</sub> + R<sub>L2</sub>
 
-Oodatud kokkuvõte: **26 läbi, 0 luhtus.**
+Oodatud kokkuvõte: **120 läbi, 0 luhtus.** Testitud on standardi näited F.2, F.3 ja F.4
+(kaitsmata ja kaitstud) ning kõik tabelikonstandid — vt `docs/AUDIT_2026-09.md`.
 
 **Iga arvutusi puudutava muudatuse järel tuleb test läbi käia.**
 

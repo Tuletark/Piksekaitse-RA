@@ -239,6 +239,29 @@ suurem kui R<sub>L1</sub>).
 
 ---
 
+## 14. LPS-iga ehitisel P<sub>S</sub> = 1
+
+**Otsus:** kui P<sub>LPS</sub> < 1 (LPS paigaldatud vastavalt IEC 62305-3), siis
+P<sub>B</sub> arvutamisel P<sub>S</sub> = 1, sõltumata konstruktsioonist. Kehtib ka
+LPS-klassi hindamisel (`hindaKlassid`). Aruande tabelis näidatakse P<sub>S</sub> = 1
+viitega „tabel B.4, MÄRKUS 1”.
+
+**Põhjendus:** tabel B.4 MÄRKUS 1 — LPS-i kasulikku mõju arvestatakse ainult
+P<sub>LPS</sub> kaudu. Kinnitatud näitega F.3 (tabel F.23: R<sub>B</sub> 5,770 → 0,577,
+st 0,5 → 1 × 0,05).
+
+---
+
+## 15. P<sub>LD</sub> vahepealse U<sub>W</sub> korral
+
+**Otsus:** kui U<sub>W</sub> jääb tabelite B.11/B.12 veergude vahele, kasutatakse
+lähimat **madalamat** veergu (suurem P<sub>LD</sub>). 12…16 kV vahel → B.11 viimane veerg.
+
+**Põhjendus:** standard interpoleerimist ei kirjelda; madalam veerg on ohutu pool
+(suurem risk). Varem kasutati kõrgemat veergu.
+
+---
+
 ## Otsused, mida me **ei** teinud
 
 - **Vigastumise sageduse F (jaotis 9) arvutus** — pole praegu rakenduses.

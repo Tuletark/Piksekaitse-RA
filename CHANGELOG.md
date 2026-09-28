@@ -7,6 +7,23 @@ projekt järgib [semantilist versioneerimist](https://semver.org/lang/et/).
 
 ## [Avaldamata]
 
+Standardi audit — vt `docs/AUDIT_2026-09.md`.
+
+### Parandatud
+- **LPS-iga ehitisel P<sub>S</sub> = 1** (tabel B.4, MÄRKUS 1). Varem jäi P<sub>S</sub> = 0,5,
+  mistõttu raudbetoon-/teraskarkassiga kaitstud ehitise R<sub>B</sub> oli 2× alahinnatud —
+  ka LPS-klassi soovitus võis olla liiga madal. Kinnitatud tabeliga F.23.
+- **P<sub>SPD</sub> „parem kui LPL I”** vastavalt tabelitele B.7/B.8: 10⁻⁴, 5 × 10⁻⁵, 10⁻⁵
+  (varasem 0,005 eemaldatud — 2025. a tabelites seda pole).
+- **P<sub>LD</sub>** tabelite vahepealse U<sub>W</sub> korral: lähim madalam veerg (ohutu pool).
+- C<sub>T</sub> valikute sildid vastavalt tabelile A.3 (MP-liin / KP-liin autotrafoga = 1).
+
+### Lisatud
+- Testid: F.2 komponendid ja kaitstud variant (F.8, F.9), F.3 kaitstud (F.23),
+  F.4 haigla kaitsmata ja kaitstud (F.28, F.35, F.37), tabelikonstandid vs standard.
+  Kokku 120 kontrolli.
+- `docs/AUDIT_2026-09.md` — auditi tulemused ja teadaolevad piirangud.
+
 ## [1.6] — 2026-09-28
 
 Liides lihtsamast täpsemani, aruande plokid; kaitsevajaduse kriteeriumi parandus.

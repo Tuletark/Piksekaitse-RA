@@ -974,14 +974,17 @@ const RF_VALIKUD = {
   'Plahvatus või tulekahju puudub': 0.0,
 };
 
-// Tabelid B.7/B.8: PSPD
+// Tabelid B.7/B.8: PSPD (koordineeritud SPD-süsteem, IEC 62305-4).
+// „Parem kui LPL I” read vastavad S4 voolule 2,5 / 3,75 / 5 kA (8/20 μs).
+// Võtmed (nt „(väga hea)”) on JSON-ühilduvuse tõttu vanad — vt KUVANIMI.
+// Varasem valik 0,005 eemaldati: 2025. a tabelites seda väärtust ei ole.
 const PSPD_VALIKUD = {
   'SPD-d puuduvad': 1.0,
   'SPD LPL III-IV': 0.05,
   'SPD LPL II': 0.02,
   'SPD LPL I': 0.01,
-  'SPD parem kui LPL I (täiustatud)': 0.005,
   'SPD parem kui LPL I (väga hea)': 1e-4,
+  'SPD parem kui LPL I (3,75 kA)': 5e-5,
   'SPD parem kui LPL I (parim)': 1e-5,
 };
 
@@ -1057,9 +1060,20 @@ const TEADMATA_VALIK = {
  * Kuvanimed valikutele, mille võti (JSON-ühilduvuse tõttu muutmata) on
  * eksitav. Võti jääb väärtuseks, kasutaja näeb kuvanime.
  */
+const PSPD_KUVANIMI = {
+  'SPD parem kui LPL I (väga hea)': 'SPD parem kui LPL I (S4: 2,5 kA)',
+  'SPD parem kui LPL I (3,75 kA)': 'SPD parem kui LPL I (S4: 3,75 kA)',
+  'SPD parem kui LPL I (parim)': 'SPD parem kui LPL I (S4: 5 kA)',
+};
+const CT_KUVANIMI = {
+  'LV-elektriliin, side- või andmesideliin': 'MP-elektriliin, side-/andmesideliin või KP-liin autotrafoga',
+  'HV-elektriliin (HV/LV trafoga, eraldatud mähistega)': 'KP-elektriliin (KP/MP trafo eraldatud mähistega)',
+};
 const KUVANIMI = {
   PEB_P_valik: { 'SPD-d puuduvad': 'Potentsiaaliühtlustus puudub' },
   PEB_T_valik: { 'SPD-d puuduvad': 'Potentsiaaliühtlustus puudub' },
+  PSPD_P_valik: PSPD_KUVANIMI, PSPD_T_valik: PSPD_KUVANIMI,
+  CTP_valik: CT_KUVANIMI, CTT_valik: CT_KUVANIMI,
 };
 /** Valiku kuvanimi (vt KUVANIMI). */
 function kuvaNimi(id, k) {
@@ -1294,7 +1308,7 @@ function arvutaPLD(kaabli_tüüp, uw_kV) {
   if (kaabli_tüüp === 'kaitsmata' || !uw_kV || uw_kV <= 0) return 1.0;
 
   let tabel;
-  if (uw_kV <= 12) {
+  if (uw_kV < 16) {  // tabel B.11 (≤ 12 kV); 12…16 kV → B.11 viimane veerg
     if (kaabli_tüüp === 'rs_5_20') {
       tabel = [[0.35,1],[0.5,1],[1,1],[1.5,1],[2.5,0.95],[4,0.9],[6,0.8],[12,0.4]];
     } else if (kaabli_tüüp === 'rs_1_5') {
@@ -1312,10 +1326,14 @@ function arvutaPLD(kaabli_tüüp, uw_kV) {
     } else return 1.0;
   }
 
-  for (const [u, p] of tabel) {
-    if (uw_kV <= u + 0.001) return p;
+  // Tabeli vahepealne U_W: kasutatakse lähimat MADALAMAT veergu (suurem P_LD,
+  // ohutu pool). Alla tabeli esimese veeru → esimene veerg.
+  // Veerg 12 kV ja 16 kV vaheline U_W → B.11 viimane veerg.
+  let p = tabel[0][1];
+  for (const [u, pv] of tabel) {
+    if (uw_kV + 0.001 >= u) p = pv;
   }
-  return tabel[tabel.length - 1][1];
+  return p;
 }
 
 // =============================================================================
@@ -2259,7 +2277,10 @@ function koguArvutus(P, override = {}) {
   // Tõenäosused
   const PAT = arvutaPAT(PLPS, P.Pam, P.rt, P.PTWS);
   const PAD = P.kasuta_RAD ? arvutaPAD(P.PTWS, P.Pam, P.PO, PLPS) : 0;
-  const PB = arvutaPB(P.PS, PLPS, P.rf, P.rp);
+  // Tabel B.4, MÄRKUS 1: kui LPS on paigaldatud (P_LPS < 1), siis P_S = 1 —
+  // LPS-i kasu arvestatakse ainult P_LPS kaudu (vt DECISIONS §14)
+  const PS = PLPS < 1 ? 1.0 : P.PS;
+  const PB = arvutaPB(PS, PLPS, P.rf, P.rp);
 
   const PC_P = P.kasuta_elektriliin ? arvutaPC(PSPD_P, P.CLD_P) : 0;
   const PC_T = P.kasuta_sideliin ? arvutaPC(PSPD_T, P.CLD_T) : 0;
@@ -2323,7 +2344,7 @@ function koguArvutus(P, override = {}) {
   return {
     P, AD, AM, ALP, AIP, ALT, AIT, ADJ, UW_min,
     ND, NM, NL_P, NI_P, NL_T, NI_T, NDJ_P, NDJ_T,
-    PLD_P, PLD_T, PAT, PAD, PB, PC, PM,
+    PLD_P, PLD_T, PAT, PAD, PS, PB, PC, PM,
     PU_P, PV_P, PW_P, PZ_P, PU_T, PV_T, PW_T, PZ_T,
     lõigud_P: lgP, lõigud_T: lgT,
     PLPS, PSPD_P, PSPD_T, PEB_P, PEB_T, R,
@@ -2762,7 +2783,11 @@ function aruanneAlgandmed(P, t) {
   rida('Ehitise laius, m', '', 'W', fmtArv(P.W), '');
   rida('Ehitise kõrgus, m', '', 'H', fmtArv(P.H), '');
   val('Ehitise paiknemistegur', 'CD_valik', 'C<sub>D</sub>', P.CD, 'Tabel A.1');
-  val('Ehitise tüüp (konstruktsioon)', 'PS_valik', 'P<sub>S</sub>', P.PS, 'Tabel B.4');
+  if (t.PS !== P.PS) {
+    rida('Ehitise tüüp (konstruktsioon)', `${kommentaar('PS_valik')}; LPS paigaldatud → P<sub>S</sub> = 1`, 'P<sub>S</sub>', fmtArv(t.PS), 'Tabel B.4, MÄRKUS 1');
+  } else {
+    val('Ehitise tüüp (konstruktsioon)', 'PS_valik', 'P<sub>S</sub>', P.PS, 'Tabel B.4');
+  }
   val('Piksekaitsesüsteem', 'PLPS_valik', 'P<sub>LPS</sub>', P.PLPS, 'Tabel B.3');
   if (P.kasuta_elektriliin) {
     val('Liigpingekaitse, elektrisüsteem', 'PSPD_P_valik', 'P<sub>SPD</sub>', P.PSPD_P, 'Tabel B.7');
