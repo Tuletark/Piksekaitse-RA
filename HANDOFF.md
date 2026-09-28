@@ -39,7 +39,7 @@
 6. **v1.4** (2026-05-05) - mitme tsooni tugi (`arvutaEhitis`, vahekaart „Tsoonid”), F.3 büroohoone näide, test `test_examples.js`
 7. **v1.5** (2026-09-28) - liini jaotamine lõikudeks (jaotis 8.4), F.3 täpne; F.3 nupu, JSON-salvestuse ja kitsa ekraani parandused
 
-**Liides (2026-09-28):** lihtsamast täpsemani — „Põhiandmed” + lukus täpsemad vahekaardid, „teadmata” = ebasoodsaim, aruande plokid Wordi. Kavand ja põhimõtted: , DECISIONS §12–13.
+**Liides (2026-09-28):** lihtsamast täpsemani — „Põhiandmed” + lukus täpsemad vahekaardid, „teadmata” = ebasoodsaim, aruande plokid Wordi. Kavand ja põhimõtted: `docs/KAVAND_liides_v2.md`, DECISIONS §12–13.
 
 ### Järgmised võimalikud sammud
 - Tsooniredaktorisse P<sub>am</sub>, K<sub>S3</sub>, P<sub>SPD</sub> (praegu tsoonirežiimis vaikimisi 1)
