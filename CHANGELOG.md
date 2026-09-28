@@ -7,6 +7,10 @@ projekt järgib [semantilist versioneerimist](https://semver.org/lang/et/).
 
 ## [Avaldamata]
 
+## [1.5] — 2026-09-28
+
+Liinilõikude tugi; näide F.3 vastab standardile täpselt.
+
 ### Lisatud
 - **Liini jaotamine lõikudeks** (jaotis 8.4) — vahekaardil „Liinid” saab
   elektri- ja sideliinile lisada lisalõike, igal oma L<sub>L</sub>, C<sub>I</sub>,

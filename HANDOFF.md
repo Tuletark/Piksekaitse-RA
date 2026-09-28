@@ -22,7 +22,7 @@
 
 ## 🎯 Praegune staatus (üleandmise hetkel)
 
-**Versioon:** v1.4 (Git-silt `v1.4`) + avaldamata liinilõikude tugi (vt CHANGELOG)
+**Versioon:** v1.5 (Git-silt `v1.5`) — liinilõikude tugi
 **Repositoorium:** https://github.com/Tuletark/Piksekaitse-RA (haru `main`)
 **Live:** https://tuletark.github.io/Piksekaitse-RA/ (GitHub Pages, avaldub `main`-ist)
 **Olek:** ✅ F.2 (Maja) ja F.3 (Büroohoone, 5 tsooni, kahelõiguline elektriliin) vastavad standardile (tabelid F.14, F.21)
@@ -37,6 +37,7 @@
 4. **v1.3** - UX parandused: RT lukus, te peidetud, CD selgitused, KS1/KS2 expander-i alla, RAD tingimuslik aktiveerimine, kahjud dropdownidena tabeli C.2 vahemikest
 5. **Töökord** (2026-04-30 … 05-04) - Git, GitHub, GitHub Pages, README/CHANGELOG/docs, JSDoc
 6. **v1.4** (2026-05-05) - mitme tsooni tugi (`arvutaEhitis`, vahekaart „Tsoonid”), F.3 büroohoone näide, test `test_examples.js`
+7. **v1.5** (2026-09-28) - liini jaotamine lõikudeks (jaotis 8.4), F.3 täpne; F.3 nupu, JSON-salvestuse ja kitsa ekraani parandused
 
 ### Järgmised võimalikud sammud
 - A<sub>M</sub> arvestama ka sisesüsteemide U<sub>W</sub>-d, millel pole välist liini (vt DECISIONS „ei teinud”)
