@@ -7,6 +7,12 @@ projekt järgib [semantilist versioneerimist](https://semver.org/lang/et/).
 
 ## [Avaldamata]
 
+### Lisatud
+- **Parameetrite selgitused (ⓘ)**: 42 välja juures aken — mis parameeter on,
+  kõik valikud koos väärtuse ja „millal valida” juhisega, „teadmata” tähendus,
+  praktilised märkused ning klikitav standardi viide. Tekstid on rakenduse enda
+  sõnastuses (mitte standardist kopeeritud). Test kontrollib viiteid ja valikute nimesid.
+
 ## [1.8] — 2026-09-28
 
 ### Lisatud

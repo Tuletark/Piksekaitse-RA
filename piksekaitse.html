@@ -237,6 +237,21 @@ input.arvutatud { background: #f0f3f7; color: #0a4080; font-weight: 600; }
 #standard_nupp.laetud { background: #e8f4ea; border-color: #9ccc9f; color: #1b5e20; }
 .std-link { cursor: pointer; text-decoration: underline dotted; text-underline-offset: 2px; }
 .std-link:hover { color: #0a4080; text-decoration-style: solid; }
+.info-nupp { border: none; background: none; color: #1565c0; cursor: pointer; font-size: 14px; padding: 0 3px; line-height: 1; vertical-align: middle; }
+.info-nupp:hover { color: #0a4080; transform: scale(1.15); }
+.selgitus-taust { position: fixed; inset: 0; background: rgba(20, 30, 45, 0.45); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 16px; }
+.selgitus-kast { background: #fff; border-radius: 8px; max-width: 720px; width: 100%; max-height: 85vh; overflow-y: auto; padding: 16px 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); font-size: 13.5px; line-height: 1.5; }
+.selgitus-päis { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.selgitus-päis h3 { color: #0a4080; font-size: 16px; margin: 0 0 6px; }
+.selgitus-sulge { border: none; background: none; font-size: 22px; cursor: pointer; color: #666; line-height: 1; }
+.selgitus-viide { font-size: 12px; color: #555; margin: 0 0 8px; }
+.selgitus-tabel { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 12.5px; }
+.selgitus-tabel th, .selgitus-tabel td { border-bottom: 1px solid #e3e8ee; padding: 5px 6px; text-align: left; vertical-align: top; }
+.selgitus-tabel th { background: #f3f6fa; color: #0a4080; }
+.selgitus-tabel td.num { white-space: nowrap; }
+.selgitus-tabel tr.valitud td { background: #eef6ee; font-weight: 600; }
+.selgitus-teadmata { font-size: 12.5px; color: #8a5300; background: #fff8e6; padding: 6px 8px; border-radius: 4px; }
+.selgitus-praktika { margin-top: 10px; background: #f3f6fa; border-left: 3px solid #1565c0; padding: 8px 10px; border-radius: 4px; }
 .btn-danger {
   background: #fee;
   border-color: #f4a;
@@ -1831,6 +1846,360 @@ function laeVaikevaartused() {
   uuendaVahekaardid();
   document.getElementById('status').textContent = 'Vaikeväärtused laaditud (näide F.2 - Maja)';
 }
+
+// =============================================================================
+// PARAMEETRITE SELGITUSED (ⓘ) — rakenduse enda sõnastus, mitte standardi tekst
+// =============================================================================
+
+/**
+ * Selgitused parameetritele: mis see on, millal mida valida, praktilised
+ * märkused. Tekstid on rakenduse autorite sõnastuses (standardi teksti ei
+ * kopeerita — vt DECISIONS §16); viide avab kasutaja enda standardi PDF-i.
+ *
+ * Võti = välja id. Väljad:
+ *   pealkiri, viide (nt 'tabel B.6'), mis (HTML), valikud { valiku võti: millal },
+ *   praktika (HTML, kasutaja kogemus), ühik/muu vabatahtlik.
+ */
+const SELGITUSED = {
+  NG: {
+    pealkiri: 'N<sub>G</sub> — välgulöökide tihedus',
+    viide: 'jaotis A.1',
+    mis: 'Keskmine maapinda tabavate välgulöökide arv aastas ühe ruutkilomeetri kohta objekti asukohas. Kõik välgusagedused (N<sub>D</sub>, N<sub>M</sub>, N<sub>L</sub>, N<sub>I</sub>) on sellega võrdelised.',
+    praktika: 'Eestis võetakse väärtus Keskkonnaagentuuri äikeseanalüüsist (NORDLIS andmed) objekti asukoha järgi. Aruandes viita analüüsi aastale.',
+  },
+  k_tegur_sg: {
+    pealkiri: 'k — tabamispunktide tegur',
+    viide: 'jaotis A.1',
+    mis: 'Üks välgulöök võib maad tabada mitmes punktis. N<sub>SG</sub> = k × N<sub>G</sub> teisendab löökide tiheduse tabamispunktide tiheduseks, mida kasutab riskiarvutus.',
+    praktika: 'Kui välgutuvastussüsteemi (LLS) andmete haldaja tegurit ei anna, kasutatakse k = 2.',
+  },
+  CD_valik: {
+    pealkiri: 'C<sub>D</sub> — paiknemistegur',
+    viide: 'tabel A.1',
+    mis: 'Näitab, kuivõrd ümbritsevad objektid ehitist otselöögi eest varjavad. Hinnatakse ümbruses kuni ~3 H kaugusel (H = ehitise kõrgus).',
+    valikud: {
+      'Ümbritsetud kõrgemate objektidega': 'Ümberringi on selgelt kõrgemad hooned või puud — need püüavad osa välke endale.',
+      'Ümbritsetud sama kõrgete või väiksemate objektidega': 'Tihe hoonestus sarnase kõrgusega hoonetega (nt eramurajoon, kvartal).',
+      'Eraldiseisev ehitis (läheduses pole teisi objekte)': 'Lähedal pole märkimisväärseid objekte. Kõige tavalisem valik, kui ümbrus ei varja.',
+      'Eraldiseisev ehitis mäe või künka tipus': 'Ehitis on ümbrusest kõrgemal — tabamise tõenäosus kahekordistub.',
+    },
+  },
+  PS_valik: {
+    pealkiri: 'P<sub>S</sub> — konstruktsioon (ohtlik sädelemine)',
+    viide: 'tabel B.4',
+    mis: 'Tõenäosus, et otselöök põhjustab ehitises ohtliku sädelemise (tulekahju). Elektriliselt pidev ja maandusega ühendatud karkass juhib voolu ohutumalt.',
+    valikud: {
+      'Puit ja müüritis': 'Puit-, kivi- või müüritiskonstruktsioon; ka raudbetoon, mille armatuuri pidevust pole tõendatud.',
+      'Elektriliselt katkematu raudbetoon või metallkarkass': 'Armatuur või teraskarkass on omavahel ja maandusega ühendatud. Kui seinad ja katus on eri tüüpi, kaalu suuremat väärtust.',
+    },
+    praktika: 'Olemasoleva hoone puhul, kui armatuuri pidevus pole teada, vali „Teadmata” (= 1). Kui ehitisel on LPS, arvestab rakendus automaatselt P<sub>S</sub> = 1 (LPS-i kasu tuleb P<sub>LPS</sub> kaudu).',
+  },
+  tZ: {
+    pealkiri: 't<sub>z</sub> — inimeste viibimisaeg',
+    viide: 'valem B.14',
+    mis: 'Mitu tundi aastas on ehitises (tsoonis) inimesi. P<sub>P</sub> = t<sub>z</sub>/8760 vähendab inimestega seotud riske (R<sub>L1</sub>), kuid mitte ehitise riske (R<sub>L2</sub>).',
+    praktika: 'Ööpäevaringne kasutus (elamu, haigla) 8760 h; tavaline büroo ~2000–2600 h; 30 % ajast = 2628 h.',
+  },
+  kategooria: {
+    pealkiri: 'Ehitise tüüp kahju järgi',
+    viide: 'tabel C.2',
+    mis: 'Määrab kahjude L<sub>F</sub> ja L<sub>O</sub> vahemikud. Vaikimisi kasutatakse vahemiku suurimat väärtust.',
+    valikud: {
+      'Väga suure kahjuga (haigla intensiivravi, plahvatusohtlik)': 'Plahvatusohtlikud ehitised; ruumid, kus seadmete rike ohustab elu (operatsioonisaal, intensiivravi).',
+      'Suure kahjuga (palatid, juhtimisruumid, muuseumid)': 'Piiratud liikumisvõimega inimesed (palatid, vanglad); kriitilised juhtimisruumid; kultuuripärand.',
+      'Tavalise kahjuga (kirikud, koolid, kontorid, kaubahallid)': 'Üldsusele avatud hooned: kontorid, koolid, kauplused, hotellid, kirikud, meelelahutus.',
+      'Väikese kahjuga (eluhoone, talu)': 'Eraomandis ehitised: elamud, korterelamud, talud.',
+    },
+  },
+  LT_in: {
+    pealkiri: 'L<sub>T</sub> — puute- ja sammupinge kahju',
+    viide: 'tabel C.2',
+    mis: 'Keskmine osa inimestest, kes saavad vigastada puute- või sammupinge tõttu. Kõigil ehitistel sama tüüpväärtus 10⁻².',
+  },
+  LF1_in: {
+    pealkiri: 'L<sub>F1</sub> — tulekahju kahju inimestele',
+    viide: 'tabel C.2',
+    mis: 'Keskmine osa inimestest, kes saavad vigastada välgust põhjustatud tulekahjus (R<sub>B1</sub>, R<sub>V1</sub>). Vahemik sõltub ehitise tüübist.',
+    praktika: 'Kasuta vahemiku suurimat väärtust, kui väiksema valimiseks pole põhjendust (nt tuletõkkesektsioonid, kiire evakuatsioon).',
+  },
+  LF2_in: {
+    pealkiri: 'L<sub>F2</sub> — tulekahju kahju ehitisele',
+    viide: 'tabel C.2',
+    mis: 'Keskmine osa ehitisest ja selle sisust, mis tulekahjus hävib (R<sub>B2</sub>, R<sub>V2</sub>). Neis komponentides pole viibimistegurit P<sub>P</sub> — sageli suurim riskiosa.',
+  },
+  rf_valik: {
+    pealkiri: 'r<sub>f</sub> — tule- või plahvatusoht',
+    viide: 'tabel B.6',
+    mis: 'Kui kergesti välk ehitises tulekahju või plahvatuse põhjustab. Mõjutab R<sub>B</sub> ja R<sub>V</sub> komponente otse (10-kordne samm = 10-kordne risk).',
+    valikud: {
+      'Plahvatusoht: Tsoonid 0, 20 või tahke lõhkeaine': 'Plahvatusohtlike alade klassifikatsioon (EX-tsoonid 0 / 20) või lõhkeainete hoidmine.',
+      'Plahvatusoht: Tsoonid 1, 21': 'EX-tsoonid 1 / 21.',
+      'Plahvatusoht: Tsoonid 2, 22': 'EX-tsoonid 2 / 22.',
+      'Tulekahju: Kõrge tuleoht (>800 MJ/m²)': 'Suur põlemiskoormus: laod, arhiivid, kergesti süttivate materjalidega ehitised.',
+      'Tulekahju: Tavaline (400-800 MJ/m²)': 'Tavalise põlemiskoormusega hooned.',
+      'Tulekahju: Madal (<400 MJ/m²)': 'Väike põlemiskoormus: vähe põlevmaterjali.',
+      'Plahvatus või tulekahju puudub': 'Tuleoht puudub (nt katus, välialad ilma põlevmaterjalita).',
+    },
+    praktika: 'MJ/m² piirid on varasemast väljaandest; 2025. a standard viitab põlemiskoormuse osas EN 1991-1-2-le. Hinnang põhineb tuleohutusekspertiisi põlemiskoormuse hinnangul.',
+  },
+  rp_valik: {
+    pealkiri: 'r<sub>p</sub> — tulekahju tagajärgi vähendavad abinõud',
+    viide: 'tabel B.5',
+    mis: 'Vähendab tulekahjust tulenevat kahju (R<sub>B</sub>, R<sub>V</sub>).',
+    valikud: {
+      'Abinõud puuduvad': 'Ühtegi allnimetatud abinõu pole.',
+      'Käsikustutid, hüdrandid, tulekindlad seinad jms': 'Vähemalt üks: tulekustutid, käsitsi häire, hüdrandid, tulekindlad vaheseinad, evakuatsiooniteed.',
+      'Automaatne tulekustutus / häireseadmed (kaitstud SPD-ga)': 'Automaatne tulekustutus või automaatne tulekahjusignalisatsioon — ainult kui see on liigpingete eest kaitstud ja päästjad jõuavad kohale alla 10 minuti.',
+    },
+    praktika: 'ATS-iga hoone: 0,2, kui ATS on liigpingekaitstud ja päästjad jõuavad kohale alla 10 minuti; muidu 0,5. Tingimused, mille korral tuleb kasutada r<sub>p</sub> = 1: abinõud ei pruugi välgu ajal töövalmis olla (kahtluse korral 1); plahvatusohtlik tsoon (kui plahvatuse vältimist pole tagatud); tsoonis on liitiumioonakud (v.a väikesed, nt sülearvutid). Käsitsi abinõud loevad ainult väljaõppinud inimeste olemasolul. Kui r<sub>p</sub> ≠ 1, tuleb tellijat sellest teavitada.',
+  },
+  rt_valik: {
+    pealkiri: 'r<sub>t</sub> — põranda või pinnase kattekiht',
+    viide: 'tabel B.2',
+    mis: 'Kattekihi kontakttakistus mõjutab sammu- ja puutepinge ohtu (R<sub>AT</sub>, R<sub>U</sub>). Suurem takistus = väiksem oht.',
+    valikud: {
+      'Põllumajanduslik, betoon (≤1 kΩ)': 'Muld, betoon — halvim juhtum.',
+      'Marmor, keraamika (1-10 kΩ)': 'Kivi- ja keraamilised plaatpõrandad.',
+      'Kruus, vaipkate, vaibad (10-100 kΩ)': 'Kruus, vaipkate.',
+      'Asfalt, linoleum, puit (≥100 kΩ)': 'Asfalt, linoleum, puitpõrand.',
+      'Isoleerkiht ≥5 cm asfalti': 'Vähemalt 5 cm paksune isoleeriv kiht (nt asfalt) — oht loetakse kõrvaldatuks.',
+    },
+    praktika: 'Niisketes või veega kaetud kohtades on isoleeriva kihi mõju väiksem — vali ettevaatlikumalt.',
+  },
+  Pam_valik: {
+    pealkiri: 'P<sub>am</sub> — kaitse puute- ja sammupinge eest',
+    viide: 'tabel B.1',
+    mis: 'Lisameetmed, mis vähendavad otselöögil tekkivate puute- ja sammupingete ohtu (R<sub>AT</sub>, R<sub>AD</sub>, R<sub>U</sub>).',
+    valikud: {
+      'Kaitsemeetmeid pole': 'Allnimetatud meetmeid pole.',
+      'Hoiatustähis': 'Hoiatussildid (nt keeld äikese ajal katusele minna).',
+      'Elektriline isolatsioon kaitsmata osadel (≥3 mm XLPE)': 'Allaviigud jms on isoleeritud (nt ≥ 3 mm ristsillatud polüetüleen).',
+      'Efektiivne pinnase potentsiaalitasandus (võrkmaandurid)': 'Võrkmaandur tasandab pinnase potentsiaali — kaitseb sammupinge eest.',
+      'Loomulik piksekaitsesüsteem (tugev metallkarkass)': 'Ulatuslik metallkarkass või tõendatult ühendatud armatuur või võrkmaandur, ja ligipääsetavaid välguvoolu juhtivaid metallosi pole.',
+      'Ligipääsupiirangud': 'Füüsilised tõkked, mis ei lase ohualasse.',
+    },
+    praktika: 'Mitme meetme korral on P<sub>am</sub> nende korrutis — rakenduses saab praegu valida ühe (vali mõjusaim). Olemasoleva hoone puhul, kui teadmata, vali „Teadmata” (= 1).',
+  },
+  CE_valik: {
+    pealkiri: 'C<sub>E</sub> — keskkonnategur',
+    viide: 'tabel A.4',
+    mis: 'Ümbritsev hoonestus varjab liine; mõjutab ainult liinidega seotud sagedusi (N<sub>L</sub>, N<sub>I</sub>).',
+    valikud: {
+      'Maakeskkond': 'Hõre või puuduv hoonestus.',
+      'Äärelinnaline keskkond': 'Äärelinn, madal hoonestus.',
+      'Linnaline keskkond': 'Linnakeskkond.',
+      'Linnaline keskkond, kus hooned on >20 m kõrged': 'Kõrghoonetega linnakeskkond.',
+    },
+  },
+  LL_P: {
+    pealkiri: 'L<sub>L</sub> — liini (lõigu) pikkus',
+    viide: 'jaotis A.4',
+    mis: 'Liini pikkus ehitisest esimese sõlmeni (alajaam, jaotuskilp). Mida pikem liin, seda rohkem välke tabab liini või selle lähedust.',
+    praktika: 'Kui pikkus pole teada, kasutatakse 1000 m (KP + MP kokku). Realistlik maksimum on ~2 km.',
+  },
+  CIP_valik: {
+    pealkiri: 'C<sub>I</sub> — liini paigaldus',
+    viide: 'tabel A.2',
+    mis: 'Kas liin on õhus või maas. Maakaablit tabab vähem välke.',
+    valikud: {
+      'Õhus (õhuliin)': 'Õhuliin postidel.',
+      'Süvistatud (maakaabel)': 'Maakaabel (pinnase eritakistusel kuni ~400 Ωm).',
+      'Süvistatud kaablid maandurite võrksüsteemi sees': 'Maakaabel kulgeb kogu ulatuses võrkmaanduri sees (nt tööstusala).',
+    },
+  },
+  CTP_valik: {
+    pealkiri: 'C<sub>T</sub> — liini tüüp',
+    viide: 'tabel A.3',
+    mis: 'Eraldatud mähistega trafo summutab liinilt tulevaid impulsse.',
+    valikud: {
+      'LV-elektriliin, side- või andmesideliin': 'Madalpingeliin, side- või andmesideliin; ka kõrgepingeliin autotrafoga.',
+      'HV-elektriliin (HV/LV trafoga, eraldatud mähistega)': 'Kõrgepingeliin, mis toidab ehitist läbi eraldatud mähistega trafo (lõik on trafo KP-poolel).',
+    },
+  },
+  CLD_CLI_P_valik: {
+    pealkiri: 'C<sub>LD</sub> / C<sub>LI</sub> — liini varjestus, maandus, isoleerimine',
+    viide: 'tabel B.9',
+    mis: 'C<sub>LD</sub> mõjutab liini tabavat välku (P<sub>U</sub>, P<sub>V</sub>, P<sub>W</sub>, P<sub>C</sub>), C<sub>LI</sub> liini lähedale tabavat välku (P<sub>Z</sub>). Kui varje on ühendatud sama potentsiaaliühtlustuslatiga kui seadmed, on induktsioonioht praktiliselt kõrvaldatud (C<sub>LI</sub> = 0).',
+    praktika: 'Varjestatud kaabli ja ühendatud varje korral aktiveerub vahekaart „Liinid (täpsem)”, kus saab valida varje takistuse (P<sub>LD</sub>).',
+  },
+  PLPS_valik: {
+    pealkiri: 'P<sub>LPS</sub> — piksekaitsesüsteem',
+    viide: 'tabel B.3',
+    mis: 'Olemasolev piksekaitsesüsteem (IEC 62305-3) vähendab otselöögist tulenevaid riske (R<sub>B</sub>, R<sub>AD</sub>, R<sub>AT</sub>).',
+    valikud: {
+      'LPS puudub (kaitsmata)': 'Piksekaitset pole.',
+      'LPS klass IV': 'LPS klass IV.',
+      'LPS klass III': 'LPS klass III.',
+      'LPS klass II': 'LPS klass II.',
+      'LPS klass I': 'LPS klass I.',
+      'LPS I + katkematu metall- või raudbetoonkarkass': 'LPS I ja karkass toimib loomuliku allaviigusüsteemina.',
+      'LPS I + metallkatus + täielik katuse paigaldiste kaitse': 'LPS I, metallkatus ja kõik katuse paigaldised kaitstud otselöögi eest, karkass allaviigusüsteemina.',
+    },
+    praktika: 'Kui LPS-i vastavus IEC 62305-3-le pole tõendatud (nt vana süsteem ilma mõõtmisprotokollita), vali „Teadmata” (= 1).',
+  },
+  PEB_P_valik: {
+    pealkiri: 'P<sub>EB</sub> — potentsiaaliühtlustus liini sisenemiskohas',
+    viide: 'tabel B.13',
+    mis: 'Liigpingekaitse (SPD) liini ehitisse sisenemise kohas (välgupotentsiaaliühtlustus, IEC 62305-3). Vähendab liini kaudu tulevaid riske R<sub>U</sub> ja R<sub>V</sub> — tavahoonete puhul sageli kõige tõhusam meede.',
+    valikud: {
+      'SPD-d puuduvad': 'Liini sisenemiskohas SPD-d pole.',
+      'PEB LPL III-IV': 'SPD elektriliinil ≥ 5 kA (10/350 μs), sideliinil ≥ 1 kA.',
+      'PEB LPL II': 'SPD elektriliinil ≥ 7,5 kA, sideliinil ≥ 1,5 kA.',
+      'PEB LPL I': 'SPD elektriliinil ≥ 10 kA, sideliinil ≥ 2 kA.',
+    },
+    praktika: 'Peakilbis olev I klassi (T1) liigpingekaitse vastab P<sub>EB</sub>-le, kui selle I<sub>imp</sub> vastab tabeli voolule.',
+  },
+  PSPD_P_valik: {
+    pealkiri: 'P<sub>SPD</sub> — koordineeritud liigpingekaitse süsteem',
+    viide: 'tabel B.7',
+    mis: 'Koordineeritud SPD-süsteem (IEC 62305-4) kaitseb sisesüsteeme. Mõjutab ainult sisesüsteemide rikkega seotud riske (R<sub>C</sub>, R<sub>M</sub>, R<sub>W</sub>, R<sub>Z</sub>) — need arvestatakse ainult erijuhtudel (plahvatusoht, haigla).',
+    praktika: 'Tavahoone riski R see ei mõjuta. Koordineeritud SPD on tõhus ainult LPS-iga või pideva metall-/raudbetoonkarkassiga ehitises.',
+  },
+  kasuta_TWS: {
+    pealkiri: 'Äikesehoiatussüsteem (TWS)',
+    viide: 'jaotis B.1',
+    mis: 'Hoiatussüsteem, mis võimaldab ohualast õigeaegselt lahkuda. P<sub>TWS</sub> = tõenäosus, et süsteem sündmust ei tuvasta (tootja andmed).',
+    praktika: 'Arvesta ainult siis, kui evakuatsioon on tagatud ja tootja annab hoiatamata jätmise suhtarvu. Muidu P<sub>TWS</sub> = 1.',
+  },
+  UWP: {
+    pealkiri: 'U<sub>W</sub> — seadmete impulsstaluvuspinge',
+    viide: 'tabel B.11',
+    mis: 'Madalaim impulsstaluvuspinge ehitise sisesüsteemi seadmetel. Mõjutab P<sub>LD</sub> (varjestatud kaabel) ning haardealasid A<sub>M</sub> ja A<sub>I</sub>.',
+    praktika: 'Tüüpiliselt 2,5 kV elektripaigaldise seadmetele, 1,5 kV side- ja signaaliseadmetele, ~1 kV tundlikule elektroonikale.',
+  },
+  kaabli_tüüp_P: {
+    pealkiri: 'Kaabli varje — P<sub>LD</sub>',
+    viide: 'tabel B.11',
+    mis: 'Varjestatud kaabel, mille varje on ühendatud sama potentsiaaliühtlustuslatiga kui seadmed, vähendab liini tabava välgu mõju. Mida väiksem varje takistus R<sub>S</sub>, seda väiksem P<sub>LD</sub>.',
+    praktika: 'Süvistatud KP-kaablite varje takistus on tavaliselt 1–5 Ω/km; linnas on sideliinid sageli varjestatud (~5 Ω/km).',
+  },
+  KS1: {
+    pealkiri: 'K<sub>S1</sub> — ehitise ruumiline varjestus',
+    viide: 'valem B.8',
+    mis: 'LPS-i võrk või karkass välise ekraanina vähendab lähedal tabava välgu magnetvälja. Tavahoonel 1.',
+  },
+  KS3P_valik: {
+    pealkiri: 'K<sub>S3</sub> — sisekaabeldus',
+    viide: 'tabel B.10',
+    mis: 'Sisejuhtmestiku silmuste suurus mõjutab indutseeritud liigpinget (R<sub>M</sub>). Väiksemad silmused ja varjestatud kaablid = väiksem K<sub>S3</sub>.',
+    praktika: 'Ühe kaabli juhtmed (L, N, PE samas kaablis) moodustavad väikese silmuse; eri teid mööda kulgevad juhtmed suure hoones suure silmuse.',
+  },
+  te: {
+    pealkiri: 't<sub>e</sub> — seadmete tööaeg',
+    viide: 'valem B.15',
+    mis: 'Mitu tundi aastas on sisesüsteemi seadmed tsoonis töös. P<sub>e</sub> = t<sub>e</sub>/8760 kasutatakse komponentides R<sub>C</sub>, R<sub>M</sub>, R<sub>W</sub>, R<sub>Z</sub>.',
+  },
+  LO1_in: {
+    pealkiri: 'L<sub>O1</sub> — sisesüsteemi rikke kahju inimestele',
+    viide: 'tabel C.2',
+    mis: 'Keskmine osa inimestest, kes saavad vigastada sisesüsteemide rikke tõttu (nt elu toetavad seadmed, plahvatusohtlik protsess).',
+  },
+  PO: {
+    pealkiri: 'P<sub>O</sub> — inimesed avatud alal',
+    viide: 'jaotis B.3',
+    mis: 'Kas inimesed viibivad välgule avatud alal (katus, terrass) kaitsmata: 1 = jah, 0 = ei.',
+  },
+  LD_in: {
+    pealkiri: 'L<sub>D</sub> — otselöögi kahju avatud alal',
+    viide: 'tabel C.2',
+    mis: 'Keskmine osa avatud alal viibivatest inimestest, keda otselöök vigastab. Tüüpväärtus 10⁻¹.',
+  },
+  CDJ_valik: {
+    pealkiri: 'C<sub>DJ</sub> — naaberehitise paiknemine',
+    viide: 'tabel A.1',
+    mis: 'Nagu C<sub>D</sub>, kuid liiniga ühendatud naaberehitise kohta — selle tabamine võib tuua impulsi liini kaudu.',
+  },
+};
+// Sideliini väljad kasutavad elektriliini selgitusi
+SELGITUSED.LL_T = SELGITUSED.LL_P;
+SELGITUSED.CIT_valik = SELGITUSED.CIP_valik;
+SELGITUSED.CTT_valik = SELGITUSED.CTP_valik;
+SELGITUSED.CLD_CLI_T_valik = SELGITUSED.CLD_CLI_P_valik;
+SELGITUSED.PEB_T_valik = SELGITUSED.PEB_P_valik;
+SELGITUSED.PSPD_T_valik = SELGITUSED.PSPD_P_valik;
+SELGITUSED.UWT = SELGITUSED.UWP;
+SELGITUSED.kaabli_tüüp_T = SELGITUSED.kaabli_tüüp_P;
+SELGITUSED.KS2 = { ...SELGITUSED.KS1, pealkiri: 'K<sub>S2</sub> — tsooni sisemine varjestus', viide: 'valem B.9',
+  mis: 'Sisemised ekraanid (LPZ-tsoonide piiril) vähendavad magnetvälja tsoonis. Tavahoonel 1.' };
+SELGITUSED.KS3T_valik = SELGITUSED.KS3P_valik;
+SELGITUSED.LO2_in = { ...SELGITUSED.LO1_in, pealkiri: 'L<sub>O2</sub> — sisesüsteemi rikke kahju ehitisele',
+  mis: 'Keskmine osa ehitisest, mis kahjustub sisesüsteemide rikke tagajärjel (nt plahvatus). Rakendub plahvatusohu korral.' };
+SELGITUSED.LF2_in.viide = 'tabel C.2';
+
+/** Rippmenüü id → valikute objekt (selgitusakna valikute tabeli jaoks). */
+function valikudId(id) {
+  const kaart = {
+    CD_valik: CD_VALIKUD, CDJ_valik: CD_VALIKUD, PS_valik: PS_VALIKUD, kategooria: EHITISE_KATEGOORIA,
+    rf_valik: RF_VALIKUD, rp_valik: RP_VALIKUD, rt_valik: RT_VALIKUD, Pam_valik: PAM_VALIKUD,
+    CE_valik: CE_VALIKUD, CIP_valik: CI_VALIKUD, CIT_valik: CI_VALIKUD, CTP_valik: CT_VALIKUD, CTT_valik: CT_VALIKUD,
+    CLD_CLI_P_valik: CLD_CLI_VALIKUD, CLD_CLI_T_valik: CLD_CLI_VALIKUD, PLPS_valik: PLPS_VALIKUD,
+    PEB_P_valik: PEB_VALIKUD, PEB_T_valik: PEB_VALIKUD, PSPD_P_valik: PSPD_VALIKUD, PSPD_T_valik: PSPD_VALIKUD,
+    KS3P_valik: KS3_VALIKUD, KS3T_valik: KS3_VALIKUD, kaabli_tüüp_P: KAABLI_TÜÜP_VALIKUD, kaabli_tüüp_T: KAABLI_TÜÜP_VALIKUD,
+  };
+  return kaart[id] || null;
+}
+
+/** Lisab ⓘ nupu iga selgitusega välja sildi lõppu. */
+function lisaSelgitusNupud() {
+  for (const id of Object.keys(SELGITUSED)) {
+    const el = document.getElementById(id);
+    if (!el) continue;
+    const koht = el.type === 'checkbox'
+      ? el.parentElement.querySelector('span')
+      : el.closest('.field') && el.closest('.field').querySelector('label');
+    if (!koht || koht.querySelector('.info-nupp')) continue;
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'info-nupp';
+    b.textContent = 'ⓘ';
+    b.title = 'Selgitus';
+    b.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); näitaSelgitus(id); });
+    koht.appendChild(b);
+  }
+}
+
+/** Avab selgitusakna antud välja kohta. */
+function näitaSelgitus(id) {
+  const s = SELGITUSED[id];
+  if (!s) return;
+  const valikud = valikudId(id);
+  const sümbol = VALIKU_SÜMBOL[id];
+  let h = `<div class="selgitus-päis"><h3>${s.pealkiri}</h3><button type="button" class="selgitus-sulge" onclick="suleSelgitus()" title="Sulge (Esc)">×</button></div>`;
+  if (s.viide) h += `<p class="selgitus-viide">Standardis: <span class="standard-ref">${s.viide}</span></p>`;
+  h += `<p>${s.mis}</p>`;
+  if (valikud) {
+    const praegu = getSel(id);
+    h += '<table class="selgitus-tabel"><thead><tr><th>Valik</th><th>Väärtus</th><th>Millal valida</th></tr></thead><tbody>';
+    for (const k of Object.keys(valikud)) {
+      const v = typeof valikud[k] === 'number' || Array.isArray(valikud[k]) ? fmtTegur(valikud[k]) : '';
+      const millal = (s.valikud && s.valikud[k]) || '';
+      h += `<tr class="${k === praegu ? 'valitud' : ''}"><td>${kuvaNimi(id, k)}</td><td class="num">${sümbol && v ? sümbol + ' = ' + v : v}</td><td>${millal}</td></tr>`;
+    }
+    h += '</tbody></table>';
+    if (TEADMATA_VALIK[id]) {
+      h += `<p class="selgitus-teadmata">„Teadmata” → kasutatakse ebasoodsaimat valikut: <b>${kuvaNimi(id, TEADMATA_VALIK[id])}</b>; aruandes märgitakse eeldusena.</p>`;
+    }
+  }
+  if (s.praktika) h += `<div class="selgitus-praktika"><b>Praktikas</b><br>${s.praktika}</div>`;
+  let aken = document.getElementById('selgitus_aken');
+  if (!aken) {
+    aken = document.createElement('div');
+    aken.id = 'selgitus_aken';
+    aken.className = 'selgitus-taust';
+    aken.addEventListener('click', e => { if (e.target === aken) suleSelgitus(); });
+    document.body.appendChild(aken);
+  }
+  aken.innerHTML = `<div class="selgitus-kast" role="dialog" aria-modal="true">${h}</div>`;
+  aken.style.display = 'flex';
+  seoStandardiViited();
+}
+
+/** Sulgeb selgitusakna. */
+function suleSelgitus() {
+  const aken = document.getElementById('selgitus_aken');
+  if (aken) aken.style.display = 'none';
+}
+
 
 // =============================================================================
 // STANDARDI VIITED → KASUTAJA OMA PDF (vt docs/DECISIONS.md §16)
@@ -3553,7 +3922,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // Käivita esmane lülitus
   uuendaVahekaardid();
 
-  // Standardi viited → kasutaja oma PDF
+  // Parameetrite selgitused (ⓘ) ja standardi viited → kasutaja oma PDF
+  lisaSelgitusNupud();
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') suleSelgitus(); });
   seoStandardiViited();
   laeStandardMälust();
 });

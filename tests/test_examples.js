@@ -29,7 +29,7 @@ global.document = {
 global.window = {};
 
 // Tabelikonstandid (const) jäävad eval-i skoopi — tõstame need testide jaoks välja
-eval(js + ';globalThis.TABELID = { CD_VALIKUD, CI_VALIKUD, CT_VALIKUD, CE_VALIKUD, PAM_VALIKUD, RT_VALIKUD, PLPS_VALIKUD, PS_VALIKUD, RP_VALIKUD, RF_VALIKUD, PSPD_VALIKUD, PEB_VALIKUD, CLD_CLI_VALIKUD, KS3_VALIKUD, LF_VAHEMIKUD, LO_VAHEMIKUD };');  // toob namespace'i: koguArvutus, arvutaEhitis, arvutaRiskid, ...
+eval(js + ';globalThis.TABELID = { CD_VALIKUD, CI_VALIKUD, CT_VALIKUD, CE_VALIKUD, PAM_VALIKUD, RT_VALIKUD, PLPS_VALIKUD, PS_VALIKUD, RP_VALIKUD, RF_VALIKUD, PSPD_VALIKUD, PEB_VALIKUD, CLD_CLI_VALIKUD, KS3_VALIKUD, LF_VAHEMIKUD, LO_VAHEMIKUD, SELGITUSED };');  // toob namespace'i: koguArvutus, arvutaEhitis, arvutaRiskid, ...
 
 // ===== Testharness =====================================================
 
@@ -501,11 +501,24 @@ function testTabelid() {
 function testViited() {
   console.log('\n===== Standardi viited → PDF lehekülg =====');
   const viited = [...html.matchAll(/<span class="standard-ref">([\s\S]*?)<\/span>/g)]
-    .map(m => m[1].replace(/<[^>]+>/g, ''));
+    .map(m => m[1].replace(/<[^>]+>/g, ''))
+    .filter(v => !v.includes('${'));   // JS-mallid (nt selgitusaken) välja
   const leidmata = viited.filter(v => !leiaViide(v));
   const ok = viited.length > 0 && leidmata.length === 0;
   RESULTS.push({ label: 'viited', ok });
   console.log(`  ${ok ? '✓' : '✗'} ${viited.length} viidet, leidmata: ${leidmata.length ? leidmata.join('; ') : '0'}`);
+  // Selgitused (ⓘ): viide leiab lehekülje ja „millal valida” võtmed on olemas
+  const S = globalThis.TABELID.SELGITUSED;
+  const vead = [];
+  for (const [id, sel] of Object.entries(S)) {
+    if (sel.viide && !leiaViide(sel.viide)) vead.push(`${id}: viide „${sel.viide}”`);
+    const valikud = valikudId(id);
+    for (const k of Object.keys(sel.valikud || {})) {
+      if (!valikud || !(k in valikud)) vead.push(`${id}: valik „${k}”`);
+    }
+  }
+  RESULTS.push({ label: 'selgitused', ok: vead.length === 0 });
+  console.log(`  ${vead.length ? '✗' : '✓'} ${Object.keys(S).length} selgitust${vead.length ? ': ' + vead.join('; ') : ''}`);
   // Näidised: tabel, mitmuses tabelid, valem, jaotis, alajaotis → ülemjaotis
   const näited = [['(r_f, tabel B.6)', 66], ['(P_LD, tabelid B.11/B.12)', 74], ['(valem B.15)', 77],
     ['(jaotis 8.4)', 45], ['(jaotis A.2.5)', 57], ['(Lisa A.1)', 51]];

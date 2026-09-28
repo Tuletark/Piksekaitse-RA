@@ -271,6 +271,9 @@ selle brauseri kohalikus mälus (IndexedDB) — fail ei lahku kasutaja arvutist.
 
 **Põhjendus:** standard on autoriõigusega kaitstud (EVS, mitme kasutaja litsents);
 rakendus on GitHub Pagesis avalik — standardi sisu kopeerimine oleks levitamine.
+Parameetrite selgitused (ⓘ, `SELGITUSED`) on rakenduse enda sõnastuses —
+parafraseeritud ja lühendatud, koos praktiliste märkustega; standardi teksti ei
+kopeerita.
 Leheküljenumbrid (`STANDARDI_LEHED`) on EVS-i eestikeelse väljaande (130 lk)
 PDF-faili füüsilised leheküljed; teise väljaande korral võivad need nihkuda.
 
