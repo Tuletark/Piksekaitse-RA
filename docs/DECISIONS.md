@@ -262,6 +262,20 @@ lähimat **madalamat** veergu (suurem P<sub>LD</sub>). 12…16 kV vahel → B.11
 
 ---
 
+## 16. Standardi sisu: viide avab kasutaja enda PDF-i
+
+**Otsus:** rakendus ei sisalda standardi teksti ega tabeleid. Viited (nt
+„tabel B.6”) on klikitavad ja avavad **kasutaja enda** standardi PDF-i õigelt
+leheküljelt (`#page=N`). PDF valitakse nupuga „📖 Standard” ja hoitakse ainult
+selle brauseri kohalikus mälus (IndexedDB) — fail ei lahku kasutaja arvutist.
+
+**Põhjendus:** standard on autoriõigusega kaitstud (EVS, mitme kasutaja litsents);
+rakendus on GitHub Pagesis avalik — standardi sisu kopeerimine oleks levitamine.
+Leheküljenumbrid (`STANDARDI_LEHED`) on EVS-i eestikeelse väljaande (130 lk)
+PDF-faili füüsilised leheküljed; teise väljaande korral võivad need nihkuda.
+
+---
+
 ## Otsused, mida me **ei** teinud
 
 - **Vigastumise sageduse F (jaotis 9) arvutus** — pole praegu rakenduses.

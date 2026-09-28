@@ -496,6 +496,27 @@ function testTabelid() {
   console.log('  ✓ Tabelid B.11/B.12 P_LD (8 punkti, sh vahepealne U_W)');
 }
 
+// ===== Standardi viited: iga vormi viide leiab PDF-i lehekülje =========
+
+function testViited() {
+  console.log('\n===== Standardi viited → PDF lehekülg =====');
+  const viited = [...html.matchAll(/<span class="standard-ref">([\s\S]*?)<\/span>/g)]
+    .map(m => m[1].replace(/<[^>]+>/g, ''));
+  const leidmata = viited.filter(v => !leiaViide(v));
+  const ok = viited.length > 0 && leidmata.length === 0;
+  RESULTS.push({ label: 'viited', ok });
+  console.log(`  ${ok ? '✓' : '✗'} ${viited.length} viidet, leidmata: ${leidmata.length ? leidmata.join('; ') : '0'}`);
+  // Näidised: tabel, mitmuses tabelid, valem, jaotis, alajaotis → ülemjaotis
+  const näited = [['(r_f, tabel B.6)', 66], ['(P_LD, tabelid B.11/B.12)', 74], ['(valem B.15)', 77],
+    ['(jaotis 8.4)', 45], ['(jaotis A.2.5)', 57], ['(Lisa A.1)', 51]];
+  for (const [t, leht] of näited) {
+    const v = leiaViide(t);
+    const okk = v && v.leht === leht;
+    RESULTS.push({ label: t, ok: okk });
+    if (!okk) console.log(`  ✗ ${t} → ${v ? v.leht : 'ei leitud'}, oodatud ${leht}`);
+  }
+}
+
 // ===== Käivita kõik testid ============================================
 
 testF2_Maja();
@@ -505,6 +526,7 @@ testF4_Haigla();
 testLõigudKooskõla();
 testÄrihoone();
 testTabelid();
+testViited();
 
 // ===== Kokkuvõte ======================================================
 

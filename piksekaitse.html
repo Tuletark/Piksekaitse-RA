@@ -233,6 +233,10 @@ input.arvutatud { background: #f0f3f7; color: #0a4080; font-weight: 600; }
 .aruanne-plokk-sisu table { border-collapse: collapse; width: 100%; font-size: 12px; }
 .aruanne-plokk-sisu td, .aruanne-plokk-sisu th { border: 1px solid #999; padding: 3px 6px; vertical-align: top; }
 .btn-väike { padding: 3px 10px; font-size: 12px; }
+.päise-nupud { display: flex; align-items: center; gap: 10px; }
+#standard_nupp.laetud { background: #e8f4ea; border-color: #9ccc9f; color: #1b5e20; }
+.std-link { cursor: pointer; text-decoration: underline dotted; text-underline-offset: 2px; }
+.std-link:hover { color: #0a4080; text-decoration-style: solid; }
 .btn-danger {
   background: #fee;
   border-color: #f4a;
@@ -420,9 +424,13 @@ footer {
   <div class="panel">
     <div class="panel-header">
       <span>Sisendparameetrid</span>
-      <label class="ekspert-lyliti" title="Avab kõik täpsemad vahekaardid (ka need, mida põhiandmed ei eelda)">
-        <input type="checkbox" id="ekspertrežiim" onchange="uuendaVahekaardid()"> Ekspertrežiim
-      </label>
+      <span class="päise-nupud">
+        <button type="button" class="btn btn-väike" id="standard_nupp" onclick="valiStandardiPdf()"
+          title="Vali oma arvutist standardi EVS-EN IEC 62305-2:2025 PDF. Seejärel avab iga viide (nt „tabel B.6”) PDF-i õigelt lehelt. Fail jääb sinu arvutisse.">📖 Standard</button>
+        <label class="ekspert-lyliti" title="Avab kõik täpsemad vahekaardid (ka need, mida põhiandmed ei eelda)">
+          <input type="checkbox" id="ekspertrežiim" onchange="uuendaVahekaardid()"> Ekspertrežiim
+        </label>
+      </span>
     </div>
 
     <div class="tabs">
@@ -446,7 +454,7 @@ footer {
         <div class="field"><label>Koostaja:</label><input type="text" id="koostaja"></div>
         <div class="field"><label>Kuupäev:</label><input type="text" id="kuupaev"></div>
 
-        <div class="section-title">Välk <span class="standard-ref">(Lisa A.1)</span></div>
+        <div class="section-title">Välk <span class="standard-ref">(jaotis A.1)</span></div>
         <div class="field">
           <label>N<sub>G</sub> – välgulöökide tihedus (1/km²/a):</label>
           <input type="number" id="NG" value="4.0" step="0.01">
@@ -456,13 +464,13 @@ footer {
           <label>k – tegur (N<sub>SG</sub> = k × N<sub>G</sub>):</label>
           <input type="number" id="k_tegur_sg" value="2" step="0.1">
         </div>
-        <div class="help-text">Vaikimisi k = 2 (Lisa A.1, MÄRKUS 1).</div>
+        <div class="help-text">Vaikimisi k = 2 <span class="standard-ref">(jaotis A.1, MÄRKUS 1)</span>.</div>
         <div class="field">
           <label>N<sub>SG</sub> – tabamispunktide tihedus (1/km²/a):</label>
           <input type="number" id="NSG" value="8.0" step="0.1" readonly class="arvutatud">
         </div>
         <input type="hidden" id="RT" value="1e-5">
-        <div class="help-text">Vastuvõetav risk R<sub>T</sub> = 10⁻⁵ (jaotis 7.3) — fikseeritud.</div>
+        <div class="help-text">Vastuvõetav risk R<sub>T</sub> = 10⁻⁵ <span class="standard-ref">(jaotis 7.3)</span> — fikseeritud.</div>
 
         <div class="section-title">Hoone</div>
         <div class="field"><label>L – pikkus (m):</label><input type="number" id="L" value="15" step="0.1"></div>
@@ -481,7 +489,7 @@ footer {
         <div class="section-title">Kasutus ja kahjud</div>
         <div id="tsoon_märkus" class="info-box-small" style="display:none;">Tsoonirežiim on sees: viibimisaeg, kahjud, tuleoht, tulekaitse ja põrand võetakse iga tsooni kohta vahekaardilt <b>Tsoonid</b> — siinsed väärtused arvutusse ei lähe. <b>NB!</b> P<sub>am</sub>, K<sub>S3</sub> ja liigpingekaitse P<sub>SPD</sub> on tsoonirežiimis tsooni vaikeväärtusega (P<sub>am</sub> = 1, P<sub>SPD</sub> = 1) — tsooniredaktoris neid veel muuta ei saa.</div>
         <div class="field">
-          <label>t<sub>z</sub> – inimeste viibimisaeg (h/a) → P<sub>P</sub> = t<sub>z</sub>/8760:</label>
+          <label>t<sub>z</sub> – inimeste viibimisaeg (h/a) → P<sub>P</sub> = t<sub>z</sub>/8760 <span class="standard-ref">(valem B.14)</span>:</label>
           <input type="number" id="tZ" value="8760" step="1">
         </div>
         <div class="help-text">Ööpäevaringne = 8760, tööpäev ~2000–2600, 30 % ajast = 2628.</div>
@@ -629,7 +637,7 @@ footer {
           <span><b>Äikesehoiatussüsteem (TWS)</b></span>
         </label>
         <div id="TWS_block" class="field" style="display:none;">
-          <label>P<sub>TWS</sub> – tõenäosus, et TWS ei tuvasta sündmust (tootja andmed):</label>
+          <label>P<sub>TWS</sub> – tõenäosus, et TWS ei tuvasta sündmust (tootja andmed) <span class="standard-ref">(jaotis B.1)</span>:</label>
           <input type="number" id="PTWS" value="1.0" step="0.01">
         </div>
         <label class="field-checkbox">
@@ -714,8 +722,8 @@ footer {
         </div>
 
         <div class="section-title">Varjestus ja sisekaabeldus <span class="standard-ref">(jaotis B.6)</span></div>
-        <div class="field"><label>K<sub>S1</sub> – ehitise varjestus (valem B.8):</label><input type="number" id="KS1" value="1.0" step="0.01"></div>
-        <div class="field"><label>K<sub>S2</sub> – tsooni sisemine varjestus (valem B.9):</label><input type="number" id="KS2" value="1.0" step="0.01"></div>
+        <div class="field"><label>K<sub>S1</sub> – ehitise varjestus <span class="standard-ref">(valem B.8)</span>:</label><input type="number" id="KS1" value="1.0" step="0.01"></div>
+        <div class="field"><label>K<sub>S2</sub> – tsooni sisemine varjestus <span class="standard-ref">(valem B.9)</span>:</label><input type="number" id="KS2" value="1.0" step="0.01"></div>
         <div class="help-text">Tavahoonel K<sub>S1</sub> = K<sub>S2</sub> = 1 (varjestus puudub; näited F.2–F.3).</div>
         <div class="field">
           <label>Sisekaabeldus, elektrisüsteem <span class="standard-ref">(K<sub>S3</sub>, tabel B.10)</span>:</label>
@@ -732,7 +740,7 @@ footer {
         <div class="tab-staatus"></div>
         <div class="section-title">Välgu otselöök avatud alal viibivatele inimestele (R<sub>AD</sub>)</div>
         <div class="field">
-          <label>P<sub>O</sub> – inimesed on avatud alal kaitsmata (0…1):</label>
+          <label>P<sub>O</sub> – inimesed on avatud alal kaitsmata (0…1) <span class="standard-ref">(jaotis B.3)</span>:</label>
           <input type="number" id="PO" value="1" step="0.1">
         </div>
         <div class="help-text">1 = inimesed viibivad kaitsmata avatud alal (nt katus, näide F.3 Z2).</div>
@@ -1822,6 +1830,149 @@ function laeVaikevaartused() {
   lulita_tsoonid_režiim();
   uuendaVahekaardid();
   document.getElementById('status').textContent = 'Vaikeväärtused laaditud (näide F.2 - Maja)';
+}
+
+// =============================================================================
+// STANDARDI VIITED → KASUTAJA OMA PDF (vt docs/DECISIONS.md §16)
+// =============================================================================
+
+/**
+ * Viidete leheküljed standardi EVS-EN IEC 62305-2:2025 eestikeelses PDF-is
+ * (EVS, 130 lk). Numbrid on PDF-faili füüsilised leheküljed (#page=N), mitte
+ * trükitud lehenumbrid. Standardi sisu rakendusse ei kopeerita — avatakse
+ * kasutaja enda litsentsitud fail.
+ */
+const STANDARDI_LEHED = {
+  'tabel 3': 44,
+  'tabel A.1': 56, 'tabel A.2': 58, 'tabel A.3': 59, 'tabel A.4': 59,
+  'tabel B.1': 62, 'tabel B.2': 63, 'tabel B.3': 64, 'tabel B.4': 65, 'tabel B.5': 65,
+  'tabel B.6': 66, 'tabel B.7': 68, 'tabel B.8': 69, 'tabel B.9': 70, 'tabel B.10': 73,
+  'tabel B.11': 74, 'tabel B.12': 75, 'tabel B.13': 75, 'tabel C.1': 80, 'tabel C.2': 81,
+  'valem 1': 39, 'valem 6': 39, 'valem 7': 39, 'valem 8': 39,
+  'valem A.3': 52, 'valem A.5': 56, 'valem A.6': 57, 'valem A.7': 57, 'valem A.8': 57,
+  'valem A.9': 58, 'valem A.10': 58, 'valem A.11': 59, 'valem A.12': 59,
+  'valem B.1': 61, 'valem B.2': 62, 'valem B.3': 63, 'valem B.4': 64, 'valem B.5': 67,
+  'valem B.6': 71, 'valem B.7': 71, 'valem B.8': 72, 'valem B.9': 72, 'valem B.10': 73,
+  'valem B.11': 76, 'valem B.12': 76, 'valem B.13': 77, 'valem B.14': 77, 'valem B.15': 77,
+  'valem C.1': 81, 'valem C.2': 81,
+  'jaotis 6.3': 38, 'jaotis 7.3': 40, 'jaotis 8.2': 43, 'jaotis 8.3': 44, 'jaotis 8.4': 45,
+  'jaotis A.1': 51, 'jaotis A.2.5': 57, 'jaotis A.4': 58, 'jaotis A.5': 59,
+  'jaotis B.1': 61, 'jaotis B.3': 63, 'jaotis B.4': 64, 'jaotis B.5': 67, 'jaotis B.6': 71,
+  'jaotis B.7': 73, 'jaotis B.8': 75, 'jaotis B.9': 76,
+  'lisa A': 51, 'lisa B': 61, 'lisa C': 79,
+};
+
+/** Kasutaja valitud standardi PDF (blob-URL), kui see on laaditud. */
+let STANDARD_URL = null;
+
+/**
+ * Leiab viitetekstist (nt „(P<sub>LD</sub>, tabelid B.11/B.12)”) esimese
+ * tuntud viite ja selle lehekülje. Tagastab { võti, leht } või null.
+ */
+function leiaViide(tekst) {
+  const m = tekst.match(/\b(tabel|tabelid|valem|valemid|jaotis|lisa)\s+([A-F](?:\.\d+)*|\d+(?:\.\d+)*)/i);
+  if (!m) return null;
+  let liik = m[1].toLowerCase().replace(/id$/, '');
+  let nr = m[2];
+  if (liik === 'lisa' && nr.includes('.')) liik = 'jaotis';   // „Lisa A.1” = jaotis A.1
+  let võti = `${liik} ${nr}`;
+  while (!(võti in STANDARDI_LEHED) && nr.includes('.')) {    // A.2.5.1 → A.2.5 → A.2
+    nr = nr.slice(0, nr.lastIndexOf('.'));
+    võti = `${liik} ${nr}`;
+  }
+  return võti in STANDARDI_LEHED ? { võti, leht: STANDARDI_LEHED[võti] } : null;
+}
+
+/** Muudab kõik .standard-ref viited klikitavaks (kui lehekülg on teada). */
+function seoStandardiViited() {
+  document.querySelectorAll('.standard-ref').forEach(el => {
+    if (el.dataset.leht) return;
+    const v = leiaViide(el.textContent);
+    if (!v) return;
+    el.dataset.leht = v.leht;
+    el.classList.add('std-link');
+    el.title = `Ava standardis: ${v.võti} (PDF lk ${v.leht})`;
+    el.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); avaStandard(v.leht); });
+  });
+}
+
+/** Avab standardi PDF-i antud lehelt (sama aken korduvate klikkide korral). */
+function avaStandard(leht) {
+  if (!STANDARD_URL) {
+    valiStandardiPdf(leht);
+    return;
+  }
+  const a = document.createElement('a');
+  a.href = `${STANDARD_URL}#page=${leht}`;
+  a.target = 'evs_standard';
+  a.rel = 'noopener';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
+/** Uuendab päise nupu olekut. */
+function uuendaStandardiNupp(nimi) {
+  const n = document.getElementById('standard_nupp');
+  if (!n) return;
+  n.classList.toggle('laetud', !!STANDARD_URL);
+  n.textContent = STANDARD_URL ? '📖 Standard ✓' : '📖 Standard';
+  if (STANDARD_URL && nimi) n.title = `Laaditud: ${nimi}. Klõps valib uue faili. Viited avavad selle faili õigelt lehelt.`;
+}
+
+/** Seab laaditud PDF-i aktiivseks. */
+function määraStandard(blob, nimi) {
+  if (STANDARD_URL) URL.revokeObjectURL(STANDARD_URL);
+  STANDARD_URL = URL.createObjectURL(new Blob([blob], { type: 'application/pdf' }));
+  uuendaStandardiNupp(nimi);
+}
+
+/**
+ * Laseb kasutajal valida standardi PDF-i oma arvutist. Fail salvestatakse
+ * ainult selle brauseri kohalikku mällu (IndexedDB), et see järgmisel korral
+ * alles oleks — see ei lahku kasutaja arvutist.
+ * @param {number} [avaLeht] - pärast valimist ava see lehekülg
+ */
+function valiStandardiPdf(avaLeht) {
+  const inp = document.createElement('input');
+  inp.type = 'file';
+  inp.accept = '.pdf,application/pdf';
+  inp.onchange = () => {
+    const fail = inp.files && inp.files[0];
+    if (!fail) return;
+    määraStandard(fail, fail.name);
+    salvestaStandardMällu(fail, fail.name);
+    document.getElementById('status').textContent = `Standard laaditud: ${fail.name}`;
+    if (avaLeht) avaStandard(avaLeht);
+  };
+  inp.click();
+}
+
+/** IndexedDB: standardi PDF brauseri kohalikus mälus (vigade korral vaikselt ei salvesta). */
+function standardiAndmebaas() {
+  return new Promise((ok, viga) => {
+    const r = indexedDB.open('piksekaitse', 1);
+    r.onupgradeneeded = () => r.result.createObjectStore('failid');
+    r.onsuccess = () => ok(r.result);
+    r.onerror = () => viga(r.error);
+  });
+}
+async function salvestaStandardMällu(blob, nimi) {
+  try {
+    const db = await standardiAndmebaas();
+    db.transaction('failid', 'readwrite').objectStore('failid').put({ blob, nimi }, 'standard');
+  } catch (e) { /* mälu pole saadaval — fail kehtib selle seansi lõpuni */ }
+}
+async function laeStandardMälust() {
+  try {
+    const db = await standardiAndmebaas();
+    const kirje = await new Promise((ok, viga) => {
+      const r = db.transaction('failid').objectStore('failid').get('standard');
+      r.onsuccess = () => ok(r.result);
+      r.onerror = () => viga(r.error);
+    });
+    if (kirje && kirje.blob) määraStandard(kirje.blob, kirje.nimi);
+  } catch (e) { /* ei ole salvestatud või mälu pole saadaval */ }
 }
 
 // =============================================================================
@@ -3401,6 +3552,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Käivita esmane lülitus
   uuendaVahekaardid();
+
+  // Standardi viited → kasutaja oma PDF
+  seoStandardiViited();
+  laeStandardMälust();
 });
 </script>
 </body>

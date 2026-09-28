@@ -7,6 +7,13 @@ projekt järgib [semantilist versioneerimist](https://semver.org/lang/et/).
 
 ## [Avaldamata]
 
+### Lisatud
+- **Viited standardile on klikitavad**: nupp „📖 Standard” laseb valida oma
+  standardi PDF-i (jääb ainult sinu brauserisse); iga viide (nt „tabel B.6”,
+  „valem B.14”, „jaotis 8.4”) avab selle õigelt leheküljelt. Standardi sisu
+  rakendusse ei kopeerita (autoriõigus) — DECISIONS §16.
+- Test: kõik vormi viited leiavad PDF-i lehekülje.
+
 ## [1.7] — 2026-09-28
 
 Standardi audit — vt `docs/AUDIT_2026-09.md`.

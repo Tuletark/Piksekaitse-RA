@@ -48,6 +48,10 @@ Täpsemad vahekaardid on **hallid ja lukus**, kuni mõni „Erijuhud” valik ne
 
 **Ekspertrežiim** (lüliti paneeli päises) avab kõik vahekaardid.
 
+**📖 Standard** (paneeli päises): vali oma arvutist standardi PDF (EVS-EN IEC
+62305-2:2025, eestikeelne). Seejärel avab iga viide (nt „tabel B.6”) PDF-i õigelt
+leheküljelt. Fail jääb sinu brauserisse — rakendusse ega GitHubi seda ei laadita.
+
 Iga valiku juures on näha tähendus, sümbol ja väärtus (nt „Süvistatud — CI = 0,3”).
 Kolmanda osapoole andmetel (liinid, olemasolev kaitse, P<sub>am</sub>, P<sub>S</sub>)
 on valik **„Teadmata”** → kasutatakse ebasoodsaimat väärtust ja see märgitakse
