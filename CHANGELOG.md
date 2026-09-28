@@ -7,6 +7,8 @@ projekt järgib [semantilist versioneerimist](https://semver.org/lang/et/).
 
 ## [Avaldamata]
 
+## [1.8] — 2026-09-28
+
 ### Lisatud
 - **Viited standardile on klikitavad**: nupp „📖 Standard” laseb valida oma
   standardi PDF-i (jääb ainult sinu brauserisse); iga viide (nt „tabel B.6”,
