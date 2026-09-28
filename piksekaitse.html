@@ -212,6 +212,21 @@ header .sub { font-size: 12px; opacity: 0.85; margin-top: 2px; }
 .lõik-card-header { display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: 600; margin-bottom: 4px; }
 .lõik-card .field { margin-bottom: 4px; padding: 2px 0; }
 .lõik-card .field label { font-size: 12px; }
+.tab.disabled { color: #b0b7c0; cursor: not-allowed; background: #f4f5f7; }
+.tab.disabled:hover { background: #f4f5f7; }
+.tab.ekspert-avatud { font-style: italic; }
+.ekspert-lyliti { font-weight: normal; font-size: 12px; color: #444; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+.tab-staatus { font-size: 12px; padding: 6px 10px; border-radius: 4px; margin-bottom: 10px; }
+.tab-staatus.aktiivne { background: #e8f4ea; color: #1b5e20; }
+.tab-staatus.mitteaktiivne { background: #fff4e0; color: #8a5300; }
+.teadmata-rida { display: flex; gap: 8px; align-items: center; min-width: 0; }
+.teadmata-rida input[type="number"] { flex: 1; min-width: 0; }
+.teadmata-rida label { font-size: 12px; white-space: nowrap; cursor: pointer; }
+input.arvutatud { background: #f0f3f7; color: #0a4080; font-weight: 600; }
+.eeldused { background: #fff8e6; border-left: 3px solid #e0a000; padding: 8px 10px; margin: 10px 0; font-size: 12px; }
+.eeldused ul { margin: 4px 0 0 18px; }
+.valitud-väärtus { font-size: 11.5px; color: #0a4080; text-align: right; margin: -4px 0 8px; }
+.valitud-väärtus.teadmata { color: #8a5300; }
 .btn-danger {
   background: #fee;
   border-color: #f4a;
@@ -399,366 +414,337 @@ footer {
   <div class="panel">
     <div class="panel-header">
       <span>Sisendparameetrid</span>
-      <span style="font-weight: normal; font-size: 11px; color: #666;">7 vahekaarti</span>
+      <label class="ekspert-lyliti" title="Avab kõik täpsemad vahekaardid (ka need, mida põhiandmed ei eelda)">
+        <input type="checkbox" id="ekspertrežiim" onchange="uuendaVahekaardid()"> Ekspertrežiim
+      </label>
     </div>
 
     <div class="tabs">
-      <div class="tab active" data-tab="t1">1. Üldine</div>
-      <div class="tab" data-tab="t2">2. Ehitis</div>
-      <div class="tab" data-tab="t3">3. Keskkond</div>
-      <div class="tab" data-tab="t4">4. Liinid</div>
-      <div class="tab" data-tab="t5">5. Kahjud</div>
-      <div class="tab" data-tab="t6">6. Kaitse</div>
-      <div class="tab" data-tab="t7">7. Tsoonid</div>
+      <div class="tab active" data-tab="t_pohi">Põhiandmed</div>
+      <div class="tab" data-tab="t_liinid" data-noue="Aktiveerub: liin koosneb mitmest lõigust, liin ühendab naaberhoonega, varjestatud kaabel (varje ühendatud) või plahvatusoht/haigla">Liinid (täpsem)</div>
+      <div class="tab" data-tab="t_sise" data-noue="Aktiveerub: plahvatusoht või haigla (sisesüsteemide rike)">Sisesüsteemid</div>
+      <div class="tab" data-tab="t_avatud" data-noue="Aktiveerub: hoonel on avatud alad, kus viibivad inimesed">Avatud alad</div>
+      <div class="tab" data-tab="t_tsoonid" data-noue="Aktiveerub: hoone jaotatakse tsoonideks">Tsoonid</div>
     </div>
 
     <div class="panel-body">
 
-      <!-- VAHEKAART 1: ÜLDINE -->
-      <div class="tab-content active" id="t1">
-        <div class="section-title">Projekti info</div>
-        <div class="field"><label>Projekti nimi:</label><input type="text" id="projekt_nimi" value="Uus piksekaitse projekt"></div>
-        <div class="field"><label>Asukoht:</label><input type="text" id="asukoht"></div>
+      <!-- ===================== PÕHIANDMED (alati aktiivne) ===================== -->
+      <div class="tab-content active" id="t_pohi">
+
+        <div class="section-title">Objekt</div>
+        <div class="field"><label>Objekti nimetus:</label><input type="text" id="projekt_nimi" value="Uus piksekaitse projekt"></div>
+        <div class="field"><label>Aadress:</label><input type="text" id="asukoht"></div>
+        <div class="field"><label>Töö nr:</label><input type="text" id="too_nr"></div>
+        <div class="field"><label>Kasutusviis (määrus 17):</label><input type="text" id="kasutusviis" placeholder="nt VI – ärihoone, V – büroo"></div>
         <div class="field"><label>Koostaja:</label><input type="text" id="koostaja"></div>
         <div class="field"><label>Kuupäev:</label><input type="text" id="kuupaev"></div>
 
-        <div class="section-title">Pikselöökide salvesagedus <span class="standard-ref">(Lisa A)</span></div>
+        <div class="section-title">Välk <span class="standard-ref">(Lisa A.1)</span></div>
         <div class="field">
-          <label>N<sub>G</sub> – välkude tihedus (1/km²/a):</label>
-          <input type="number" id="NG" value="4.0" step="0.1">
+          <label>N<sub>G</sub> – välgulöökide tihedus (1/km²/a):</label>
+          <input type="number" id="NG" value="4.0" step="0.01">
         </div>
-        <div class="help-text">Sisesta N<sub>G</sub> väärtus (Eestis tüüpiliselt 2–4). Täpse väärtuse saab Eesti Meteoroloogia Instituudilt või LLS-ist.</div>
-
+        <div class="help-text">Äikeseanalüüsi (Keskkonnaagentuur / NORDLIS) andmetel.</div>
         <div class="field">
-          <label>k tegur (N<sub>G</sub> → N<sub>SG</sub> teisendus):</label>
+          <label>k – tegur (N<sub>SG</sub> = k × N<sub>G</sub>):</label>
           <input type="number" id="k_tegur_sg" value="2" step="0.1">
         </div>
-        <div class="help-text">Vaikimisi 2 (Lisa A.1, MÄRKUS 1). N<sub>SG</sub> = k × N<sub>G</sub></div>
-
+        <div class="help-text">Vaikimisi k = 2 (Lisa A.1, MÄRKUS 1).</div>
         <div class="field">
-          <label>N<sub>SG</sub> – pilve-maa välkude tihedus (1/km²/a) <i>[automaatne]</i>:</label>
-          <input type="number" id="NSG" value="8.0" step="0.1" readonly style="background:#f0f3f7; color:#0a4080; font-weight:600;">
-        </div>
-        <div class="help-text">Arvutatakse automaatselt: N<sub>SG</sub> = k × N<sub>G</sub>. Saab käsitsi muuta vajadusel (eemalda readonly).</div>
-
-        <div class="section-title">Vastuvõetav risk R<sub>T</sub> <span class="standard-ref">(jaotis 7.3, MÄRKUS 1)</span></div>
-        <div class="info-box">
-          <b>R<sub>T</sub> = 1 × 10⁻⁵ (aasta⁻¹)</b><br>
-          Standardi tüüpiline väärtus inimelu kaotuse jaoks. See on fikseeritud vastavalt EVS-EN IEC 62305-2:2025 jaotisele 7.3 ja seda ei muudeta.
+          <label>N<sub>SG</sub> – tabamispunktide tihedus (1/km²/a):</label>
+          <input type="number" id="NSG" value="8.0" step="0.1" readonly class="arvutatud">
         </div>
         <input type="hidden" id="RT" value="1e-5">
+        <div class="help-text">Vastuvõetav risk R<sub>T</sub> = 10⁻⁵ (jaotis 7.3) — fikseeritud.</div>
 
-        <div class="section-title">Inimeste kohaolu aeg ehitises (P<sub>P</sub> – valem B.14)</div>
+        <div class="section-title">Hoone</div>
+        <div class="field"><label>L – pikkus (m):</label><input type="number" id="L" value="15" step="0.1"></div>
+        <div class="field"><label>W – laius (m):</label><input type="number" id="W" value="20" step="0.1"></div>
+        <div class="field"><label>H – kõrgus (m):</label><input type="number" id="H" value="6" step="0.1"></div>
         <div class="field">
-          <label>t<sub>Z</sub> – inimeste kohalolu aeg ehitises (h/a):</label>
-          <input type="number" id="tZ" value="8760" step="1">
-        </div>
-        <div class="help-text">P<sub>P</sub> = t<sub>Z</sub>/8760. Aasta = 8760 h. Pidevalt asustatud = 8760, päevasel ajal = 4380, töötunnid = ~2000.</div>
-
-        <input type="hidden" id="te" value="8760">
-      </div>
-
-      <!-- VAHEKAART 2: EHITIS -->
-      <div class="tab-content" id="t2">
-        <div class="section-title">Ehitise mõõtmed ja paiknemine</div>
-        <div class="field"><label>L – ehitise pikkus (m):</label><input type="number" id="L" value="15" step="0.5"></div>
-        <div class="field"><label>W – ehitise laius (m):</label><input type="number" id="W" value="20" step="0.5"></div>
-        <div class="field"><label>H – ehitise kõrgus (m):</label><input type="number" id="H" value="6" step="0.5"></div>
-
-        <div class="field">
-          <label>C<sub>D</sub> – paiknemistegur <span class="standard-ref">(Tabel A.1)</span>:</label>
+          <label>Paiknemine ümbruse suhtes <span class="standard-ref">(C<sub>D</sub>, tabel A.1)</span>:</label>
           <select id="CD_valik" onchange="naita_CD_selgitus()"></select>
         </div>
         <div id="CD_selgitus" class="info-box-small"></div>
-
-        <div class="section-title">Ehitusmaterjal ja varjestus</div>
         <div class="field">
-          <label>P<sub>S</sub> – ehitusmaterjal <span class="standard-ref">(Tabel B.4)</span>:</label>
+          <label>Konstruktsioon <span class="standard-ref">(P<sub>S</sub>, tabel B.4)</span>:</label>
           <select id="PS_valik"></select>
         </div>
-        <details style="margin-top:12px;">
-          <summary style="cursor:pointer; color:#666; font-size:12px; padding:6px 0;">⚙ Täpsustatud varjestuse parameetrid (vaikimisi 1.0 - tavaehitised)</summary>
-          <div style="padding:8px; background:#f8f9fa; border-radius:4px; margin-top:6px;">
-            <div class="info-box-small" style="margin-bottom:8px;">
-              <b>Märkus:</b> K<sub>S1</sub> ja K<sub>S2</sub> on vaja muuta ainult juhul, kui ehitisel on eriline elektromagnetiline varjestus
-              (LPS-i metallekraan, raudbetoonelementide võrk, või sisemised ekraanid LPZ-tsoonide vahel). Tavalistele ehitistele
-              on standardväärtus <b>1.0</b> (näidetes F.1-F.3 kasutatakse alati 1.0).
-            </div>
-            <div class="field"><label>K<sub>S1</sub> – välimise varjestuse tegur:</label><input type="number" id="KS1" value="1.0" step="0.01"></div>
-            <div class="help-text">Vt jaotis B.6, valem B.8. Tavaehitisele = 1.0.</div>
-            <div class="field"><label>K<sub>S2</sub> – sisemiste ekraanide tegur:</label><input type="number" id="KS2" value="1.0" step="0.01"></div>
-            <div class="help-text">Tavaehitisele = 1.0.</div>
-          </div>
-        </details>
 
-        <div class="section-title">Ehitise kategooria <span class="standard-ref">(Tabel C.2)</span></div>
+        <div class="section-title">Kasutus ja kahjud</div>
+        <div id="tsoon_märkus" class="info-box-small" style="display:none;">Tsoonirežiim on sees: viibimisaeg, kahjud, tuleoht, tulekaitse ja põrand võetakse iga tsooni kohta vahekaardilt <b>Tsoonid</b> — siinsed väärtused arvutusse ei lähe. <b>NB!</b> P<sub>am</sub>, K<sub>S3</sub> ja liigpingekaitse P<sub>SPD</sub> on tsoonirežiimis tsooni vaikeväärtusega (P<sub>am</sub> = 1, P<sub>SPD</sub> = 1) — tsooniredaktoris neid veel muuta ei saa.</div>
         <div class="field">
-          <label>Kategooria (mõjutab kahju vaikeväärtuseid):</label>
+          <label>t<sub>z</sub> – inimeste viibimisaeg (h/a) → P<sub>P</sub> = t<sub>z</sub>/8760:</label>
+          <input type="number" id="tZ" value="8760" step="1">
+        </div>
+        <div class="help-text">Ööpäevaringne = 8760, tööpäev ~2000–2600, 30 % ajast = 2628.</div>
+        <div class="field">
+          <label>Ehitise tüüp kahju järgi <span class="standard-ref">(tabel C.2)</span>:</label>
           <select id="kategooria"></select>
         </div>
-        <div class="help-text">Kahju täpseid väärtuseid saad muuta vahekaardil "5. Kahjud".</div>
-
-        <div class="section-title">Avatud aladel viibivad inimesed (R<sub>AD</sub>)</div>
-        <label class="field-checkbox">
-          <input type="checkbox" id="kasuta_RAD" onchange="lulita_RAD()">
-          <span>Ehitisel on avatud alad, kus inimesed viibivad (terrass, katuseparkla, rõdu)</span>
-        </label>
-        <div class="field"><label>P<sub>O</sub> – paiknemise tegur:</label><input type="number" id="PO" value="0" step="0.1" disabled></div>
-        <div class="help-text">0 = pole inimesi avatud alal, 1 = on kaitsmata avatud alal</div>
-
-        <div class="section-title">Erilised ehitise tüübid (R<sub>C</sub>, R<sub>M</sub>, R<sub>W</sub>, R<sub>Z</sub>)</div>
-        <label class="field-checkbox">
-          <input type="checkbox" id="kasuta_RC1">
-          <span><b>Plahvatusoht või haigla</b> – sisesüsteemi rike → inimoht (RC1, RM1, RW1, RZ1)</span>
-        </label>
-        <label class="field-checkbox">
-          <input type="checkbox" id="kasuta_RC2">
-          <span><b>Plahvatusohtlik ehitis</b> – sisesüsteemi rike → ehitise plahvatus (RC2, RM2, RW2, RZ2)</span>
-        </label>
-      </div>
-
-      <!-- VAHEKAART 3: KESKKOND -->
-      <div class="tab-content" id="t3">
-        <div class="section-title">Keskkonnategur <span class="standard-ref">(Tabel A.4)</span></div>
         <div class="field">
-          <label>C<sub>E</sub> – keskkond:</label>
-          <select id="CE_valik"></select>
+          <label>L<sub>T</sub> – puute- ja sammupinge:</label>
+          <select id="LT_in"></select>
         </div>
-
-        <div class="section-title">Pinnase / põranda kattekiht <span class="standard-ref">(r<sub>t</sub> – Tabel B.2)</span></div>
         <div class="field">
-          <label>Põranda või pinnase tüüp:</label>
-          <select id="rt_valik"></select>
+          <label>L<sub>F1</sub> – tulekahju, inimesed (L1):</label>
+          <select id="LF1_in"></select>
         </div>
-
-        <div class="section-title">Kaitse puute- ja sammupingete eest <span class="standard-ref">(P<sub>am</sub> – Tabel B.1)</span></div>
+        <div id="LF1_abi" class="help-text"></div>
         <div class="field">
-          <label>Kaitsemeetmed:</label>
-          <select id="Pam_valik"></select>
+          <label>L<sub>F2</sub> – tulekahju, ehitis (L2):</label>
+          <select id="LF2_in"></select>
         </div>
-
-        <div class="section-title">Tuleoht ja tulekaitse</div>
+        <div id="LF2_abi" class="help-text"></div>
         <div class="field">
-          <label>r<sub>f</sub> – tuleoht <span class="standard-ref">(Tabel B.6)</span>:</label>
+          <label>Tuleoht <span class="standard-ref">(r<sub>f</sub>, tabel B.6)</span>:</label>
           <select id="rf_valik"></select>
         </div>
         <div class="field">
-          <label>r<sub>p</sub> – tulekaitse <span class="standard-ref">(Tabel B.5)</span>:</label>
+          <label>Tulekahju abinõud <span class="standard-ref">(r<sub>p</sub>, tabel B.5)</span>:</label>
           <select id="rp_valik"></select>
         </div>
-
-        <div class="section-title">Sisekaabelduse omadused <span class="standard-ref">(K<sub>S3</sub> – Tabel B.10)</span></div>
         <div class="field">
-          <label>K<sub>S3</sub> elektrisüsteemis:</label>
-          <select id="KS3P_valik"></select>
+          <label>Põranda / pinnase tüüp <span class="standard-ref">(r<sub>t</sub>, tabel B.2)</span>:</label>
+          <select id="rt_valik"></select>
         </div>
         <div class="field">
-          <label>K<sub>S3</sub> sidesüsteemis:</label>
-          <select id="KS3T_valik"></select>
+          <label>Puute- ja sammupinge kaitse <span class="standard-ref">(P<sub>am</sub>, tabel B.1)</span>:</label>
+          <select id="Pam_valik"></select>
         </div>
 
-        <div class="section-title">Äikesetormi hoiatussüsteem (TWS) <span class="standard-ref">(jaotis B.1)</span></div>
+        <div class="section-title">Keskkond</div>
         <div class="field">
-          <label>P<sub>TWS</sub> – tõenäosus, et TWS ei tuvasta sündmust:</label>
-          <input type="number" id="PTWS" value="1.0" step="0.05">
+          <label>Hoone asukoha keskkond <span class="standard-ref">(C<sub>E</sub>, tabel A.4)</span>:</label>
+          <select id="CE_valik"></select>
         </div>
-        <div class="help-text">Vaikimisi 1.0 (TWS-i pole). Kui TWS rakendatud, siis tootja andmetelt.</div>
-      </div>
 
-      <!-- VAHEKAART 4: LIINID -->
-      <div class="tab-content" id="t4">
         <div class="section-title">Elektriliin</div>
         <label class="field-checkbox">
-          <input type="checkbox" id="kasuta_elektriliin" checked>
+          <input type="checkbox" id="kasuta_elektriliin" checked onchange="uuendaVahekaardid()">
           <span>Elektriliin on ehitisega ühendatud</span>
         </label>
-        <div class="help-text">Allolevad väljad kirjeldavad <b>lõiku 1</b> (ehitise poolne lõik). Kui liin koosneb mitmest erinevate omadustega lõigust (nt LV-kaabel + HV-liin trafoga), lisa ülejäänud lõigud allpool — jaotis 8.4.</div>
-        <div class="field"><label>L<sub>L</sub> – lõigu 1 pikkus (m):</label><input type="number" id="LL_P" value="1000" step="10"></div>
-        <div class="help-text">Kui pikkus pole teada: HV + LV kokku 1000 m (jaotis A.4).</div>
-        <div class="field">
-          <label>C<sub>I</sub> – paigaldustegur <span class="standard-ref">(Tabel A.2)</span>:</label>
-          <select id="CIP_valik"></select>
-        </div>
-        <div class="field">
-          <label>C<sub>T</sub> – tüübitegur <span class="standard-ref">(Tabel A.3)</span>:</label>
-          <select id="CTP_valik"></select>
-        </div>
-        <div class="field">
-          <label>U<sub>W</sub> – seadmestiku impulsstaluvuspinge (kV):</label>
-          <input type="number" id="UWP" value="2.5" step="0.1">
-        </div>
-        <div class="help-text">Tüüpiliselt 2.5 kV (toiteseadmed)</div>
-        <div class="field">
-          <label>Kaabli tüüp <span class="standard-ref">(P<sub>LD</sub> – Tabel B.11/B.12)</span>:</label>
-          <select id="kaabli_tüüp_P"></select>
-        </div>
-        <div class="field">
-          <label>Varjestus <span class="standard-ref">(C<sub>LD</sub>/C<sub>LI</sub> – Tabel B.9)</span>:</label>
-          <select id="CLD_CLI_P_valik"></select>
-        </div>
-        <div class="liinilõigud">
-          <div class="liinilõigud-pealkiri">Elektriliini lisalõigud <span class="standard-ref">(jaotis 8.4)</span></div>
-          <div id="lõigud_P_list"></div>
-          <button class="btn" type="button" onclick="lisa_lõik('P')">+ Lisa lõik</button>
-        </div>
-
-        <div class="section-title">Sideliin / andmeside</div>
-        <label class="field-checkbox">
-          <input type="checkbox" id="kasuta_sideliin" checked>
-          <span>Sideliin on ehitisega ühendatud</span>
-        </label>
-        <div class="field"><label>L<sub>L</sub> – lõigu 1 pikkus (m):</label><input type="number" id="LL_T" value="800" step="10"></div>
-        <div class="help-text">Kui pikkus pole teada: 1000 m (jaotis A.4).</div>
-        <div class="field">
-          <label>C<sub>I</sub> – paigaldustegur:</label>
-          <select id="CIT_valik"></select>
-        </div>
-        <div class="field">
-          <label>C<sub>T</sub> – tüübitegur:</label>
-          <select id="CTT_valik"></select>
-        </div>
-        <div class="field">
-          <label>U<sub>W</sub> – sideseadme impulsstaluvuspinge (kV):</label>
-          <input type="number" id="UWT" value="1.5" step="0.1">
-        </div>
-        <div class="help-text">Tüüpiliselt 1.5 kV (signaaliseadmed)</div>
-        <div class="field">
-          <label>Kaabli tüüp:</label>
-          <select id="kaabli_tüüp_T"></select>
-        </div>
-        <div class="field">
-          <label>Varjestus:</label>
-          <select id="CLD_CLI_T_valik"></select>
-        </div>
-        <div class="liinilõigud">
-          <div class="liinilõigud-pealkiri">Sideliini lisalõigud <span class="standard-ref">(jaotis 8.4)</span></div>
-          <div id="lõigud_T_list"></div>
-          <button class="btn" type="button" onclick="lisa_lõik('T')">+ Lisa lõik</button>
-        </div>
-
-        <div class="section-title">Naaberehitis (NDJ)</div>
-        <label class="field-checkbox">
-          <input type="checkbox" id="kasuta_naaber">
-          <span>Liin ühendab kahte hoonet (arvuta NDJ - välk teise hoonesse)</span>
-        </label>
-        <div class="flex-row">
-          <div class="field"><label>L<sub>J</sub> (m):</label><input type="number" id="L_J" value="0" step="0.5"></div>
-          <div class="field"><label>W<sub>J</sub> (m):</label><input type="number" id="W_J" value="0" step="0.5"></div>
-          <div class="field"><label>H<sub>J</sub> (m):</label><input type="number" id="H_J" value="0" step="0.5"></div>
-        </div>
-        <div class="field">
-          <label>C<sub>DJ</sub> – naaberehitise paiknemine:</label>
-          <select id="CDJ_valik"></select>
-        </div>
-      </div>
-
-      <!-- VAHEKAART 5: KAHJUD -->
-      <div class="tab-content" id="t5">
-        <div class="section-title">Kahju väärtused L<sub>X</sub> <span class="standard-ref">(Lisa C, Tabel C.2)</span></div>
-        <div class="info-box">
-          Kahju väärtused valitakse vahemikest standardi Tabel C.2 järgi. Vaikevalik tehakse automaatselt vastavalt vahekaardil "Ehitis" valitud kategooriale.
-          Saad valida vahemikust täpsema väärtuse oma ehitisele.
-        </div>
-
-        <div class="section-title">Inimeste vigastustega seonduvad kahjud (L1)</div>
-
-        <div class="field">
-          <label>L<sub>T</sub> – puute/sammupinge vigastuste suhe:</label>
-          <select id="LT_in"></select>
-        </div>
-        <div class="help-text">Tabel C.2: standardväärtus 10⁻² kõikide ehitiste jaoks.</div>
-
-        <div class="field">
-          <label>L<sub>D</sub> – välgu otselöögist vigastuste suhe (avatud alal):</label>
-          <select id="LD_in"></select>
-        </div>
-        <div class="help-text">Tabel C.2: standardväärtus 10⁻¹ kõikide ehitiste jaoks.</div>
-
-        <div class="field">
-          <label>L<sub>F1</sub> – tulekahjust inimeste vigastuse suhe:</label>
-          <select id="LF1_in"></select>
-        </div>
-        <div id="LF1_abi" class="help-text">Vahemik sõltub ehitise kategooriast (Tabel C.2)</div>
-
-        <div id="LO1_block">
+        <div id="elektriliin_block">
           <div class="field">
-            <label>L<sub>O1</sub> – sisesüsteemi rikkest inimeste vigastuse suhe:</label>
-            <select id="LO1_in"></select>
+            <label>L<sub>L</sub> – pikkus (m):</label>
+            <div class="teadmata-rida">
+              <input type="number" id="LL_P" value="1000" step="10">
+              <label><input type="checkbox" id="LL_P_teadmata" onchange="lulita_LL_teadmata('P')"> teadmata</label>
+            </div>
           </div>
-          <div id="LO1_abi" class="help-text">Rakendub plahvatusoht/haigla puhul</div>
-        </div>
-
-        <div class="section-title">Ehitise füüsikaliste vigastustega seonduvad kahjud (L2)</div>
-
-        <div class="field">
-          <label>L<sub>F2</sub> – tulekahjust füüsikaliste vigastuste suhe:</label>
-          <select id="LF2_in"></select>
-        </div>
-        <div id="LF2_abi" class="help-text">Vahemik sõltub ehitise kategooriast (Tabel C.2)</div>
-
-        <div id="LO2_block">
           <div class="field">
-            <label>L<sub>O2</sub> – sisesüsteemi rikkest füüsikaliste vigastuste suhe:</label>
-            <select id="LO2_in"></select>
+            <label>Paigaldus <span class="standard-ref">(C<sub>I</sub>, tabel A.2)</span>:</label>
+            <select id="CIP_valik"></select>
           </div>
-          <div id="LO2_abi" class="help-text">Rakendub plahvatusohu korral</div>
+          <div class="field">
+            <label>Liini tüüp <span class="standard-ref">(C<sub>T</sub>, tabel A.3)</span>:</label>
+            <select id="CTP_valik"></select>
+          </div>
+          <div class="field">
+            <label>Varjestus, maandus <span class="standard-ref">(C<sub>LD</sub>/C<sub>LI</sub>, tabel B.9)</span>:</label>
+            <select id="CLD_CLI_P_valik" onchange="uuendaVahekaardid()"></select>
+          </div>
         </div>
-      </div>
 
-      <!-- VAHEKAART 6: KAITSE -->
-      <div class="tab-content" id="t6">
+        <div class="section-title">Sideliin</div>
+        <label class="field-checkbox">
+          <input type="checkbox" id="kasuta_sideliin" checked onchange="uuendaVahekaardid()">
+          <span>Vasest sideliin on ehitisega ühendatud (fiiberoptiline liin → jäta märkimata)</span>
+        </label>
+        <div id="sideliin_block">
+          <div class="field">
+            <label>L<sub>L</sub> – pikkus (m):</label>
+            <div class="teadmata-rida">
+              <input type="number" id="LL_T" value="800" step="10">
+              <label><input type="checkbox" id="LL_T_teadmata" onchange="lulita_LL_teadmata('T')"> teadmata</label>
+            </div>
+          </div>
+          <div class="field">
+            <label>Paigaldus <span class="standard-ref">(C<sub>I</sub>, tabel A.2)</span>:</label>
+            <select id="CIT_valik"></select>
+          </div>
+          <div class="field">
+            <label>Liini tüüp <span class="standard-ref">(C<sub>T</sub>, tabel A.3)</span>:</label>
+            <select id="CTT_valik"></select>
+          </div>
+          <div class="field">
+            <label>Varjestus, maandus <span class="standard-ref">(C<sub>LD</sub>/C<sub>LI</sub>, tabel B.9)</span>:</label>
+            <select id="CLD_CLI_T_valik" onchange="uuendaVahekaardid()"></select>
+          </div>
+        </div>
+
         <div class="section-title">Olemasolev kaitse</div>
-        <div class="info-box">
-          Sisesta hetkel ehitises olemasolev olukord. Tööriist arvutab seejärel,
-          kas vaja on lisameetmeid ja millise klassi.
-        </div>
-
-        <div class="section-title">Piksekaitsesüsteem (LPS) <span class="standard-ref">(Tabel B.3)</span></div>
         <div class="field">
-          <label>P<sub>LPS</sub> – olemasolev LPS:</label>
+          <label>Piksekaitsesüsteem <span class="standard-ref">(P<sub>LPS</sub>, tabel B.3)</span>:</label>
           <select id="PLPS_valik"></select>
         </div>
-
-        <div class="section-title">Liigpingekaitsesüsteem (P<sub>SPD</sub>) <span class="standard-ref">(Tabelid B.7/B.8)</span></div>
         <div class="field">
-          <label>SPD elektrisüsteemil:</label>
+          <label>Liigpingekaitse, elektrisüsteem <span class="standard-ref">(P<sub>SPD</sub>, tabel B.7)</span>:</label>
           <select id="PSPD_P_valik"></select>
         </div>
         <div class="field">
-          <label>SPD sidesüsteemil:</label>
+          <label>Liigpingekaitse, sidesüsteem <span class="standard-ref">(P<sub>SPD</sub>, tabel B.7)</span>:</label>
           <select id="PSPD_T_valik"></select>
         </div>
-
-        <div class="section-title">Potentsiaaliühtlustus liini sisenemiskohas (P<sub>EB</sub>) <span class="standard-ref">(Tabel B.13)</span></div>
         <div class="field">
-          <label>P<sub>EB</sub> elektriliinil:</label>
+          <label>Potentsiaaliühtlustus, elektriliin <span class="standard-ref">(P<sub>EB</sub>, tabel B.13)</span>:</label>
           <select id="PEB_P_valik"></select>
         </div>
         <div class="field">
-          <label>P<sub>EB</sub> sideliinil:</label>
+          <label>Potentsiaaliühtlustus, sideliin <span class="standard-ref">(P<sub>EB</sub>, tabel B.13)</span>:</label>
           <select id="PEB_T_valik"></select>
+        </div>
+
+        <div class="section-title">Erijuhud</div>
+        <div class="help-text" style="margin-bottom:6px;">Tavahoone puhul jäta kõik märkimata. Märkimine aktiveerib vastava täpsema vahekaardi.</div>
+        <label class="field-checkbox">
+          <input type="checkbox" id="kasuta_RC1" onchange="uuendaVahekaardid()">
+          <span><b>Plahvatusoht või haigla</b> — sisesüsteemide rike ohustab inimelu (R<sub>C1</sub>, R<sub>M1</sub>, R<sub>W1</sub>, R<sub>Z1</sub>) → <i>Sisesüsteemid</i></span>
+        </label>
+        <label class="field-checkbox">
+          <input type="checkbox" id="kasuta_RC2" onchange="uuendaVahekaardid()">
+          <span><b>Plahvatusohtlik ehitis</b> — sisesüsteemide rike võib põhjustada plahvatuse (R<sub>C2</sub>, R<sub>M2</sub>, R<sub>W2</sub>, R<sub>Z2</sub>) → <i>Sisesüsteemid</i></span>
+        </label>
+        <label class="field-checkbox">
+          <input type="checkbox" id="kasuta_RAD" onchange="uuendaVahekaardid()">
+          <span><b>Avatud alad</b> — katusel või hoone juures on ala, kus viibivad inimesed (R<sub>AD</sub>) → <i>Avatud alad</i></span>
+        </label>
+        <label class="field-checkbox">
+          <input type="checkbox" id="kasuta_lõigud" onchange="uuendaVahekaardid()">
+          <span><b>Liin koosneb mitmest lõigust</b> — nt MP-kaabel + KP-liin trafoga (jaotis 8.4) → <i>Liinid (täpsem)</i></span>
+        </label>
+        <label class="field-checkbox">
+          <input type="checkbox" id="kasuta_naaber" onchange="uuendaVahekaardid()">
+          <span><b>Liin ühendab naaberhoonega</b> (N<sub>DJ</sub>) → <i>Liinid (täpsem)</i></span>
+        </label>
+        <label class="field-checkbox">
+          <input type="checkbox" id="kasuta_TWS" onchange="uuendaVahekaardid()">
+          <span><b>Äikesehoiatussüsteem (TWS)</b></span>
+        </label>
+        <div id="TWS_block" class="field" style="display:none;">
+          <label>P<sub>TWS</sub> – tõenäosus, et TWS ei tuvasta sündmust (tootja andmed):</label>
+          <input type="number" id="PTWS" value="1.0" step="0.01">
+        </div>
+        <label class="field-checkbox">
+          <input type="checkbox" id="kasuta_tsoonid" onchange="lulita_tsoonid_režiim(); uuendaVahekaardid()">
+          <span><b>Hoone jaotatakse tsoonideks</b> — eri tuleoht, kohalolek või kahjud (näide F.3) → <i>Tsoonid</i></span>
+        </label>
+      </div>
+
+      <!-- ===================== LIINID (TÄPSEM) ===================== -->
+      <div class="tab-content" id="t_liinid">
+        <div class="tab-staatus"></div>
+
+        <div class="section-title">Seadmete impulsstaluvuspinge ja kaabli varje</div>
+        <div class="help-text">Mõjutavad P<sub>LD</sub> (varjestatud kaabel), A<sub>M</sub> ja A<sub>I</sub> (sisesüsteemide rike).</div>
+        <div class="field">
+          <label>U<sub>W</sub> – elektrisüsteemi seadmed (kV):</label>
+          <input type="number" id="UWP" value="2.5" step="0.1">
+        </div>
+        <div class="field">
+          <label>Elektriliini kaabli varje <span class="standard-ref">(P<sub>LD</sub>, tabelid B.11/B.12)</span>:</label>
+          <select id="kaabli_tüüp_P"></select>
+        </div>
+        <div class="field">
+          <label>U<sub>W</sub> – sidesüsteemi seadmed (kV):</label>
+          <input type="number" id="UWT" value="1.5" step="0.1">
+        </div>
+        <div class="field">
+          <label>Sideliini kaabli varje <span class="standard-ref">(P<sub>LD</sub>, tabelid B.11/B.12)</span>:</label>
+          <select id="kaabli_tüüp_T"></select>
+        </div>
+
+        <div id="lõigud_block">
+          <div class="section-title">Liinilõigud <span class="standard-ref">(jaotis 8.4)</span></div>
+          <div class="help-text">Põhiandmete liiniväljad on <b>lõik 1</b> (ehitise poolne). Lisa siia ülejäänud lõigud; R<sub>U</sub>, R<sub>V</sub>, R<sub>W</sub>, R<sub>Z</sub> summeeritakse lõikude kaupa (jaotis 8.2).</div>
+          <div class="liinilõigud">
+            <div class="liinilõigud-pealkiri">Elektriliini lisalõigud</div>
+            <div id="lõigud_P_list"></div>
+            <button class="btn" type="button" onclick="lisa_lõik('P')">+ Lisa lõik</button>
+          </div>
+          <div class="liinilõigud">
+            <div class="liinilõigud-pealkiri">Sideliini lisalõigud</div>
+            <div id="lõigud_T_list"></div>
+            <button class="btn" type="button" onclick="lisa_lõik('T')">+ Lisa lõik</button>
+          </div>
+        </div>
+
+        <div id="naaber_block">
+          <div class="section-title">Naaberehitis <span class="standard-ref">(N<sub>DJ</sub>, jaotis A.2.5)</span></div>
+          <div class="flex-row">
+            <div class="field"><label>L<sub>J</sub> (m):</label><input type="number" id="L_J" value="0" step="0.5"></div>
+            <div class="field"><label>W<sub>J</sub> (m):</label><input type="number" id="W_J" value="0" step="0.5"></div>
+            <div class="field"><label>H<sub>J</sub> (m):</label><input type="number" id="H_J" value="0" step="0.5"></div>
+          </div>
+          <div class="field">
+            <label>Naaberehitise paiknemine <span class="standard-ref">(C<sub>DJ</sub>, tabel A.1)</span>:</label>
+            <select id="CDJ_valik"></select>
+          </div>
         </div>
       </div>
 
-      <!-- VAHEKAART 7: TSOONID -->
-      <div class="tab-content" id="t7">
-        <div class="section-title">Mitme tsooni režiim</div>
+      <!-- ===================== SISESÜSTEEMID ===================== -->
+      <div class="tab-content" id="t_sise">
+        <div class="tab-staatus"></div>
+        <div class="section-title">Sisesüsteemide rikkest tulenevad kahjud <span class="standard-ref">(tabel C.2)</span></div>
+        <div id="LO1_block">
+          <div class="field">
+            <label>L<sub>O1</sub> – sisesüsteemi rike, inimesed (L1):</label>
+            <select id="LO1_in"></select>
+          </div>
+          <div id="LO1_abi" class="help-text"></div>
+        </div>
+        <div id="LO2_block">
+          <div class="field">
+            <label>L<sub>O2</sub> – sisesüsteemi rike, ehitis (L2):</label>
+            <select id="LO2_in"></select>
+          </div>
+          <div id="LO2_abi" class="help-text"></div>
+        </div>
+        <div class="field">
+          <label>t<sub>e</sub> – seadmestiku tööaeg (h/a) → P<sub>e</sub> = t<sub>e</sub>/8760 <span class="standard-ref">(valem B.15)</span>:</label>
+          <input type="number" id="te" value="8760" step="1">
+        </div>
+
+        <div class="section-title">Varjestus ja sisekaabeldus <span class="standard-ref">(jaotis B.6)</span></div>
+        <div class="field"><label>K<sub>S1</sub> – ehitise varjestus (valem B.8):</label><input type="number" id="KS1" value="1.0" step="0.01"></div>
+        <div class="field"><label>K<sub>S2</sub> – tsooni sisemine varjestus (valem B.9):</label><input type="number" id="KS2" value="1.0" step="0.01"></div>
+        <div class="help-text">Tavahoonel K<sub>S1</sub> = K<sub>S2</sub> = 1 (varjestus puudub; näited F.2–F.3).</div>
+        <div class="field">
+          <label>Sisekaabeldus, elektrisüsteem <span class="standard-ref">(K<sub>S3</sub>, tabel B.10)</span>:</label>
+          <select id="KS3P_valik"></select>
+        </div>
+        <div class="field">
+          <label>Sisekaabeldus, sidesüsteem <span class="standard-ref">(K<sub>S3</sub>, tabel B.10)</span>:</label>
+          <select id="KS3T_valik"></select>
+        </div>
+      </div>
+
+      <!-- ===================== AVATUD ALAD ===================== -->
+      <div class="tab-content" id="t_avatud">
+        <div class="tab-staatus"></div>
+        <div class="section-title">Välgu otselöök avatud alal viibivatele inimestele (R<sub>AD</sub>)</div>
+        <div class="field">
+          <label>P<sub>O</sub> – inimesed on avatud alal kaitsmata (0…1):</label>
+          <input type="number" id="PO" value="1" step="0.1">
+        </div>
+        <div class="help-text">1 = inimesed viibivad kaitsmata avatud alal (nt katus, näide F.3 Z2).</div>
+        <div class="field">
+          <label>L<sub>D</sub> – otselöögi kahju <span class="standard-ref">(tabel C.2)</span>:</label>
+          <select id="LD_in"></select>
+        </div>
+      </div>
+
+      <!-- ===================== TSOONID ===================== -->
+      <div class="tab-content" id="t_tsoonid">
+        <div class="tab-staatus"></div>
         <div class="info-box">
-          Vaikimisi käsitleme ehitist <b>ühe tsoonina</b> — kasutatakse vahekaartide
-          „Ehitis”, „Keskkond”, „Kahjud” väärtusi. Sobib tüüpiliste eluhoonete jaoks (näide F.2).
-          <br><br>
-          Mitme tsooni režiim on vajalik, kui ehitise eri osadel on
-          <b>erinev tuleoht, kohaloleku aeg või kahjud</b> — näiteks büroohoones
-          arhiiv (kõrge tuleoht) vs kontorid (madal tuleoht). Standardi näide F.3.
-          <br><br>
-          Kogu ehitisele ühised on mõõtmed, NSG, liinid (koos lisalõikudega) ja LPS.
+          Ehitis jaotatakse tsoonideks, kui eri osadel on <b>erinev tuleoht, kohaloleku
+          aeg või kahjud</b> — nt büroohoones arhiiv (kõrge tuleoht) ja kontorid.
+          Kogu ehitisele ühised on mõõtmed, N<sub>SG</sub>, liinid ja olemasolev kaitse.
+          Standardi näide F.3.
         </div>
-
-        <div class="field-checkbox">
-          <input type="checkbox" id="kasuta_tsoonid" onchange="lulita_tsoonid_režiim()">
-          <label for="kasuta_tsoonid">Aktiveeri mitme tsooni režiim</label>
-        </div>
-
         <div id="tsoonid_block" style="display:none;">
           <div class="btn-row" style="margin: 12px 0;">
             <button class="btn" onclick="lisa_tsoon()">+ Lisa tsoon</button>
@@ -1030,6 +1016,45 @@ const KAABLI_TÜÜP_VALIKUD = {
   'Varjestatud, RS 5-20 Ω/km, varje ühendatud': 'rs_5_20',
   'Varjestatud, RS 1-5 Ω/km, varje ühendatud': 'rs_1_5',
   'Varjestatud, RS ≤1 Ω/km, varje ühendatud': 'rs_alla_1',
+};
+
+// Valiku sümbol kuvamiseks rippmenüüs („tähendus — sümbol = väärtus”)
+const VALIKU_SÜMBOL = {
+  CD_valik: 'CD', CDJ_valik: 'CDJ', PS_valik: 'PS', CE_valik: 'CE',
+  rt_valik: 'rt', Pam_valik: 'Pam', rf_valik: 'rf', rp_valik: 'rp',
+  KS3P_valik: 'KS3', KS3T_valik: 'KS3',
+  CIP_valik: 'CI', CIT_valik: 'CI', CTP_valik: 'CT', CTT_valik: 'CT',
+  CLD_CLI_P_valik: 'CLD / CLI', CLD_CLI_T_valik: 'CLD / CLI',
+  PLPS_valik: 'PLPS', PSPD_P_valik: 'PSPD', PSPD_T_valik: 'PSPD',
+  PEB_P_valik: 'PEB', PEB_T_valik: 'PEB',
+};
+
+/**
+ * „Teadmata” valikud: rippmenüü id → valik, mida kasutatakse, kui andmed
+ * puuduvad (ebasoodsaim ehk suurimat riski andev väärtus). Ainult andmetele,
+ * mis tulevad kolmandalt osapoolelt või ei pruugi olemasoleva hoone puhul
+ * teada olla. Vt docs/DECISIONS.md §12.
+ */
+const TEADMATA = '__teadmata__';
+const TEADMATA_VALIK = {
+  PS_valik: 'Puit ja müüritis',
+  Pam_valik: 'Kaitsemeetmeid pole',
+  CIP_valik: 'Õhus (õhuliin)', CIT_valik: 'Õhus (õhuliin)',
+  CTP_valik: 'LV-elektriliin, side- või andmesideliin',
+  CTT_valik: 'LV-elektriliin, side- või andmesideliin',
+  CLD_CLI_P_valik: 'Varjestamata õhuliin', CLD_CLI_T_valik: 'Varjestamata õhuliin',
+  PLPS_valik: 'LPS puudub (kaitsmata)',
+  PSPD_P_valik: 'SPD-d puuduvad', PSPD_T_valik: 'SPD-d puuduvad',
+  PEB_P_valik: 'SPD-d puuduvad', PEB_T_valik: 'SPD-d puuduvad',
+};
+/** Liini pikkus, kui see pole teada (jaotis A.4). */
+const TEADMATA_LL = 1000;
+/** Mis liini alla väli kuulub (eelduste loendi jaoks). */
+const VÄLJA_LIIN = {
+  CIP_valik: 'elektriliin', CTP_valik: 'elektriliin', CLD_CLI_P_valik: 'elektriliin',
+  PSPD_P_valik: 'elektriliin', PEB_P_valik: 'elektriliin',
+  CIT_valik: 'sideliin', CTT_valik: 'sideliin', CLD_CLI_T_valik: 'sideliin',
+  PSPD_T_valik: 'sideliin', PEB_T_valik: 'sideliin',
 };
 
 // Ehitise kategooriad (Tabel C.2)
@@ -1385,21 +1410,73 @@ function arvutaRiskid(p) {
  * @param {string} vaikimisi - võti, mis valitakse vaikimisi
  * @param {boolean} [naitaArve=false] - kui true, lisatakse "(= väärtus)" iga rea järele
  */
-function täidaSelect(id, valikud, vaikimisi, naitaArve = false) {
+function täidaSelect(id, valikud, vaikimisi) {
   const el = document.getElementById(id);
   if (!el) return;
+  const sümbol = VALIKU_SÜMBOL[id];
   el.innerHTML = '';
   for (const k of Object.keys(valikud)) {
     const o = document.createElement('option');
     o.value = k;
-    if (naitaArve && typeof valikud[k] === 'number') {
-      o.textContent = `${k}  (= ${valikud[k]})`;
-    } else {
-      o.textContent = k;
-    }
+    o.textContent = sümbol ? `${k} — ${sümbol} = ${fmtTegur(valikud[k])}` : k;
     if (k === vaikimisi) o.selected = true;
     el.appendChild(o);
   }
+  const halvim = TEADMATA_VALIK[id];
+  if (halvim !== undefined) {
+    const o = document.createElement('option');
+    o.value = TEADMATA;
+    o.textContent = `Teadmata → ebasoodsaim: ${halvim}${sümbol ? ` (${sümbol} = ${fmtTegur(valikud[halvim])})` : ''}`;
+    el.appendChild(o);
+  }
+}
+
+/**
+ * Näitab rippmenüü all valitud väärtust tervikuna (nt „CT = 1”) — kitsas
+ * rippmenüüs lõigatakse pikk tekst ära. Loob märgise esimesel korral.
+ */
+function uuendaValikuMärk(id) {
+  const el = document.getElementById(id);
+  const sümbol = VALIKU_SÜMBOL[id];
+  if (!el || !sümbol) return;
+  const field = el.closest('.field');
+  if (!field) return;
+  let märk = field.nextElementSibling;
+  if (!märk || !märk.classList.contains('valitud-väärtus')) {
+    märk = document.createElement('div');
+    märk.className = 'valitud-väärtus';
+    field.after(märk);
+    el.addEventListener('change', () => uuendaValikuMärk(id));
+  }
+  const teadmata = el.value === TEADMATA;
+  const opt = el.options[el.selectedIndex];
+  const tekst = opt ? opt.textContent : '';
+  märk.classList.toggle('teadmata', teadmata);
+  märk.textContent = teadmata ? tekst : (tekst.split(' — ').pop() || '');
+  el.title = tekst;
+}
+
+/** Uuendab kõigi sümboliga rippmenüüde väärtusmärgised. */
+function uuendaKõikMärgid() {
+  for (const id of Object.keys(VALIKU_SÜMBOL)) uuendaValikuMärk(id);
+}
+
+/** Ülaindeksid astendajate kuvamiseks. */
+const ÜLAINDEKS = { '-': '⁻', '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴', '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹' };
+
+/**
+ * Teguri kuvamine eesti vormingus: 0,5 / 0,01 / 10⁻⁴ / 5 × 10⁻⁵.
+ * Massiivi (nt [CLD, CLI]) puhul „1 / 0,3”.
+ */
+function fmtTegur(v) {
+  if (Array.isArray(v)) return v.map(fmtTegur).join(' / ');
+  if (typeof v !== 'number') return String(v);
+  if (v === 0) return '0';
+  if (v >= 0.001) return String(+v.toPrecision(3)).replace('.', ',');
+  const e = Math.floor(Math.log10(v) + 1e-9);
+  const m = +(v / Math.pow(10, e)).toPrecision(2);
+  const aste = '10' + String(e).split('').map(c => ÜLAINDEKS[c]).join('');
+  return m === 1 ? aste : `${String(m).replace('.', ',')} × ${aste}`;
 }
 
 /** Näitab kasutajale CD valitud variandi juures selgituse (nt millise objekti vahetus läheduses). */
@@ -1416,14 +1493,91 @@ function naita_CD_selgitus() {
  * Kui RAD ei ole kasutusel, nullitakse PO väärtus, et see ei panustaks arvutusse.
  */
 function lulita_RAD() {
-  const cb = document.getElementById('kasuta_RAD');
-  const po = document.getElementById('PO');
-  if (!cb || !po) return;
+  uuendaVahekaardid();
+}
+
+/**
+ * Lihtsamast täpsemani: määrab, millised täpsemad vahekaardid on aktiivsed.
+ * Vahekaart on aktiivne, kui mõni põhiandmete valik seda eeldab; muidu on see
+ * hall ja lukus. Ekspertrežiimis saab avada kõiki vahekaarte, kuid arvutuses
+ * arvestatakse ainult aktiivsete vahekaartide sisu (välja arvatud väljad, mis
+ * on alati arvutuses vaikeväärtusega — U_W, K_S, t_e).
+ * Lisaks näitab/peidab põhiandmete tingimuslikke plokke.
+ */
+function uuendaVahekaardid() {
+  const b = id => getBool(id);
+  const ekspert = b('ekspertrežiim');
+  const sise = b('kasuta_RC1') || b('kasuta_RC2');
+  const varjeÜhendatud = (b('kasuta_elektriliin') && /varje ühendatud|ühendatud potentsiaaliühtlustusega/.test(getSel('CLD_CLI_P_valik')))
+    || (b('kasuta_sideliin') && /varje ühendatud|ühendatud potentsiaaliühtlustusega/.test(getSel('CLD_CLI_T_valik')));
+
+  const põhjused = {
+    t_liinid: [
+      b('kasuta_lõigud') && 'liin koosneb mitmest lõigust',
+      b('kasuta_naaber') && 'liin ühendab naaberhoonega',
+      varjeÜhendatud && 'varjestatud kaabel, varje ühendatud',
+      sise && 'plahvatusoht või haigla (U_W)',
+    ].filter(Boolean),
+    t_sise: [
+      b('kasuta_RC1') && 'plahvatusoht või haigla',
+      b('kasuta_RC2') && 'plahvatusohtlik ehitis',
+    ].filter(Boolean),
+    t_avatud: [b('kasuta_RAD') && 'hoonel on avatud alad'].filter(Boolean),
+    t_tsoonid: [b('kasuta_tsoonid') && 'hoone jaotatakse tsoonideks'].filter(Boolean),
+  };
+
+  document.querySelectorAll('.tab[data-tab]').forEach(tab => {
+    const id = tab.dataset.tab;
+    if (!(id in põhjused)) return;
+    const on = põhjused[id].length > 0;
+    tab.classList.toggle('disabled', !on && !ekspert);
+    tab.classList.toggle('ekspert-avatud', !on && ekspert);
+    tab.title = on ? 'Aktiivne: ' + põhjused[id].join(', ') : (tab.dataset.noue || '');
+    const sisu = document.getElementById(id);
+    const staatus = sisu && sisu.querySelector('.tab-staatus');
+    if (staatus) {
+      staatus.className = 'tab-staatus ' + (on ? 'aktiivne' : 'mitteaktiivne');
+      staatus.textContent = on
+        ? '✓ Arvestatakse arvutuses: ' + põhjused[id].join(', ')
+        : '⊘ Ei ole praegu arvutuses. ' + (tab.dataset.noue || '') + ' (Põhiandmed → Erijuhud).';
+    }
+    // Aktiivne vahekaart muutus lukustatuks → tagasi põhiandmetesse
+    if (tab.classList.contains('active') && tab.classList.contains('disabled')) {
+      document.querySelector('.tab[data-tab="t_pohi"]').click();
+    }
+  });
+
+  const näita = (id, nähtav) => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = nähtav ? '' : 'none';
+  };
+  näita('elektriliin_block', b('kasuta_elektriliin'));
+  näita('sideliin_block', b('kasuta_sideliin'));
+  näita('TWS_block', b('kasuta_TWS'));
+  näita('lõigud_block', b('kasuta_lõigud') || ekspert);
+  näita('naaber_block', b('kasuta_naaber') || ekspert);
+  näita('tsoon_märkus', b('kasuta_tsoonid'));
+  uuendaKõikMärgid();
+
+  lulita_LO();
+}
+
+/**
+ * „Teadmata” liinipikkus: lukustab välja väärtusega 1000 m (jaotis A.4) ja
+ * taastab eelmise väärtuse, kui märge eemaldatakse.
+ * @param {'P'|'T'} liin
+ */
+function lulita_LL_teadmata(liin) {
+  const inp = document.getElementById('LL_' + liin);
+  const cb = document.getElementById('LL_' + liin + '_teadmata');
+  if (!inp || !cb) return;
   if (cb.checked) {
-    po.disabled = false;
+    if (!inp.disabled) inp.dataset.eelmine = inp.value;
+    inp.value = String(TEADMATA_LL);
+    inp.disabled = true;
   } else {
-    po.disabled = true;
-    po.value = '0';
+    inp.disabled = false;
+    if (inp.dataset.eelmine) inp.value = inp.dataset.eelmine;
   }
 }
 
@@ -1469,13 +1623,13 @@ function lulita_LO() {
   const lo2abi = document.getElementById('LO2_abi');
   if (lo1abi) {
     lo1abi.textContent = (useRC1 && useRC1.checked)
-      ? '✓ Aktiveeritud (vahekaardil "Ehitis" valitud plahvatusoht/haigla)'
-      : '⊘ Mitteaktiivne – aktiveerub vahekaardil "Ehitis" valikuga "Plahvatusoht või haigla"';
+      ? '✓ Arvestatakse (Põhiandmed → Erijuhud: plahvatusoht või haigla)'
+      : '⊘ Ei arvestata – aktiveerub valikuga Põhiandmed → Erijuhud → „Plahvatusoht või haigla”';
   }
   if (lo2abi) {
     lo2abi.textContent = (useRC2 && useRC2.checked)
-      ? '✓ Aktiveeritud (vahekaardil "Ehitis" valitud plahvatusohtlik ehitis)'
-      : '⊘ Mitteaktiivne – aktiveerub vahekaardil "Ehitis" valikuga "Plahvatusohtlik ehitis"';
+      ? '✓ Arvestatakse (Põhiandmed → Erijuhud: plahvatusohtlik ehitis)'
+      : '⊘ Ei arvestata – aktiveerub valikuga Põhiandmed → Erijuhud → „Plahvatusohtlik ehitis”';
   }
 }
 
@@ -1576,6 +1730,8 @@ function laeVaikevaartused() {
 
   // Üldine
   document.getElementById('projekt_nimi').value = 'Näide F.2 - Maja';
+  document.getElementById('too_nr').value = '';
+  document.getElementById('kasutusviis').value = '';
   document.getElementById('asukoht').value = 'Eestis';
   document.getElementById('koostaja').value = '';
   const kp = new Date();
@@ -1610,6 +1766,13 @@ function laeVaikevaartused() {
   LISALÕIGUD = { P: [], T: [] };
   renderLõigud('P');
   renderLõigud('T');
+  for (const id of ['kasuta_lõigud', 'kasuta_TWS', 'LL_P_teadmata', 'LL_T_teadmata', 'kasuta_tsoonid']) {
+    document.getElementById(id).checked = false;
+  }
+  document.getElementById('LL_P').disabled = false;
+  document.getElementById('LL_T').disabled = false;
+  document.getElementById('PO').value = '1';
+  document.getElementById('PTWS').value = '1.0';
   document.getElementById('kasuta_naaber').checked = false;
   document.getElementById('L_J').value = '0';
   document.getElementById('W_J').value = '0';
@@ -1619,6 +1782,8 @@ function laeVaikevaartused() {
 
   // Kahjud täidetakse automaatselt kategooria kaudu (uuenda_kahju_valikud)
 
+  lulita_tsoonid_režiim();
+  uuendaVahekaardid();
   document.getElementById('status').textContent = 'Vaikeväärtused laaditud (näide F.2 - Maja)';
 }
 
@@ -1665,9 +1830,9 @@ function uuenda_lõik(el) {
 }
 
 /** Koostab `<option>`-id valikute objektist, märkides valitud võtme. */
-function valikudHTML(valikud, valitud) {
+function valikudHTML(valikud, valitud, sümbol) {
   return Object.keys(valikud).map(k =>
-    `<option value="${k}"${k === valitud ? ' selected' : ''}>${k}</option>`).join('');
+    `<option value="${k}"${k === valitud ? ' selected' : ''}>${k}${sümbol ? ` — ${sümbol} = ${fmtTegur(valikud[k])}` : ''}</option>`).join('');
 }
 
 /** Renderdab liini lisalõikude kaardid. */
@@ -1687,11 +1852,11 @@ function renderLõigud(liin) {
       <div class="field"><label>L<sub>L</sub> – pikkus (m):</label>
         <input type="number" step="10" value="${lg.LL}" ${d} data-key="LL" oninput="uuenda_lõik(this)"></div>
       <div class="field"><label>C<sub>I</sub> – paigaldustegur:</label>
-        <select ${d} data-key="CI" onchange="uuenda_lõik(this)">${valikudHTML(CI_VALIKUD, lg.CI)}</select></div>
+        <select ${d} data-key="CI" onchange="uuenda_lõik(this)">${valikudHTML(CI_VALIKUD, lg.CI, 'CI')}</select></div>
       <div class="field"><label>C<sub>T</sub> – tüübitegur:</label>
-        <select ${d} data-key="CT" onchange="uuenda_lõik(this)">${valikudHTML(CT_VALIKUD, lg.CT)}</select></div>
+        <select ${d} data-key="CT" onchange="uuenda_lõik(this)">${valikudHTML(CT_VALIKUD, lg.CT, 'CT')}</select></div>
       <div class="field"><label>C<sub>E</sub> – keskkonnategur:</label>
-        <select ${d} data-key="CE" onchange="uuenda_lõik(this)">${valikudHTML(CE_VALIKUD, lg.CE)}</select></div>
+        <select ${d} data-key="CE" onchange="uuenda_lõik(this)">${valikudHTML(CE_VALIKUD, lg.CE, 'CE')}<option value="${TEADMATA}"${lg.CE === TEADMATA ? ' selected' : ''}>Teadmata → ebasoodsaim: Maakeskkond (CE = 1)</option></select></div>
       <div class="field"><label>Kaabli tüüp (P<sub>LD</sub>):</label>
         <select ${d} data-key="kaabel" onchange="uuenda_lõik(this)">${valikudHTML(KAABLI_TÜÜP_VALIKUD, lg.kaabel)}</select></div>
     `;
@@ -1704,13 +1869,23 @@ function renderLõigud(liin) {
  * { LL, CI, CT, CE, kaabli_tüüp } — vt `koostaLiiniLõigud`.
  */
 function lõigudArvudeks(liin) {
-  return LISALÕIGUD[liin].map(lg => ({
-    LL: lg.LL,
-    CI: CI_VALIKUD[lg.CI] ?? 1.0,
-    CT: CT_VALIKUD[lg.CT] ?? 1.0,
-    CE: CE_VALIKUD[lg.CE] ?? 1.0,
-    kaabli_tüüp: KAABLI_TÜÜP_VALIKUD[lg.kaabel] ?? 'kaitsmata',
-  }));
+  return LISALÕIGUD[liin].map((lg, i) => {
+    let CE = CE_VALIKUD[lg.CE] ?? 1.0;
+    if (lg.CE === TEADMATA) {
+      CE = 1.0;
+      EELDUSED.push({
+        id: 'lõik_CE', sümbol: 'CE', valik: 'Maakeskkond', väärtus: '1',
+        silt: `Keskkond, ${liin === 'P' ? 'elektriliini' : 'sideliini'} lõik ${i + 2}`,
+      });
+    }
+    return {
+      LL: lg.LL,
+      CI: CI_VALIKUD[lg.CI] ?? 1.0,
+      CT: CT_VALIKUD[lg.CT] ?? 1.0,
+      CE,
+      kaabli_tüüp: KAABLI_TÜÜP_VALIKUD[lg.kaabel] ?? 'kaitsmata',
+    };
+  });
 }
 
 // =============================================================================
@@ -1871,6 +2046,13 @@ function laeF3Näide() {
   LISALÕIGUD.T = [];
   renderLõigud('P');
   renderLõigud('T');
+  document.getElementById('kasuta_lõigud').checked = true;
+  document.getElementById('LL_P_teadmata').checked = false;
+  // Avatud ala (Z2 katus) ja erijuhud on F.3-s tsoonipõhised
+  for (const id of ['kasuta_RAD', 'kasuta_RC1', 'kasuta_RC2', 'kasuta_TWS']) {
+    document.getElementById(id).checked = false;
+  }
+  document.getElementById('LL_P').disabled = false;
   // Väline sideliin on fiiberoptiline (tabel F.12) — ei arvestata
   document.getElementById('kasuta_sideliin').checked = false;
   document.getElementById('LL_T').value = '0';
@@ -1927,6 +2109,7 @@ function laeF3Näide() {
   lulita_tsoonid_režiim();
   renderTsoonid();
 
+  uuendaVahekaardid();
   document.getElementById('status').textContent = 'Laaditud F.3 büroohoone näide (5 tsooni)';
 }
 
@@ -2210,6 +2393,39 @@ function arvutaEhitis(shared, tsoonid) {
   return { tsoonid: tulemused, R: R_total };
 }
 
+/** Arvutuses kasutatud „teadmata” eeldused (täidab `koguSisendid`). */
+let EELDUSED = [];
+
+/** Välja silt eelduste loendi jaoks (ilma standardi viite ja kooloni­ta). */
+function väljaSilt(id) {
+  const el = document.getElementById(id);
+  const field = el && el.closest('.field');
+  const lbl = field && field.querySelector('label');
+  if (!lbl) return id;
+  return lbl.textContent.replace(/\s*\([^)]*\)\s*/g, ' ').replace(/:\s*$/, '').replace(/\s+/g, ' ').trim();
+}
+
+/**
+ * Loeb rippmenüü väärtuse. „Teadmata” korral kasutab ebasoodsaimat valikut
+ * (`TEADMATA_VALIK`) ja lisab selle eelduste loendisse `EELDUSED`.
+ */
+function valik(id, valikud, vaikimisi) {
+  let k = getSel(id);
+  if (k === TEADMATA) {
+    k = TEADMATA_VALIK[id];
+    const liin = VÄLJA_LIIN[id] ? ` (${VÄLJA_LIIN[id]})` : '';
+    EELDUSED.push({ id, silt: väljaSilt(id) + liin, sümbol: VALIKU_SÜMBOL[id] || '', valik: k, väärtus: fmtTegur(valikud[k]) });
+  }
+  return valikud[k] ?? vaikimisi;
+}
+
+/** Teadmata liinipikkus → 1000 m (jaotis A.4); lisab eelduse. */
+function teadmataLL(id) {
+  const liin = id === 'LL_P' ? 'elektriliin' : 'sideliin';
+  EELDUSED.push({ id, silt: `Pikkus (${liin})`, sümbol: 'LL', valik: 'jaotis A.4', väärtus: TEADMATA_LL + ' m' });
+  return TEADMATA_LL;
+}
+
 /**
  * Kogub kogu vormi sisendi DOM-ist ja koostab `P` objekti, mis on
  * `koguArvutus`-le sobivas kujus. Iga väli leitakse oma `id` järgi;
@@ -2224,6 +2440,7 @@ function arvutaEhitis(shared, tsoonid) {
  */
 function koguSisendid() {
   const P = {};
+  EELDUSED = [];
 
   // Üldine
   // NG sisestab kasutaja, NSG arvutatakse automaatselt
@@ -2240,8 +2457,8 @@ function koguSisendid() {
   P.L = getNum('L', 10);
   P.W = getNum('W', 10);
   P.H = getNum('H', 6);
-  P.CD = CD_VALIKUD[getSel('CD_valik')] ?? 1.0;
-  P.PS = PS_VALIKUD[getSel('PS_valik')] ?? 1.0;
+  P.CD = valik('CD_valik', CD_VALIKUD, 1.0);
+  P.PS = valik('PS_valik', PS_VALIKUD, 1.0);
   P.KS1 = getNum('KS1', 1.0);
   P.KS2 = getNum('KS2', 1.0);
 
@@ -2251,47 +2468,48 @@ function koguSisendid() {
   P.plahvatus_L2 = getBool('kasuta_RC2');
 
   // Keskkond
-  P.CE = CE_VALIKUD[getSel('CE_valik')] ?? 1.0;
-  P.rt = RT_VALIKUD[getSel('rt_valik')] ?? 1e-5;
-  P.Pam = PAM_VALIKUD[getSel('Pam_valik')] ?? 1.0;
-  P.rf = RF_VALIKUD[getSel('rf_valik')] ?? 0;
-  P.rp = RP_VALIKUD[getSel('rp_valik')] ?? 1.0;
+  P.CE = valik('CE_valik', CE_VALIKUD, 1.0);
+  P.rt = valik('rt_valik', RT_VALIKUD, 1e-5);
+  P.Pam = valik('Pam_valik', PAM_VALIKUD, 1.0);
+  P.rf = valik('rf_valik', RF_VALIKUD, 0);
+  P.rp = valik('rp_valik', RP_VALIKUD, 1.0);
   P.KS3_P = KS3_VALIKUD[getSel('KS3P_valik')] ?? 1.0;
   P.KS3_T = KS3_VALIKUD[getSel('KS3T_valik')] ?? 1.0;
-  P.PTWS = getNum('PTWS', 1.0);
+  P.PTWS = getBool('kasuta_TWS') ? getNum('PTWS', 1.0) : 1.0;
 
   // Liinid
   P.kasuta_elektriliin = getBool('kasuta_elektriliin');
-  P.LL_P = getNum('LL_P', 1000);
-  P.CIP = CI_VALIKUD[getSel('CIP_valik')] ?? 1.0;
-  P.CTP = CT_VALIKUD[getSel('CTP_valik')] ?? 1.0;
+  P.LL_P = getBool('LL_P_teadmata') ? teadmataLL('LL_P') : getNum('LL_P', 1000);
+  P.CIP = valik('CIP_valik', CI_VALIKUD, 1.0);
+  P.CTP = valik('CTP_valik', CT_VALIKUD, 1.0);
   P.UWP = getNum('UWP', 2.5);
-  P.kaabli_tüüp_P = KAABLI_TÜÜP_VALIKUD[getSel('kaabli_tüüp_P')] ?? 'kaitsmata';
-  const cldP = CLD_CLI_VALIKUD[getSel('CLD_CLI_P_valik')] ?? [1.0, 1.0];
+  P.kaabli_tüüp_P = valik('kaabli_tüüp_P', KAABLI_TÜÜP_VALIKUD, 'kaitsmata');
+  const cldP = valik('CLD_CLI_P_valik', CLD_CLI_VALIKUD, [1.0, 1.0]);
   P.CLD_P = cldP[0]; P.CLI_P = cldP[1];
 
   P.kasuta_sideliin = getBool('kasuta_sideliin');
-  P.LL_T = getNum('LL_T', 1000);
-  P.CIT = CI_VALIKUD[getSel('CIT_valik')] ?? 1.0;
-  P.CTT = CT_VALIKUD[getSel('CTT_valik')] ?? 1.0;
+  P.LL_T = getBool('LL_T_teadmata') ? teadmataLL('LL_T') : getNum('LL_T', 1000);
+  P.CIT = valik('CIT_valik', CI_VALIKUD, 1.0);
+  P.CTT = valik('CTT_valik', CT_VALIKUD, 1.0);
   P.UWT = getNum('UWT', 1.5);
-  P.kaabli_tüüp_T = KAABLI_TÜÜP_VALIKUD[getSel('kaabli_tüüp_T')] ?? 'kaitsmata';
-  const cldT = CLD_CLI_VALIKUD[getSel('CLD_CLI_T_valik')] ?? [1.0, 1.0];
+  P.kaabli_tüüp_T = valik('kaabli_tüüp_T', KAABLI_TÜÜP_VALIKUD, 'kaitsmata');
+  const cldT = valik('CLD_CLI_T_valik', CLD_CLI_VALIKUD, [1.0, 1.0]);
   P.CLD_T = cldT[0]; P.CLI_T = cldT[1];
 
   // Lisalõigud (jaotis 8.4) — lõik 1 on ülal, need on lõigud 2, 3, …
-  P.lisalõigud_P = lõigudArvudeks('P');
-  P.lisalõigud_T = lõigudArvudeks('T');
+  const lõigud = getBool('kasuta_lõigud');
+  P.lisalõigud_P = lõigud ? lõigudArvudeks('P') : [];
+  P.lisalõigud_T = lõigud ? lõigudArvudeks('T') : [];
 
   P.kasuta_naaber = getBool('kasuta_naaber');
   P.L_J = getNum('L_J', 0);
   P.W_J = getNum('W_J', 0);
   P.H_J = getNum('H_J', 0);
-  P.CDJ = CD_VALIKUD[getSel('CDJ_valik')] ?? 1.0;
+  P.CDJ = valik('CDJ_valik', CD_VALIKUD, 1.0);
 
   // Kahjud (loetakse nüüd dropdownidest)
-  P.LT = LT_VALIKUD[getSel('LT_in')] ?? 1e-2;
-  P.LD = LD_VALIKUD[getSel('LD_in')] ?? 1e-1;
+  P.LT = valik('LT_in', LT_VALIKUD, 1e-2);
+  P.LD = valik('LD_in', LD_VALIKUD, 1e-1);
 
   // LF1, LF2, LO1, LO2 - vahemikud sõltuvad kategooriast
   const katEl = document.getElementById('kategooria');
@@ -2305,17 +2523,19 @@ function koguSisendid() {
   P.LO2 = loV[getSel('LO2_in')] ?? Object.values(loV)[0];
 
   // Kaitsemeetmed
-  P.PLPS = PLPS_VALIKUD[getSel('PLPS_valik')] ?? 1.0;
-  P.PSPD_P = PSPD_VALIKUD[getSel('PSPD_P_valik')] ?? 1.0;
-  P.PSPD_T = PSPD_VALIKUD[getSel('PSPD_T_valik')] ?? 1.0;
-  P.PEB_P = PEB_VALIKUD[getSel('PEB_P_valik')] ?? 1.0;
-  P.PEB_T = PEB_VALIKUD[getSel('PEB_T_valik')] ?? 1.0;
+  P.PLPS = valik('PLPS_valik', PLPS_VALIKUD, 1.0);
+  P.PSPD_P = valik('PSPD_P_valik', PSPD_VALIKUD, 1.0);
+  P.PSPD_T = valik('PSPD_T_valik', PSPD_VALIKUD, 1.0);
+  P.PEB_P = valik('PEB_P_valik', PEB_VALIKUD, 1.0);
+  P.PEB_T = valik('PEB_T_valik', PEB_VALIKUD, 1.0);
 
+  P.eeldused = EELDUSED.slice();
   return P;
 }
 
 /**
- * Hindab, milline minimaalne LPS-klass viib R₁ alla R_T piiri.
+ * Hindab, milline minimaalne LPS-klass viib koguriski R = R_L1 + R_L2
+ * alla R_T piiri (jaotis 7.3, valem 6).
  * Käivitab `koguArvutus` viiel korral — iga klassi (puudub, IV, III, II, I)
  * tegurikomplektiga — ja tagastab tabeli, kus iga rida sisaldab klassi
  * P_LPS / P_SPD / P_EB väärtusi ja vastavat R₁-i.
@@ -2324,7 +2544,7 @@ function koguSisendid() {
  * ja B.13 (P_EB) LPL klasside lõikes.
  *
  * @param {object} P - sisendparameetrid (`koguSisendid` tagastusväärtus)
- * @returns {Array<object>} viit klassi koos R₁, R₂, R ja vastab_R1 lipuga
+ * @returns {Array<object>} viit klassi koos R₁, R₂, R ja `vastab` lipuga (R ≤ R_T)
  */
 function hindaKlassid(P) {
   const klassid = [
@@ -2343,7 +2563,7 @@ function hindaKlassid(P) {
     return {
       ...k,
       R1: t.R.R1, R2: t.R.R2, R: t.R.R,
-      vastab_R1: t.R.R1 <= P.RT,
+      vastab: t.R.R <= P.RT,
     };
   });
 }
@@ -2395,6 +2615,19 @@ function arvuta() {
 }
 
 /**
+ * „Teadmata” eeldused tulemuste paneelis — iga parameeter, mille puhul
+ * andmed puudusid ja kasutati ebasoodsaimat väärtust.
+ */
+function eeldusedHTML(P) {
+  if (!P.eeldused || !P.eeldused.length) return '';
+  let h = '<div class="eeldused"><b>Eeldused — andmed puuduvad, võetud ebasoodsaim väärtus:</b><ul>';
+  for (const e of P.eeldused) {
+    h += `<li>${e.silt}: ${e.valik} — ${e.sümbol} = ${e.väärtus}</li>`;
+  }
+  return h + '</ul></div>';
+}
+
+/**
  * Renderdab mitme tsooni tulemused parempoolsesse paneeli — sisaldab
  * tsoonipõhist riskitabelit (nagu standardi tabel F.21) ja koguriski R.
  *
@@ -2405,7 +2638,9 @@ function kuvaTulemusedTsoonid(P, tulem) {
   const out = document.getElementById('tulemused');
   const RT = P.RT;
   const R_total = tulem.R;
-  const onOk = R_total.R1 <= RT;
+  // Jaotis 7.3: tsoonideks jaotatud ehitise korral võrreldakse R-i igas tsoonis
+  const ületavad = tulem.tsoonid.filter(ts => ts.R.R > RT);
+  const onOk = ületavad.length === 0;
 
   let html = '';
 
@@ -2413,16 +2648,17 @@ function kuvaTulemusedTsoonid(P, tulem) {
   html += `<div class="results-summary ${onOk ? 'ok' : 'fail'}">`;
   html += `<h3>${onOk ? '✓ Risk on lubatud tasemest madalam' : '✗ Risk on lubatud tasemest kõrgem'}</h3>`;
   html += `<div class="result-row"><span>Vastuvõetav risk R<sub>T</sub>:</span><span class="val">${fmtSci(RT)}</span></div>`;
-  html += `<div class="result-row"><span>R<sub>1</sub> (inimoht, kõik tsoonid):</span><span class="val">${fmtSci(R_total.R1)}</span></div>`;
-  html += `<div class="result-row"><span>R<sub>2</sub> (ehitis, kõik tsoonid):</span><span class="val">${fmtSci(R_total.R2)}</span></div>`;
-  html += `<div class="result-row"><span><b>R kogurisk:</b></span><span class="val">${fmtSci(R_total.R)}</span></div>`;
+  const maxTsoon = tulem.tsoonid.reduce((a, b) => (b.R.R > a.R.R ? b : a), tulem.tsoonid[0]);
+  html += `<div class="result-row"><span>Suurim tsooni risk R (${maxTsoon.nimi.split('—')[0].trim()}):</span><span class="val">${fmtSci(maxTsoon.R.R)}</span></div>`;
+  html += `<div class="result-row"><span>R<sub>L1</sub> + R<sub>L2</sub>, kõik tsoonid kokku:</span><span class="val">${fmtSci(R_total.R)}</span></div>`;
   if (onOk) {
-    html += `<p style="margin-top:10px;">Kõik tsoonid kokku — R<sub>1</sub> ≤ R<sub>T</sub>. Piksekaitse pole inimohu vähendamiseks vajalik.</p>`;
+    html += `<p style="margin-top:10px;">Igas tsoonis R ≤ R<sub>T</sub> — piksekaitse ei ole riski vähendamiseks vajalik (jaotis 7.3).</p>`;
   } else {
-    const suhe = R_total.R1 / RT;
-    html += `<p style="margin-top:10px;"><b>Piksekaitse on VAJALIK!</b> R<sub>1</sub> ületab R<sub>T</sub>-d ${suhe.toFixed(1)}-kordselt.</p>`;
+    html += `<p style="margin-top:10px;"><b>Piksekaitse on VAJALIK!</b> R ületab R<sub>T</sub>-d tsoonides: ${ületavad.map(ts => ts.nimi.split('—')[0].trim()).join(', ')} (jaotis 7.3: võrdlus igas tsoonis).</p>`;
   }
   html += `</div>`;
+
+  html += eeldusedHTML(P);
 
   // Tsoonide tabel — nagu standardi tabel F.21
   html += `<h3 style="color:#0a4080; margin-top:20px; margin-bottom:8px;">Risk tsoonide kaupa (väärtused × 10⁻⁵)</h3>`;
@@ -2499,70 +2735,75 @@ function kuvaTulemused(P, t, klassid) {
   let html = '';
 
   // Peamine tulemus
-  const onOk = R.R1 <= RT;
+  // Jaotis 7.3: võrreldakse koguriski R = R_L1 + R_L2 (valem 6)
+  const onOk = R.R <= RT;
   html += `<div class="results-summary ${onOk ? 'ok' : 'fail'}">`;
   html += `<h3>${onOk ? '✓ Risk on lubatud tasemest madalam' : '✗ Risk on lubatud tasemest kõrgem'}</h3>`;
   html += `<div class="result-row"><span>Vastuvõetav risk R<sub>T</sub>:</span><span class="val">${fmtSci(RT)}</span></div>`;
-  html += `<div class="result-row"><span>R<sub>1</sub> (inimelu kaotus):</span><span class="val">${fmtSci(R.R1)}</span></div>`;
-  html += `<div class="result-row"><span>R<sub>2</sub> (ehitis ja sisu):</span><span class="val">${fmtSci(R.R2)}</span></div>`;
-  html += `<div class="result-row"><span><b>R kogurisk:</b></span><span class="val">${fmtSci(R.R)}</span></div>`;
+  html += `<div class="result-row"><span>R<sub>L1</sub> (inimesed):</span><span class="val">${fmtSci(R.R1)}</span></div>`;
+  html += `<div class="result-row"><span>R<sub>L2</sub> (ehitis ja sisu):</span><span class="val">${fmtSci(R.R2)}</span></div>`;
+  html += `<div class="result-row"><span><b>R = R<sub>L1</sub> + R<sub>L2</sub>:</b></span><span class="val">${fmtSci(R.R)}</span></div>`;
 
   if (onOk) {
-    html += `<p style="margin-top:10px;">Hetkeolukorras on R<sub>1</sub> ≤ R<sub>T</sub> – piksekaitse pole inimelu kaotuse riski vähendamiseks vajalik (jaotis 7.3, MÄRKUS 3).</p>`;
+    html += `<p style="margin-top:10px;">R ≤ R<sub>T</sub> — piksekaitse ei ole riski vähendamiseks vajalik (jaotis 7.3, MÄRKUS 3).</p>`;
   } else {
-    const suhe = R.R1 / RT;
-    html += `<p style="margin-top:10px;"><b>Piksekaitse on VAJALIK!</b> R<sub>1</sub> ületab R<sub>T</sub>-d ${suhe.toFixed(1)}-kordselt.</p>`;
+    const suhe = R.R / RT;
+    html += `<p style="margin-top:10px;"><b>Piksekaitse on VAJALIK!</b> R ületab R<sub>T</sub>-d ${suhe.toFixed(1)}-kordselt (jaotis 7.3).</p>`;
   }
   html += `</div>`;
 
+  html += eeldusedHTML(P);
+
   // Kaitseklasside hindamine
   html += `<h3 style="color:#0a4080; margin-top:20px; margin-bottom:8px;">Kaitseklassi hindamine</h3>`;
-  html += `<p style="font-size:12px; color:#666; margin-bottom:8px;">Tabel näitab, milline minimaalne kaitseklass viib R<sub>1</sub> väärtuse alla R<sub>T</sub>.</p>`;
+  html += `<p style="font-size:12px; color:#666; margin-bottom:8px;">Tabel näitab, milline minimaalne kaitseklass viib koguriski R alla R<sub>T</sub>.</p>`;
   html += `<table class="results-table">`;
-  html += `<thead><tr><th>Kaitseklass</th><th>P<sub>LPS</sub></th><th class="num">R<sub>1</sub></th><th class="num">R<sub>1</sub>/R<sub>T</sub></th><th>Vastab?</th></tr></thead>`;
+  html += `<thead><tr><th>Kaitseklass</th><th>P<sub>LPS</sub></th><th class="num">R</th><th class="num">R/R<sub>T</sub></th><th>Vastab?</th></tr></thead>`;
   html += `<tbody>`;
 
   let leitud_minimaalne = false;
   for (const k of klassid) {
-    let cls = k.vastab_R1 ? 'ok' : 'fail';
-    if (k.vastab_R1 && !leitud_minimaalne && k.nimi !== 'Kaitse puudub') {
+    let cls = k.vastab ? 'ok' : 'fail';
+    if (k.vastab && !leitud_minimaalne && k.nimi !== 'Kaitse puudub') {
       cls = 'recommended';
       leitud_minimaalne = true;
     }
     html += `<tr class="${cls}">`;
     html += `<td>${k.nimi}${cls === 'recommended' ? ' ★' : ''}</td>`;
     html += `<td class="num">${k.PLPS}</td>`;
-    html += `<td class="num">${fmtSci(k.R1, 2)}</td>`;
-    html += `<td class="num">${(k.R1 / RT).toFixed(2)}</td>`;
-    html += `<td>${k.vastab_R1 ? '✓' : '✗'}</td>`;
+    html += `<td class="num">${fmtSci(k.R, 2)}</td>`;
+    html += `<td class="num">${(k.R / RT).toFixed(2)}</td>`;
+    html += `<td>${k.vastab ? '✓' : '✗'}</td>`;
     html += `</tr>`;
   }
   html += `</tbody></table>`;
 
-  if (R.R1 <= RT) {
+  if (R.R <= RT) {
     html += `<div class="info-box"><b>★ Käesolev olukord juba vastab nõuetele</b> – piksekaitse pole vajalik (kuid võib olla soovitatav).</div>`;
   } else {
-    const minK = klassid.find(k => k.vastab_R1 && k.nimi !== 'Kaitse puudub');
+    const minK = klassid.find(k => k.vastab && k.nimi !== 'Kaitse puudub');
     if (minK) {
-      html += `<div class="info-box" style="background:#e8f5e9; border-left-color:#1a7f1a;"><b>★ MINIMAALNE PIISAV KLASS:</b> ${minK.nimi}<br>R<sub>1</sub> = ${fmtSci(minK.R1)} (R<sub>T</sub> = ${fmtSci(RT)})</div>`;
+      html += `<div class="info-box" style="background:#e8f5e9; border-left-color:#1a7f1a;"><b>★ MINIMAALNE PIISAV KLASS:</b> ${minK.nimi}<br>R = ${fmtSci(minK.R)} (R<sub>T</sub> = ${fmtSci(RT)})</div>`;
     } else {
       html += `<div class="warning-box"><b>⚠ Isegi parim klass (LPS I) ei vähenda riski piisavalt!</b> Vaja võib olla erimeetmeid (vt standardi MÄRKUS 5).</div>`;
     }
   }
 
-  // Peamised panustajad
+  // Peamised panustajad koguriskile R
   const komponendid = [
     ['RAT', R.RAT], ['RAD', R.RAD], ['RB1', R.RB1],
     ['RC1', R.RC1], ['RM1', R.RM1], ['RU', R.RU],
     ['RV1', R.RV1], ['RW1', R.RW1], ['RZ1', R.RZ1],
+    ['RB2', R.RB2], ['RC2', R.RC2], ['RM2', R.RM2],
+    ['RV2', R.RV2], ['RW2', R.RW2], ['RZ2', R.RZ2],
   ].filter(c => c[1] > 0).sort((a, b) => b[1] - a[1]);
 
-  if (komponendid.length && R.R1 > 0) {
-    html += `<h3 style="color:#0a4080; margin-top:20px; margin-bottom:8px;">Peamised panustajad R<sub>1</sub>-le</h3>`;
+  if (komponendid.length && R.R > 0) {
+    html += `<h3 style="color:#0a4080; margin-top:20px; margin-bottom:8px;">Peamised panustajad koguriskile R</h3>`;
     html += `<table class="results-table">`;
     html += `<thead><tr><th>Komponent</th><th class="num">Väärtus</th><th class="num">Osakaal</th></tr></thead><tbody>`;
     for (const [nimi, v] of komponendid.slice(0, 5)) {
-      const pct = (100 * v / R.R1).toFixed(1);
+      const pct = (100 * v / R.R).toFixed(1);
       html += `<tr><td>${nimi}</td><td class="num">${fmtSci(v)}</td><td class="num">${pct} %</td></tr>`;
     }
     html += `</tbody></table>`;
@@ -2727,13 +2968,24 @@ function laeFailist() {
     r.onload = ev => {
       try {
         const data = JSON.parse(ev.target.result);
-        for (const [k, v] of Object.entries(data)) {
-          if (k.startsWith('_')) continue;
-          const el = document.getElementById(k);
-          if (!el) continue;
-          if (el.type === 'checkbox') el.checked = v;
-          else el.value = v;
+        // Kaks käiku: LF/LO valikud sõltuvad kategooriast, mis tuleb enne määrata
+        const määra = () => {
+          for (const [k, v] of Object.entries(data)) {
+            if (k.startsWith('_')) continue;
+            const el = document.getElementById(k);
+            if (!el) continue;
+            if (el.type === 'checkbox') el.checked = v;
+            else el.value = v;
+          }
+        };
+        määra();
+        uuenda_kahju_valikud();
+        määra();
+        for (const liin of ['P', 'T']) {
+          const cb = document.getElementById('LL_' + liin + '_teadmata');
+          document.getElementById('LL_' + liin).disabled = !!(cb && cb.checked);
         }
+        naita_CD_selgitus();
         // Vanemates failides neid pole — siis tühjad loendid
         LISALÕIGUD = { P: [], T: [], ...(data._lisalõigud || {}) };
         renderLõigud('P');
@@ -2741,6 +2993,7 @@ function laeFailist() {
         TSOONID = Array.isArray(data._tsoonid) ? data._tsoonid : [];
         renderTsoonid();
         lulita_tsoonid_režiim();
+        uuendaVahekaardid();
         document.getElementById('status').textContent = `Laaditud: ${fail.name}`;
       } catch (err) {
         alert('Vigane JSON fail: ' + err.message);
@@ -2816,6 +3069,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Vahekaardid - klikkimisel vahetage aktiivset tabi
   document.querySelectorAll('.tab').forEach(tab => {
     tab.addEventListener('click', () => {
+      if (tab.classList.contains('disabled')) return;
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
       tab.classList.add('active');
@@ -2849,8 +3103,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (rc2Cb) rc2Cb.addEventListener('change', lulita_LO);
 
   // Käivita esmane lülitus
-  lulita_RAD();
-  lulita_LO();
+  uuendaVahekaardid();
 });
 </script>
 </body>

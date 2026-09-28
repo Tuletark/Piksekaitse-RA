@@ -266,11 +266,50 @@ function testLõigudKooskõla() {
   }
 }
 
+// ===== Praktiline näide: ärihoone (sõltumatu Exceli arvutus) ===========
+//
+// Ärihoone 24,2 × 18,2 × 7,1 m, NG = 0,62, MP-maakaabel 40 m, sideliin
+// fiiberoptiline. Võrdlus kasutaja varasema Exceli kalkulaatoriga:
+// RAT, RB1, RB2 ja NL (lehelt „Ru”, kus NL on arvutatud õigesti AL-iga).
+// Lisaks otsustuskriteerium: R = R_L1 + R_L2 (jaotis 7.3, valem 6), mitte R1.
+
+function testÄrihoone() {
+  console.log('\n===== Praktiline näide: ärihoone (võrdlus Exceliga) =====');
+  const P = {
+    NSG: 1.24, k_tegur: 2, RT: 1e-5, PP: 0.3, Pe: 1.0,
+    L: 24.2, W: 18.2, H: 7.1, CD: 1.0, PS: 0.5, KS1: 1.0, KS2: 1.0,
+    kasuta_RAD: false, PO: 0, plahvatus_haigla_L1: false, plahvatus_L2: false,
+    CE: 0.5, rt: 0.01, Pam: 0.01, rf: 0.01, rp: 0.2,
+    KS3_P: 1.0, KS3_T: 1.0, PTWS: 1.0,
+    kasuta_elektriliin: true, LL_P: 40, CIP: 0.3, CTP: 1.0, UWP: 2.5,
+    kaabli_tüüp_P: 'kaitsmata', CLD_P: 1.0, CLI_P: 0.0,
+    kasuta_sideliin: false, kasuta_naaber: false,
+    LT: 0.01, LD: 0.1, LF1: 0.05, LF2: 0.05, LO1: 0, LO2: 0,
+    PLPS: 1.0, PSPD_P: 1.0, PSPD_T: 1.0, PEB_P: 1.0, PEB_T: 1.0,
+  };
+  const t = koguArvutus(P);
+  // Excel kasutab π asemel 3,14 → AD erinevus ~0,02 %
+  kontrolliArv('NL (Excel „Ru”: 2,976 × 10⁻⁴)', t.NL_P, 2.976e-4, 0.1);
+  kontrolli('RAT (Excel)', t.R.RAT, 1.3657e-9, 0.1);
+  kontrolli('RB1 (Excel)', t.R.RB1, 6.8286e-8, 0.1);
+  kontrolli('RB2 (Excel)', t.R.RB2, 2.2762e-7, 0.1);
+
+  // Otsustuskriteerium: juhtum, kus R1 < RT < R (RB2 domineerib, sest L2
+  // komponentides pole PP-d). Tõstame tuleohtu, et R ületaks RT.
+  const P2 = { ...P, rf: 0.1, rp: 1.0, PP: 0.05, NSG: 8.0 };
+  const t2 = koguArvutus(P2);
+  const klass0 = hindaKlassid(P2)[0];
+  const ok = t2.R.R1 < P2.RT && t2.R.R > P2.RT && klass0.vastab === false;
+  RESULTS.push({ label: 'kriteerium', ok });
+  console.log(`  ${ok ? '✓' : '✗'} Kriteerium R = R_L1 + R_L2: R1 = ${fmtR(t2.R.R1)} < RT < R = ${fmtR(t2.R.R)} → piksekaitse vajalik`);
+}
+
 // ===== Käivita kõik testid ============================================
 
 testF2_Maja();
 testF3_Büroohoone();
 testLõigudKooskõla();
+testÄrihoone();
 
 // ===== Kokkuvõte ======================================================
 
