@@ -22,10 +22,11 @@
 
 ## 🎯 Praegune staatus (üleandmise hetkel)
 
-**Versioon:** v1.4 (Git-silt `v1.4`)
+**Versioon:** v1.4 (Git-silt `v1.4`) + avaldamata liinilõikude tugi (vt CHANGELOG)
 **Repositoorium:** https://github.com/Tuletark/Piksekaitse-RA (haru `main`)
 **Live:** https://tuletark.github.io/Piksekaitse-RA/ (GitHub Pages, avaldub `main`-ist)
-**Olek:** ✅ F.2 (Maja) vastab standardile täpselt (R = 1,793 × 10⁻⁵); F.3 (Büroohoone, 5 tsooni) vastab RB osas täpselt, kogurisk R Z3–Z5 tsoonides ~4 % madalam (ühe lõiguga elektriliin — vt CHANGELOG „Teadaolevad piirangud”)
+**Olek:** ✅ F.2 (Maja) ja F.3 (Büroohoone, 5 tsooni, kahelõiguline elektriliin) vastavad standardile (tabelid F.14, F.21)
+**Standardi PDF:** `standard/` kaustas (ainult lokaalselt, `.gitignore`-s — autoriõigus). Lugemiseks on vaja `pdfjs-dist` (npm) ajutises kaustas; Pythonit ega poppler'it masinas pole.
 **Kasutusvalmidus:** Kasutusel, edasiarendus on järkjärguline
 
 ### Mis on tehtud (ajaline järjestus)
@@ -38,7 +39,8 @@
 6. **v1.4** (2026-05-05) - mitme tsooni tugi (`arvutaEhitis`, vahekaart „Tsoonid”), F.3 büroohoone näide, test `test_examples.js`
 
 ### Järgmised võimalikud sammud
-- Elektriliini **mitme lõigu tugi** (kõrgepinge + madalpinge) — kõrvaldaks F.3 ~4 % erinevuse. Vajab standardi 2025 teksti (liini lõikude käsitlus + F.3 liiniandmete tabel).
+- A<sub>M</sub> arvestama ka sisesüsteemide U<sub>W</sub>-d, millel pole välist liini (vt DECISIONS „ei teinud”)
+- F.3 kaitstud ehitise valideerimine (tabel F.23)
 - Aruande eksport (PDF / print)
 - Vigastumise sageduse F arvutus (jaotis 9)
 - Haigla näite valideerimine
@@ -125,7 +127,7 @@ Need on kohad, kus tegime **konkreetseid valikuid standardi rakendamisel** - nee
 
 `tests/test_examples.js` võtab HTML-failist välja JS-mootori ja arvutab näited F.2 (Maja, üks tsoon) ja F.3 (Büroohoone, 5 tsooni).
 
-**Oodatud tulemus:** 9 läbi, 0 luhtus. F.2: R = 1,793 × 10⁻⁵ (erinevus < 0,01 %).
+**Oodatud tulemus:** 21 läbi, 0 luhtus. F.2: R = 1,793 × 10⁻⁵ (erinevus < 0,01 %).
 
 Käivitamine: `node tests/test_examples.js`
 

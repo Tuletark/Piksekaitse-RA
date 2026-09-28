@@ -7,6 +7,38 @@ projekt järgib [semantilist versioneerimist](https://semver.org/lang/et/).
 
 ## [Avaldamata]
 
+### Lisatud
+- **Liini jaotamine lõikudeks** (jaotis 8.4) — vahekaardil „Liinid” saab
+  elektri- ja sideliinile lisada lisalõike, igal oma L<sub>L</sub>, C<sub>I</sub>,
+  C<sub>T</sub>, C<sub>E</sub> ja kaabli tüübiga. R<sub>U</sub>, R<sub>V</sub>,
+  R<sub>W</sub>, R<sub>Z</sub> summeeritakse lõikude kaupa (jaotis 8.2).
+  Liini põhiväljad = lõik 1 (ehitise poolne). Vt DECISIONS §11.
+- Aruandes haardealad ja sagedused lõikude kaupa (A<sub>L,P1</sub>, N<sub>L,P2</sub> jne) ning Σ.
+- Testid: F.3 N<sub>L</sub>/N<sub>I</sub> lõikude kaupa (tabel F.14), R<sub>V</sub>
+  tsoonides Z3–Z5 (tabel F.21), lõikudeks jagamise kooskõla. Kokku 21 kontrolli.
+
+### Parandatud
+- **F.3 näide vastab nüüd standardile täpselt** — Z3–Z5 R erinevus oli ~4 %,
+  nüüd ≤ 0,2 % (elektriliin LV 100 m + HV 1000 m, tabel F.11).
+- **„Lae F.3 büroohoone näide” nupp seadis valed väärtused** — C<sub>E</sub> ja
+  P<sub>S</sub> valikute nimed ei vastanud rippmenüüdele, mistõttu jäid
+  C<sub>E</sub> = 1 ja P<sub>S</sub> = 1 (õige 0,5 ja 0,5); liini C<sub>I</sub>
+  ja C<sub>T</sub> jäid seadmata. Rakenduses kuvatud F.3 tulemus oli seega vale
+  (arvutusmootori test seda ei tabanud, sest kutsub mootorit otse).
+- **JSON-salvestus ei salvestanud tsoone** — nüüd salvestatakse ja laaditakse
+  ka tsoonid ja liinilõigud. Vanemad failid laadivad endiselt.
+- Naaberehitise mõõtude rida (L<sub>J</sub>, W<sub>J</sub>, H<sub>J</sub>) ei
+  mahtunud kitsas aknas ära ja tekitas horisontaalse kerimisriba.
+- `docs/standardiviited.md`: Lisa A valemite numbrid (A.3, A.5–A.12) ning
+  A<sub>I</sub> ja N<sub>M</sub> valemid parandatud vastavalt standardile.
+
+### Teadaolevad piirangud
+- A<sub>M</sub> arvestab U<sub>W</sub>-d ainult ühendatud väliste liinide seast.
+  Kui sisesüsteemil pole välist liini (F.3: fiiberoptiline sideliin, sisemine
+  vasest sidesüsteem U<sub>W</sub> = 1,5 kV), on N<sub>M</sub> alahinnatud.
+  Mõjutab ainult R<sub>M</sub>-i (plahvatusoht/haigla). Vt DECISIONS.
+- Vigastumise sageduse F arvutust (jaotis 9) pole rakendatud.
+
 ### Muudetud
 - Dokumentatsioon ajakohastatud v1.4 seisuga: HANDOFF.md, README failipuu,
   `docs/arhitektuur.md` (tsoonide loogika, andmevoog) ja `docs/standardiviited.md`

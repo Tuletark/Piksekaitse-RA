@@ -39,10 +39,11 @@ otsi funktsiooni nime järgi).
 | **HAARDEALAD ja SAGEDUSED**         | Lisa A: `arvutaAD`, `arvutaAM`, `arvutaAL`, `arvutaAI`, `arvutaND`, `arvutaNM`, `arvutaNL`, `arvutaNI`. |
 | **TÕENÄOSUSED**                     | Lisa B: `arvutaPAT`, `arvutaPAD`, `arvutaPB`, `arvutaPC`, `arvutaPM`, `arvutaPU`, `arvutaPV`, `arvutaPW`, `arvutaPZ`, `arvutaPLD`. |
 | **RISKIKOMPONENDID**                | `arvutaRiskid` — jaotis 8, Tabel 3: arvutab RA, RB, RU, RV, RC, RM, RW, RZ ning R1, R2 ja kogurisk R. |
+| **Liinilõigud (v1.5)**              | Olek `LISALÕIGUD`; `lisa_lõik`, `eemalda_lõik`, `uuenda_lõik`, `renderLõigud`, `lõigudArvudeks`. |
 | **UI loogika**                      | `täidaSelect`, `naita_CD_selgitus`, `lulita_RAD`, `lulita_LO`, `laeVaikevalikud`, `uuenda_kahju_valikud`, `kategooriaUuenda`, `laeVaikevaartused`. |
 | **Tsoonid (v1.4)**                  | `lulita_tsoonid_režiim`, `lisa_tsoon`, `eemalda_tsoon`, `uuenda_tsoon`, `renderTsoonid`, `laeF3Näide`. |
 | **Abifunktsioonid**                 | `getNum`/`getStr`/`getBool`/`getSel`, `fmt`/`fmtSci`/`fmtNumber`. |
-| **PEAMINE arvutus**                 | `koguArvutus(P, override)` — üks tsoon, kogu arvutusahel; `arvutaEhitis(shared, tsoonid)` — mitu tsooni, R = Σ R_tsoon; `koguSisendid()` — loeb DOM-ist; `hindaKlassid(P)` — hindab LPS I–IV vajadust. |
+| **PEAMINE arvutus**                 | `koostaLiiniLõigud(P, liin)` — liini lõigud (lõik 1 + lisalõigud); `koguArvutus(P, override)` — üks tsoon, kogu arvutusahel, liinikomponendid lõikude kaupa; `arvutaEhitis(shared, tsoonid)` — mitu tsooni, R = Σ R_tsoon; `koguSisendid()` — loeb DOM-ist; `hindaKlassid(P)` — hindab LPS I–IV vajadust. |
 | **TULEMUSTE kuvamine**              | `arvuta()` — peamine click-handler; `kuvaTulemused(P, t, klassid)` — ühe tsooni aruanne; `kuvaTulemusedTsoonid(P, tulem)` — tsoonipõhine tabel (sarnane standardi tabelile F.21). |
 | **Salvestamine / laadimine / abi**  | `salvestaSisendid`, `laeFailist`, `kuvaAbi`. |
 | **KÄIVITAMINE**                     | `DOMContentLoaded`: `laeVaikevaartused`, vahekaartide klikid, NSG automaatarvutus (`uuendaNSG`), RAD- ja LO-lülitid. |
@@ -69,9 +70,10 @@ koguSisendid()  ←─── loeb DOM-ist, tagastab P-objekti
    │                          kuvaTulemusedTsoonid(P, tulem)
    ▼
 koguArvutus(P)  ←─── orkestreerib:
-   │                  AD/AM/AL/AI  →  ND/NM/NL/NI
-   │                  PLD          →  PAT/PAD/PB/PC/PM/PU/PV/PW/PZ
-   │                  arvutaRiskid →  RA, RB, RU, RV, RC, RM, RW, RZ
+   │                  AD/AM        →  ND/NM
+   │                  iga liinilõik: AL/AI → NL/NI, PLD → PU/PV/PW/PZ
+   │                  PAT/PAD/PB/PC/PM
+   │                  arvutaRiskid →  RA, RB, RC, RM; RU, RV, RW, RZ = Σ lõigud
    │                  R = Σ
    ▼
 hindaKlassid(P)  ←─── proovib LPS I, II, III, IV, et leida vajalik klass

@@ -194,6 +194,24 @@ header .sub { font-size: 12px; opacity: 0.85; margin-top: 2px; }
   align-items: center;
   gap: 4px;
 }
+.liinilõigud {
+  margin: 10px 0 18px;
+  padding: 8px 10px;
+  border: 1px dashed #b8c8dc;
+  border-radius: 6px;
+  background: #f7fafd;
+}
+.liinilõigud-pealkiri { font-size: 13px; font-weight: 600; color: #0a4080; margin-bottom: 6px; }
+.lõik-card {
+  border: 1px solid #d0dae6;
+  border-radius: 6px;
+  background: #fff;
+  padding: 6px 8px;
+  margin-bottom: 8px;
+}
+.lõik-card-header { display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: 600; margin-bottom: 4px; }
+.lõik-card .field { margin-bottom: 4px; padding: 2px 0; }
+.lõik-card .field label { font-size: 12px; }
 .btn-danger {
   background: #fee;
   border-color: #f4a;
@@ -301,7 +319,9 @@ footer {
 
 /* Helper */
 .flex-row { display: flex; gap: 8px; }
-.flex-row > * { flex: 1; }
+.flex-row > * { flex: 1; min-width: 0; }
+.flex-row .field { grid-template-columns: auto minmax(0, 1fr); }
+.flex-row .field input { width: 100%; min-width: 0; }
 
 .summary-card {
   display: grid;
@@ -547,12 +567,14 @@ footer {
 
       <!-- VAHEKAART 4: LIINID -->
       <div class="tab-content" id="t4">
-        <div class="section-title">Elektriliin (madalpinge)</div>
+        <div class="section-title">Elektriliin</div>
         <label class="field-checkbox">
           <input type="checkbox" id="kasuta_elektriliin" checked>
           <span>Elektriliin on ehitisega ühendatud</span>
         </label>
-        <div class="field"><label>L<sub>L</sub> – elektriliini pikkus (m, max 1000):</label><input type="number" id="LL_P" value="1000" step="10"></div>
+        <div class="help-text">Allolevad väljad kirjeldavad <b>lõiku 1</b> (ehitise poolne lõik). Kui liin koosneb mitmest erinevate omadustega lõigust (nt LV-kaabel + HV-liin trafoga), lisa ülejäänud lõigud allpool — jaotis 8.4.</div>
+        <div class="field"><label>L<sub>L</sub> – lõigu 1 pikkus (m):</label><input type="number" id="LL_P" value="1000" step="10"></div>
+        <div class="help-text">Kui pikkus pole teada: HV + LV kokku 1000 m (jaotis A.4).</div>
         <div class="field">
           <label>C<sub>I</sub> – paigaldustegur <span class="standard-ref">(Tabel A.2)</span>:</label>
           <select id="CIP_valik"></select>
@@ -574,13 +596,19 @@ footer {
           <label>Varjestus <span class="standard-ref">(C<sub>LD</sub>/C<sub>LI</sub> – Tabel B.9)</span>:</label>
           <select id="CLD_CLI_P_valik"></select>
         </div>
+        <div class="liinilõigud">
+          <div class="liinilõigud-pealkiri">Elektriliini lisalõigud <span class="standard-ref">(jaotis 8.4)</span></div>
+          <div id="lõigud_P_list"></div>
+          <button class="btn" type="button" onclick="lisa_lõik('P')">+ Lisa lõik</button>
+        </div>
 
         <div class="section-title">Sideliin / andmeside</div>
         <label class="field-checkbox">
           <input type="checkbox" id="kasuta_sideliin" checked>
           <span>Sideliin on ehitisega ühendatud</span>
         </label>
-        <div class="field"><label>L<sub>L</sub> – sideliini pikkus (m, max 1000):</label><input type="number" id="LL_T" value="800" step="10"></div>
+        <div class="field"><label>L<sub>L</sub> – lõigu 1 pikkus (m):</label><input type="number" id="LL_T" value="800" step="10"></div>
+        <div class="help-text">Kui pikkus pole teada: 1000 m (jaotis A.4).</div>
         <div class="field">
           <label>C<sub>I</sub> – paigaldustegur:</label>
           <select id="CIT_valik"></select>
@@ -601,6 +629,11 @@ footer {
         <div class="field">
           <label>Varjestus:</label>
           <select id="CLD_CLI_T_valik"></select>
+        </div>
+        <div class="liinilõigud">
+          <div class="liinilõigud-pealkiri">Sideliini lisalõigud <span class="standard-ref">(jaotis 8.4)</span></div>
+          <div id="lõigud_T_list"></div>
+          <button class="btn" type="button" onclick="lisa_lõik('T')">+ Lisa lõik</button>
         </div>
 
         <div class="section-title">Naaberehitis (NDJ)</div>
@@ -718,8 +751,7 @@ footer {
           <b>erinev tuleoht, kohaloleku aeg või kahjud</b> — näiteks büroohoones
           arhiiv (kõrge tuleoht) vs kontorid (madal tuleoht). Standardi näide F.3.
           <br><br>
-          <b>Piirangud:</b> ühesegmendiline elektriliin (kõrgepinge + madalpinge eraldi
-          segmendid pole toetatud); kogu ehitisele ühised on mõõtmed, NSG, liinid ja LPS.
+          Kogu ehitisele ühised on mõõtmed, NSG, liinid (koos lisalõikudega) ja LPS.
         </div>
 
         <div class="field-checkbox">
@@ -1258,6 +1290,12 @@ function arvutaPLD(kaabli_tüüp, uw_kV) {
  * plahvatusohu / haigla puhul; RC2, RM2, RW2, RZ2 (LO2) ainult plahvatusohu
  * puhul. Vt docs/DECISIONS.md §9.
  *
+ * Liinikomponendid (RU, RV, RW, RZ) summeeritakse liinilõikude kaupa
+ * (jaotis 8.2: kui liinil on mitu lõiku, on R_U, R_V, R_W ja R_Z iga lõiguga
+ * seonduvate väärtuste summa). Lõigud antakse massiivina `p.lõigud`, igal
+ * { NL, NI, NDJ, PU, PV, PW, PZ }. Kui `p.lõigud` puudub, moodustatakse
+ * kaks lõiku skalaaridest NL_P/NL_T, PU_P/PU_T jne (üks lõik liini kohta).
+ *
  * @param {object} p - Sageduste, tõenäosuste, kahjude ja kasuta_*-lülitite kogum
  * @returns {object} R - kõik komponendid + R1, R2, R (kogurisk)
  */
@@ -1265,16 +1303,23 @@ function arvutaRiskid(p) {
   const R = {};
 
   const ND = p.ND || 0, NM = p.NM || 0;
-  const NL_P = p.NL_P || 0, NL_T = p.NL_T || 0;
-  const NI_P = p.NI_P || 0, NI_T = p.NI_T || 0;
-  const NDJ_P = p.NDJ_P || 0, NDJ_T = p.NDJ_T || 0;
 
   const PAT = p.PAT || 0, PAD = p.PAD || 0;
   const PB = p.PB || 0, PC = p.PC || 0, PM = p.PM || 0;
-  const PU_P = p.PU_P || 0, PU_T = p.PU_T || 0;
-  const PV_P = p.PV_P || 0, PV_T = p.PV_T || 0;
-  const PW_P = p.PW_P || 0, PW_T = p.PW_T || 0;
-  const PZ_P = p.PZ_P || 0, PZ_T = p.PZ_T || 0;
+
+  const lõigud = p.lõigud || [
+    { NL: p.NL_P, NI: p.NI_P, NDJ: p.NDJ_P, PU: p.PU_P, PV: p.PV_P, PW: p.PW_P, PZ: p.PZ_P },
+    { NL: p.NL_T, NI: p.NI_T, NDJ: p.NDJ_T, PU: p.PU_T, PV: p.PV_T, PW: p.PW_T, PZ: p.PZ_T },
+  ];
+  // Σ üle lõikude: (NL + NDJ) × PX ja NI × PZ
+  let sU = 0, sV = 0, sW = 0, sZ = 0;
+  for (const s of lõigud) {
+    const NLJ = (s.NL || 0) + (s.NDJ || 0);
+    sU += NLJ * (s.PU || 0);
+    sV += NLJ * (s.PV || 0);
+    sW += NLJ * (s.PW || 0);
+    sZ += (s.NI || 0) * (s.PZ || 0);
+  }
 
   const PP = p.PP || 1.0, Pe = p.Pe || 1.0;
 
@@ -1298,18 +1343,18 @@ function arvutaRiskid(p) {
   R.RB1 = ND * PB * PP * LF1;
   R.RC1 = useRC1 ? ND * PC * PP * Pe * LO1 : 0;
   R.RM1 = useRM1 ? NM * PM * PP * Pe * LO1 : 0;
-  R.RU = (NL_P + NDJ_P) * PU_P * PP * LT + (NL_T + NDJ_T) * PU_T * PP * LT;
-  R.RV1 = (NL_P + NDJ_P) * PV_P * PP * LF1 + (NL_T + NDJ_T) * PV_T * PP * LF1;
-  R.RW1 = useRW1 ? ((NL_P + NDJ_P) * PW_P + (NL_T + NDJ_T) * PW_T) * PP * Pe * LO1 : 0;
-  R.RZ1 = useRZ1 ? (NI_P * PZ_P + NI_T * PZ_T) * PP * Pe * LO1 : 0;
+  R.RU = sU * PP * LT;
+  R.RV1 = sV * PP * LF1;
+  R.RW1 = useRW1 ? sW * PP * Pe * LO1 : 0;
+  R.RZ1 = useRZ1 ? sZ * PP * Pe * LO1 : 0;
 
   // L2 - füüsikalised vigastused
   R.RB2 = ND * PB * LF2;
   R.RC2 = useRC2 ? ND * PC * Pe * LO2 : 0;
   R.RM2 = useRM2 ? NM * PM * Pe * LO2 : 0;
-  R.RV2 = (NL_P + NDJ_P) * PV_P * LF2 + (NL_T + NDJ_T) * PV_T * LF2;
-  R.RW2 = useRW2 ? ((NL_P + NDJ_P) * PW_P + (NL_T + NDJ_T) * PW_T) * Pe * LO2 : 0;
-  R.RZ2 = useRZ2 ? (NI_P * PZ_P + NI_T * PZ_T) * Pe * LO2 : 0;
+  R.RV2 = sV * LF2;
+  R.RW2 = useRW2 ? sW * Pe * LO2 : 0;
+  R.RZ2 = useRZ2 ? sZ * Pe * LO2 : 0;
 
   R.RB = R.RB1 + R.RB2;
   R.RC = R.RC1 + R.RC2;
@@ -1562,6 +1607,9 @@ function laeVaikevaartused() {
   document.getElementById('kasuta_sideliin').checked = true;
   document.getElementById('LL_T').value = '800';
   document.getElementById('UWT').value = '1.5';
+  LISALÕIGUD = { P: [], T: [] };
+  renderLõigud('P');
+  renderLõigud('T');
   document.getElementById('kasuta_naaber').checked = false;
   document.getElementById('L_J').value = '0';
   document.getElementById('W_J').value = '0';
@@ -1572,6 +1620,97 @@ function laeVaikevaartused() {
   // Kahjud täidetakse automaatselt kategooria kaudu (uuenda_kahju_valikud)
 
   document.getElementById('status').textContent = 'Vaikeväärtused laaditud (näide F.2 - Maja)';
+}
+
+// =============================================================================
+// LIINILÕIGUD (vahekaart 4, jaotis 8.4)
+// =============================================================================
+
+/**
+ * Olek: liinide lisalõigud (lõik 1 on liini põhiväljadel). Iga lõik hoiab
+ * rippmenüüde valikute nimesid (mitte arvväärtusi), et salvestus/laadimine
+ * ja kuvamine oleksid lihtsad; arvudeks teisendab `lõigudArvudeks`.
+ */
+let LISALÕIGUD = { P: [], T: [] };
+
+/** Lisab liinile ('P' elektriliin, 'T' sideliin) uue lõigu vaikeväärtustega. */
+function lisa_lõik(liin) {
+  const ceEl = document.getElementById('CE_valik');
+  LISALÕIGUD[liin].push({
+    id: 'lg_' + Date.now() + '_' + Math.floor(Math.random() * 10000),
+    LL: 1000,
+    CI: 'Õhus (õhuliin)',
+    CT: liin === 'P'
+      ? 'HV-elektriliin (HV/LV trafoga, eraldatud mähistega)'
+      : 'LV-elektriliin, side- või andmesideliin',
+    CE: ceEl && ceEl.value ? ceEl.value : 'Maakeskkond',
+    kaabel: 'Kaitsmata või varje ühendamata',
+  });
+  renderLõigud(liin);
+}
+
+/** Eemaldab lõigu id järgi. */
+function eemalda_lõik(liin, id) {
+  LISALÕIGUD[liin] = LISALÕIGUD[liin].filter(lg => lg.id !== id);
+  renderLõigud(liin);
+}
+
+/** Uuendab lõigu välja kasutaja sisendi põhjal (`oninput` / `onchange`). */
+function uuenda_lõik(el) {
+  const lg = LISALÕIGUD[el.dataset.liin].find(x => x.id === el.dataset.loik);
+  if (!lg) return;
+  lg[el.dataset.key] = el.type === 'number'
+    ? (parseFloat(el.value.replace(',', '.')) || 0)
+    : el.value;
+}
+
+/** Koostab `<option>`-id valikute objektist, märkides valitud võtme. */
+function valikudHTML(valikud, valitud) {
+  return Object.keys(valikud).map(k =>
+    `<option value="${k}"${k === valitud ? ' selected' : ''}>${k}</option>`).join('');
+}
+
+/** Renderdab liini lisalõikude kaardid. */
+function renderLõigud(liin) {
+  const list = document.getElementById('lõigud_' + liin + '_list');
+  if (!list) return;
+  list.innerHTML = '';
+  LISALÕIGUD[liin].forEach((lg, i) => {
+    const c = document.createElement('div');
+    c.className = 'lõik-card';
+    const d = `data-liin="${liin}" data-loik="${lg.id}"`;
+    c.innerHTML = `
+      <div class="lõik-card-header">
+        <span>Lõik ${i + 2}</span>
+        <button class="btn btn-danger" type="button" onclick="eemalda_lõik('${liin}', '${lg.id}')">Eemalda</button>
+      </div>
+      <div class="field"><label>L<sub>L</sub> – pikkus (m):</label>
+        <input type="number" step="10" value="${lg.LL}" ${d} data-key="LL" oninput="uuenda_lõik(this)"></div>
+      <div class="field"><label>C<sub>I</sub> – paigaldustegur:</label>
+        <select ${d} data-key="CI" onchange="uuenda_lõik(this)">${valikudHTML(CI_VALIKUD, lg.CI)}</select></div>
+      <div class="field"><label>C<sub>T</sub> – tüübitegur:</label>
+        <select ${d} data-key="CT" onchange="uuenda_lõik(this)">${valikudHTML(CT_VALIKUD, lg.CT)}</select></div>
+      <div class="field"><label>C<sub>E</sub> – keskkonnategur:</label>
+        <select ${d} data-key="CE" onchange="uuenda_lõik(this)">${valikudHTML(CE_VALIKUD, lg.CE)}</select></div>
+      <div class="field"><label>Kaabli tüüp (P<sub>LD</sub>):</label>
+        <select ${d} data-key="kaabel" onchange="uuenda_lõik(this)">${valikudHTML(KAABLI_TÜÜP_VALIKUD, lg.kaabel)}</select></div>
+    `;
+    list.appendChild(c);
+  });
+}
+
+/**
+ * Teisendab lisalõigud (valikute nimed) arvutusmootori kujule
+ * { LL, CI, CT, CE, kaabli_tüüp } — vt `koostaLiiniLõigud`.
+ */
+function lõigudArvudeks(liin) {
+  return LISALÕIGUD[liin].map(lg => ({
+    LL: lg.LL,
+    CI: CI_VALIKUD[lg.CI] ?? 1.0,
+    CT: CT_VALIKUD[lg.CT] ?? 1.0,
+    CE: CE_VALIKUD[lg.CE] ?? 1.0,
+    kaabli_tüüp: KAABLI_TÜÜP_VALIKUD[lg.kaabel] ?? 'kaitsmata',
+  }));
 }
 
 // =============================================================================
@@ -1713,10 +1852,29 @@ function laeF3Näide() {
   document.getElementById('L').value = '20';
   document.getElementById('W').value = '40';
   document.getElementById('H').value = '25';
-  document.getElementById('LL_P').value = '1000';
+  // Elektriliin (tabel F.11): lõik 1 = LV 100 m süvistatud (ehitise poolne),
+  // lõik 2 = HV 1000 m süvistatud, HV/LV trafoga
+  document.getElementById('kasuta_elektriliin').checked = true;
+  document.getElementById('LL_P').value = '100';
+  document.getElementById('CIP_valik').value = 'Süvistatud (maakaabel)';
+  document.getElementById('CTP_valik').value = 'LV-elektriliin, side- või andmesideliin';
   document.getElementById('UWP').value = '2.5';
+  document.getElementById('kaabli_tüüp_P').value = 'Kaitsmata või varje ühendamata';
+  document.getElementById('CLD_CLI_P_valik').value = 'Varjestamata süvistatud liin';
+  LISALÕIGUD.P = [{
+    id: 'lg_f3_hv_' + Date.now(), LL: 1000,
+    CI: 'Süvistatud (maakaabel)',
+    CT: 'HV-elektriliin (HV/LV trafoga, eraldatud mähistega)',
+    CE: 'Äärelinnaline keskkond',
+    kaabel: 'Kaitsmata või varje ühendamata',
+  }];
+  LISALÕIGUD.T = [];
+  renderLõigud('P');
+  renderLõigud('T');
+  // Väline sideliin on fiiberoptiline (tabel F.12) — ei arvestata
   document.getElementById('kasuta_sideliin').checked = false;
   document.getElementById('LL_T').value = '0';
+  document.getElementById('kasuta_naaber').checked = false;
 
   // Tsoonid
   TSOONID = [
@@ -1759,8 +1917,10 @@ function laeF3Näide() {
 
   // Veendu et ka muud parameetrid on F.3 jaoks õiged (CD = 1, CE = 0,5, raudbetoon → PS = 0,5)
   document.getElementById('CD_valik').value = 'Eraldiseisev ehitis (läheduses pole teisi objekte)';
-  document.getElementById('CE_valik').value = 'Äärelinnaline (alla 5 m kõrgused ehitised, hooned)';
-  document.getElementById('PS_valik').value = 'Raudbetoonist või terasraamiga ehitis';
+  // NB! Väärtused peavad täpselt vastama CE_VALIKUD / PS_VALIKUD võtmetele
+  document.getElementById('CE_valik').value = 'Äärelinnaline keskkond';
+  document.getElementById('PS_valik').value = 'Elektriliselt katkematu raudbetoon või metallkarkass';
+  document.getElementById('PLPS_valik').value = 'LPS puudub (kaitsmata)';
 
   // Aktiveeri mitme tsooni režiim
   document.getElementById('kasuta_tsoonid').checked = true;
@@ -1824,6 +1984,31 @@ function fmtSci(x, n = 3) {
 // =============================================================================
 
 /**
+ * Koostab liini lõikude loendi (jaotis 8.4). Lõik 1 on ehitise poolne lõik
+ * ja tuleb liini põhiväljadelt (LL_P, CIP, CTP, kaabli_tüüp_P; C_E vahekaardilt
+ * „Keskkond”). Lisalõigud tulevad massiivist `P.lisalõigud_P` / `P.lisalõigud_T`,
+ * kus igal lõigul on { LL, CI, CT, CE, kaabli_tüüp } — puuduv CE või
+ * kaabli_tüüp võetakse lõigult 1.
+ *
+ * @param {object} P - sisendparameetrid
+ * @param {'P'|'T'} liin - 'P' = elektriliin, 'T' = sideliin
+ * @returns {Array<object>} lõigud [{ LL, CI, CT, CE, kaabli_tüüp }, ...]
+ */
+function koostaLiiniLõigud(P, liin) {
+  const esimene = liin === 'P'
+    ? { LL: P.LL_P, CI: P.CIP, CT: P.CTP, CE: P.CE, kaabli_tüüp: P.kaabli_tüüp_P }
+    : { LL: P.LL_T, CI: P.CIT, CT: P.CTT, CE: P.CE, kaabli_tüüp: P.kaabli_tüüp_T };
+  const lisad = (liin === 'P' ? P.lisalõigud_P : P.lisalõigud_T) || [];
+  return [esimene, ...lisad.map(lg => ({
+    LL: lg.LL,
+    CI: lg.CI,
+    CT: lg.CT,
+    CE: lg.CE ?? esimene.CE,
+    kaabli_tüüp: lg.kaabli_tüüp ?? esimene.kaabli_tüüp,
+  }))];
+}
+
+/**
  * Peamine arvutusahela orkestreerija. Võtab sisendparameetrid `P` ja arvutab:
  *   1. haardealad (A_D, A_M, A_L, A_I)
  *   2. sagedused (N_D, N_M, N_L, N_I, NDJ — kui naaberehitis)
@@ -1859,31 +2044,17 @@ function koguArvutus(P, override = {}) {
   const UW_min = UWs.length ? Math.min(...UWs) : 1.5;
   const AM = arvutaAM(P.L, P.W, UW_min);
 
-  const ALP = P.kasuta_elektriliin ? arvutaAL(P.LL_P) : 0;
-  const AIP = P.kasuta_elektriliin ? arvutaAI(P.LL_P, P.UWP) : 0;
-  const ALT = P.kasuta_sideliin ? arvutaAL(P.LL_T) : 0;
-  const AIT = P.kasuta_sideliin ? arvutaAI(P.LL_T, P.UWT) : 0;
+  // Liinilõigud (jaotis 8.4): lõik 1 on põhiväljadelt, lisalõigud massiivist
+  const lõigudP = P.kasuta_elektriliin ? koostaLiiniLõigud(P, 'P') : [];
+  const lõigudT = P.kasuta_sideliin ? koostaLiiniLõigud(P, 'T') : [];
 
   const ADJ = (P.kasuta_naaber && P.L_J > 0) ? arvutaAD(P.L_J, P.W_J, P.H_J) : 0;
 
   // Sagedused
   const ND = arvutaND(P.NSG, AD, P.CD);
   const NM = arvutaNM(P.NSG, AM, P.k_tegur);
-  const NL_P = P.kasuta_elektriliin ? arvutaNL(P.NSG, ALP, P.CIP, P.CE, P.CTP) : 0;
-  const NI_P = P.kasuta_elektriliin ? arvutaNI(P.NSG, AIP, P.CIP, P.CE, P.CTP, P.k_tegur) : 0;
-  const NL_T = P.kasuta_sideliin ? arvutaNL(P.NSG, ALT, P.CIT, P.CE, P.CTT) : 0;
-  const NI_T = P.kasuta_sideliin ? arvutaNI(P.NSG, AIT, P.CIT, P.CE, P.CTT, P.k_tegur) : 0;
-
-  let NDJ_P = 0, NDJ_T = 0;
-  if (P.kasuta_naaber && ADJ > 0) {
-    if (P.kasuta_elektriliin) NDJ_P = P.NSG * ADJ * P.CDJ * P.CTP * 1e-6;
-    if (P.kasuta_sideliin) NDJ_T = P.NSG * ADJ * P.CDJ * P.CTT * 1e-6;
-  }
 
   // Tõenäosused
-  const PLD_P = P.kasuta_elektriliin ? arvutaPLD(P.kaabli_tüüp_P, P.UWP) : 0;
-  const PLD_T = P.kasuta_sideliin ? arvutaPLD(P.kaabli_tüüp_T, P.UWT) : 0;
-
   const PAT = arvutaPAT(PLPS, P.Pam, P.rt, P.PTWS);
   const PAD = P.kasuta_RAD ? arvutaPAD(P.PTWS, P.Pam, P.PO, PLPS) : 0;
   const PB = arvutaPB(P.PS, PLPS, P.rf, P.rp);
@@ -1897,25 +2068,45 @@ function koguArvutus(P, override = {}) {
   const PM_T = P.kasuta_sideliin ? arvutaPM(PSPD_T, P.KS1, P.KS2, P.KS3_T) : 0;
   const PM = (PM_P > 0 && PM_T > 0) ? (1 - (1 - PM_P) * (1 - PM_T)) : Math.max(PM_P, PM_T);
 
-  let PU_P = 0, PV_P = 0, PW_P = 0, PZ_P = 0;
-  if (P.kasuta_elektriliin) {
-    PU_P = arvutaPU(P.Pam, PEB_P, PLD_P, P.CLD_P, P.rt, P.PTWS);
-    PV_P = arvutaPV(PEB_P, PLD_P, P.CLD_P, P.rf, P.rp, P.PTWS);
-    PW_P = arvutaPW(PSPD_P, PLD_P, P.CLD_P, P.PTWS);
-    PZ_P = arvutaPZ(PSPD_P, P.CLI_P, P.PTWS);
+  // Iga lõigu haardealad, sagedused ja tõenäosused. UW, CLD/CLI, PEB ja PSPD
+  // on liinipõhised (ehitise sisesüsteem ja liini sisenemiskoht); PLD sõltub
+  // lõigu kaabli tüübist. NDJ seotakse lõiguga 1 (vt DECISIONS §11).
+  function arvutaLõigud(lõigud, UW, CLD, CLI, PEB, PSPD, CT_naaber) {
+    return lõigud.map((lg, i) => {
+      const AL = arvutaAL(lg.LL);
+      const AI = arvutaAI(lg.LL, UW);
+      const NL = arvutaNL(P.NSG, AL, lg.CI, lg.CE, lg.CT);
+      const NI = arvutaNI(P.NSG, AI, lg.CI, lg.CE, lg.CT, P.k_tegur);
+      const NDJ = (i === 0 && ADJ > 0) ? P.NSG * ADJ * P.CDJ * CT_naaber * 1e-6 : 0;
+      const PLD = arvutaPLD(lg.kaabli_tüüp, UW);
+      return {
+        ...lg, AL, AI, NL, NI, NDJ, PLD,
+        PU: arvutaPU(P.Pam, PEB, PLD, CLD, P.rt, P.PTWS),
+        PV: arvutaPV(PEB, PLD, CLD, P.rf, P.rp, P.PTWS),
+        PW: arvutaPW(PSPD, PLD, CLD, P.PTWS),
+        PZ: arvutaPZ(PSPD, CLI, P.PTWS),
+      };
+    });
   }
-  let PU_T = 0, PV_T = 0, PW_T = 0, PZ_T = 0;
-  if (P.kasuta_sideliin) {
-    PU_T = arvutaPU(P.Pam, PEB_T, PLD_T, P.CLD_T, P.rt, P.PTWS);
-    PV_T = arvutaPV(PEB_T, PLD_T, P.CLD_T, P.rf, P.rp, P.PTWS);
-    PW_T = arvutaPW(PSPD_T, PLD_T, P.CLD_T, P.PTWS);
-    PZ_T = arvutaPZ(PSPD_T, P.CLI_T, P.PTWS);
-  }
+  const lgP = arvutaLõigud(lõigudP, P.UWP, P.CLD_P, P.CLI_P, PEB_P, PSPD_P, P.CTP);
+  const lgT = arvutaLõigud(lõigudT, P.UWT, P.CLD_T, P.CLI_T, PEB_T, PSPD_T, P.CTT);
+
+  // Liini kokkuvõtlikud väärtused (Σ üle lõikude) — aruande ja tagasiühilduvuse jaoks
+  const summa = (arr, k) => arr.reduce((x, lg) => x + lg[k], 0);
+  const ALP = summa(lgP, 'AL'), AIP = summa(lgP, 'AI');
+  const ALT = summa(lgT, 'AL'), AIT = summa(lgT, 'AI');
+  const NL_P = summa(lgP, 'NL'), NI_P = summa(lgP, 'NI'), NDJ_P = summa(lgP, 'NDJ');
+  const NL_T = summa(lgT, 'NL'), NI_T = summa(lgT, 'NI'), NDJ_T = summa(lgT, 'NDJ');
+  // Tõenäosused lõigu 1 järgi (erinevad lisalõikudes ainult siis, kui kaabli tüüp erineb)
+  const esim = (arr, k) => arr.length ? arr[0][k] : 0;
+  const PLD_P = esim(lgP, 'PLD'), PLD_T = esim(lgT, 'PLD');
+  const PU_P = esim(lgP, 'PU'), PV_P = esim(lgP, 'PV'), PW_P = esim(lgP, 'PW'), PZ_P = esim(lgP, 'PZ');
+  const PU_T = esim(lgT, 'PU'), PV_T = esim(lgT, 'PV'), PW_T = esim(lgT, 'PW'), PZ_T = esim(lgT, 'PZ');
 
   const riskParam = {
-    ND, NM, NL_P, NL_T, NI_P, NI_T, NDJ_P, NDJ_T,
+    ND, NM,
+    lõigud: [...lgP, ...lgT],
     PAT, PAD, PB, PC, PM,
-    PU_P, PU_T, PV_P, PV_T, PW_P, PW_T, PZ_P, PZ_T,
     PP: P.PP, Pe: P.Pe,
     LT: P.LT, LD: P.LD, LF1: P.LF1, LF2: P.LF2, LO1: P.LO1, LO2: P.LO2,
     kasuta_RC1: P.plahvatus_haigla_L1, kasuta_RM1: P.plahvatus_haigla_L1,
@@ -1932,6 +2123,7 @@ function koguArvutus(P, override = {}) {
     ND, NM, NL_P, NI_P, NL_T, NI_T, NDJ_P, NDJ_T,
     PLD_P, PLD_T, PAT, PAD, PB, PC, PM,
     PU_P, PV_P, PW_P, PZ_P, PU_T, PV_T, PW_T, PZ_T,
+    lõigud_P: lgP, lõigud_T: lgT,
     PLPS, PSPD_P, PSPD_T, PEB_P, PEB_T, R,
   };
 }
@@ -2086,6 +2278,10 @@ function koguSisendid() {
   P.kaabli_tüüp_T = KAABLI_TÜÜP_VALIKUD[getSel('kaabli_tüüp_T')] ?? 'kaitsmata';
   const cldT = CLD_CLI_VALIKUD[getSel('CLD_CLI_T_valik')] ?? [1.0, 1.0];
   P.CLD_T = cldT[0]; P.CLI_T = cldT[1];
+
+  // Lisalõigud (jaotis 8.4) — lõik 1 on ülal, need on lõigud 2, 3, …
+  P.lisalõigud_P = lõigudArvudeks('P');
+  P.lisalõigud_T = lõigudArvudeks('T');
 
   P.kasuta_naaber = getBool('kasuta_naaber');
   P.L_J = getNum('L_J', 0);
@@ -2394,24 +2590,36 @@ function kuvaTulemused(P, t, klassid) {
   html += `<thead><tr><th>Tähis</th><th>Kirjeldus</th><th class="num">Väärtus</th><th>Valem</th></tr></thead><tbody>`;
   html += `<tr><td>A<sub>D</sub></td><td>Ehitis</td><td class="num">${fmtSci(t.AD)} m²</td><td>A.3</td></tr>`;
   html += `<tr><td>A<sub>M</sub></td><td>Ehitise lähedus (rM=350/UW, UW=${t.UW_min} kV)</td><td class="num">${fmtSci(t.AM)} m²</td><td>A.8</td></tr>`;
-  if (P.kasuta_elektriliin) {
-    html += `<tr><td>A<sub>L,P</sub></td><td>Elektriliin</td><td class="num">${fmtSci(t.ALP)} m²</td><td>A.10</td></tr>`;
-    html += `<tr><td>A<sub>I,P</sub></td><td>Elektriliini lähedus (rI=2000/UW^1.8)</td><td class="num">${fmtSci(t.AIP)} m²</td><td>A.12</td></tr>`;
-  }
-  if (P.kasuta_sideliin) {
-    html += `<tr><td>A<sub>L,T</sub></td><td>Sideliin</td><td class="num">${fmtSci(t.ALT)} m²</td><td>A.10</td></tr>`;
-    html += `<tr><td>A<sub>I,T</sub></td><td>Sideliini lähedus</td><td class="num">${fmtSci(t.AIT)} m²</td><td>A.12</td></tr>`;
-  }
+  // Liinid — mitme lõigu korral rida iga lõigu kohta (A_L,P1, A_L,P2, …)
+  const liiniRead = (lõigud, tähis, nimi, kokkuAL, kokkuAI) => {
+    if (lõigud.length <= 1) {
+      html += `<tr><td>A<sub>L,${tähis}</sub></td><td>${nimi}</td><td class="num">${fmtSci(kokkuAL)} m²</td><td>A.10</td></tr>`;
+      html += `<tr><td>A<sub>I,${tähis}</sub></td><td>${nimi} – lähedus (rI=2000/UW^1.8)</td><td class="num">${fmtSci(kokkuAI)} m²</td><td>A.12</td></tr>`;
+      return;
+    }
+    lõigud.forEach((lg, i) => {
+      const kirj = `${nimi}, lõik ${i + 1} (L<sub>L</sub>=${lg.LL} m, C<sub>T</sub>=${lg.CT})`;
+      html += `<tr><td>A<sub>L,${tähis}${i + 1}</sub></td><td>${kirj}</td><td class="num">${fmtSci(lg.AL)} m²</td><td>A.10</td></tr>`;
+      html += `<tr><td>A<sub>I,${tähis}${i + 1}</sub></td><td>${kirj} – lähedus</td><td class="num">${fmtSci(lg.AI)} m²</td><td>A.12</td></tr>`;
+    });
+  };
+  if (P.kasuta_elektriliin) liiniRead(t.lõigud_P, 'P', 'Elektriliin', t.ALP, t.AIP);
+  if (P.kasuta_sideliin) liiniRead(t.lõigud_T, 'T', 'Sideliin', t.ALT, t.AIT);
   html += `<tr><td>N<sub>D</sub></td><td>Otselöögi sagedus ehitisse</td><td class="num">${fmtSci(t.ND)}</td><td>A.5</td></tr>`;
   html += `<tr><td>N<sub>M</sub></td><td>Lähedusele löögi sagedus</td><td class="num">${fmtSci(t.NM)}</td><td>A.7</td></tr>`;
-  if (P.kasuta_elektriliin) {
-    html += `<tr><td>N<sub>L,P</sub></td><td>Otselöök elektriliini</td><td class="num">${fmtSci(t.NL_P)}</td><td>A.9</td></tr>`;
-    html += `<tr><td>N<sub>I,P</sub></td><td>Elektriliini lähedusele</td><td class="num">${fmtSci(t.NI_P)}</td><td>A.11</td></tr>`;
-  }
-  if (P.kasuta_sideliin) {
-    html += `<tr><td>N<sub>L,T</sub></td><td>Otselöök sideliini</td><td class="num">${fmtSci(t.NL_T)}</td><td>A.9</td></tr>`;
-    html += `<tr><td>N<sub>I,T</sub></td><td>Sideliini lähedusele</td><td class="num">${fmtSci(t.NI_T)}</td><td>A.11</td></tr>`;
-  }
+  const sageduseRead = (lõigud, tähis, nimi, kokkuNL, kokkuNI) => {
+    if (lõigud.length > 1) {
+      lõigud.forEach((lg, i) => {
+        html += `<tr><td>N<sub>L,${tähis}${i + 1}</sub></td><td>Otselöök: ${nimi.toLowerCase()}, lõik ${i + 1}</td><td class="num">${fmtSci(lg.NL)}</td><td>A.9</td></tr>`;
+        html += `<tr><td>N<sub>I,${tähis}${i + 1}</sub></td><td>Lähedusele: ${nimi.toLowerCase()}, lõik ${i + 1}</td><td class="num">${fmtSci(lg.NI)}</td><td>A.11</td></tr>`;
+      });
+    }
+    const Σ = lõigud.length > 1 ? ' (Σ lõigud)' : '';
+    html += `<tr><td>N<sub>L,${tähis}</sub></td><td>Otselöök: ${nimi.toLowerCase()}${Σ}</td><td class="num">${fmtSci(kokkuNL)}</td><td>A.9</td></tr>`;
+    html += `<tr><td>N<sub>I,${tähis}</sub></td><td>Lähedusele: ${nimi.toLowerCase()}${Σ}</td><td class="num">${fmtSci(kokkuNI)}</td><td>A.11</td></tr>`;
+  };
+  if (P.kasuta_elektriliin) sageduseRead(t.lõigud_P, 'P', 'Elektriliin', t.NL_P, t.NI_P);
+  if (P.kasuta_sideliin) sageduseRead(t.lõigud_T, 'T', 'Sideliin', t.NL_T, t.NI_T);
   html += `</tbody></table>`;
 
   // Tõenäosused
@@ -2487,6 +2695,9 @@ function salvestaSisendid() {
       else data[el.id] = el.value;
     }
   });
+  // Dünaamilised loendid (neil pole oma id-ga välju)
+  data._lisalõigud = LISALÕIGUD;
+  data._tsoonid = TSOONID;
 
   const json = JSON.stringify(data, null, 2);
   const blob = new Blob([json], { type: 'application/json' });
@@ -2517,11 +2728,19 @@ function laeFailist() {
       try {
         const data = JSON.parse(ev.target.result);
         for (const [k, v] of Object.entries(data)) {
+          if (k.startsWith('_')) continue;
           const el = document.getElementById(k);
           if (!el) continue;
           if (el.type === 'checkbox') el.checked = v;
           else el.value = v;
         }
+        // Vanemates failides neid pole — siis tühjad loendid
+        LISALÕIGUD = { P: [], T: [], ...(data._lisalõigud || {}) };
+        renderLõigud('P');
+        renderLõigud('T');
+        TSOONID = Array.isArray(data._tsoonid) ? data._tsoonid : [];
+        renderTsoonid();
+        lulita_tsoonid_režiim();
         document.getElementById('status').textContent = `Laaditud: ${fail.name}`;
       } catch (err) {
         alert('Vigane JSON fail: ' + err.message);

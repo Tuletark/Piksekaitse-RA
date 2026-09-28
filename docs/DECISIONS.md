@@ -159,25 +159,38 @@ naaberehitise mõõtmed ja CDJ (selle paiknemistegur).
 
 ---
 
-## 11. Mitme tsooni režiim — ühesegmendiline elektriliin
+## 11. Liini jaotamine lõikudeks (jaotis 8.4)
 
-**Otsus:** Mitme tsooni režiimis (vahekaart „Tsoonid”, v1.4+) jagatakse ehitis
-eri tsoonideks omade kahjudega ja kohaloleku aegadega, kuid kogu ehitisele
-kasutame **ühte elektriliini segmenti** ja **ühte sideliini segmenti**.
+**Otsus:** Elektri- ja sideliinile saab lisada lisalõike (vahekaart „Liinid”,
+alates v1.5). Liini põhiväljad kirjeldavad **lõiku 1 — ehitise poolset lõiku**.
+Igal lõigul on oma pikkus L<sub>L</sub>, paigaldustegur C<sub>I</sub>,
+tüübitegur C<sub>T</sub>, keskkonnategur C<sub>E</sub> ja kaabli tüüp (P<sub>LD</sub>).
 
-**Põhjendus:** Standard lubab modelleerida liini mitme segmendina (nt
-F.3 näites: kõrgepinge 1000 m + madalpinge 100 m). Kahesegmendiline mudel
-nõuab oluliselt suurema UI-keerukust (segment-segmendi kaupa CI, CT, UW,
-kaabli tüüp). Ühesegmendiline mudel katab tüüpilised juhtumid hästi —
-suurem segment domineerib niikuinii.
+**Põhjendus:**
+- Jaotis 8.2: kui liinil on mitu lõiku, on R<sub>U</sub>, R<sub>V</sub>,
+  R<sub>W</sub> ja R<sub>Z</sub> iga lõiguga seonduvate väärtuste summa.
+  Arvestatakse lõike ehitise ja esimese sõlme vahel.
+- Jaotis 8.4: lõigud eristuvad liini tüübi (C<sub>I</sub>), omaduste
+  (varjestus, ekraani takistus) ning tegurite C<sub>D</sub>, C<sub>E</sub>,
+  C<sub>T</sub> poolest.
+- Näide F.3 (tabel F.11): LV 100 m + HV 1000 m, mõlemad süvistatud,
+  C<sub>E</sub> = 0,5. Tabel F.14 annab N<sub>L</sub> ja N<sub>I</sub> lõikude kaupa.
 
-**Mõju:** Standardi näide F.3 valideerimisel jäävad RV ja RU komponendid
-~30% standardi väärtustest madalamaks, kogurisk R aga 3–4% madalam. RB ja
-RAT komponendid (mis ei sõltu liinist) vastavad standardile täpselt.
+**Mis on lõigupõhine ja mis liinipõhine:**
 
-**Tähendus kasutajale:** Tüüpiliste büroohoonete jaoks piisav. Kui projektis
-on liin tõsiselt mitmesegmendiline (kõrgepingest madalpingele), arvutage
-mõlema segmendi NL ja NI käsitsi ja võrrelge eraldi.
+| Lõigupõhine (iga lõik eraldi) | Liinipõhine (kõigil lõikudel sama) |
+|---|---|
+| L<sub>L</sub>, C<sub>I</sub>, C<sub>T</sub>, C<sub>E</sub>, kaabli tüüp → P<sub>LD</sub> | U<sub>W</sub> (ehitise sisesüsteem), C<sub>LD</sub>/C<sub>LI</sub> (liini sisenemine ehitisse), P<sub>EB</sub>, P<sub>SPD</sub> |
+
+**N<sub>DJ</sub> (naaberehitis)** seotakse lõiguga 1 ja kasutab lõigu 1
+C<sub>T</sub>-d (nagu enne lõikude tuge). Naaberehitisega ühendav liin on
+tavaliselt üks lõik; kui see nii pole, tuleb N<sub>DJ</sub> eraldi üle vaadata.
+
+**Tagasiühilduvus:** lisalõikudeta arvutus on matemaatiliselt identne
+varasemaga (test: 1 × 1000 m == 400 m + 600 m; F.2 = 1,793 × 10⁻⁵).
+
+**Mõju:** näide F.3 vastab nüüd tabelile F.21 kõigis tsoonides (R erinevus
+≤ 0,2 %, Z1 ümardamise tõttu). Varem (v1.4, üks lõik) oli Z3–Z5 R ~4 % madalam.
 
 ---
 
@@ -187,7 +200,12 @@ mõlema segmendi NL ja NI käsitsi ja võrrelge eraldi.
   Materjal on standardis olemas, kui kasutaja seda hiljem küsib.
 - **Majandusliku riski R4 arvutus** — keskendume L1 (inimelu kaotus) riskile,
   mis on projekteerija jaoks kõige sagedasem nõue.
-- **Mitmesegmendiline liini mudel** (vt §11) — võiks olla tulevane laiendus
-  keerukamate büroohoonete jaoks.
+- **A<sub>M</sub> sisesüsteemide U<sub>W</sub> järgi, millel pole välist liini** —
+  A<sub>M</sub> kasutab madalaimat U<sub>W</sub>-d ainult ühendatud liinide seast
+  (§3). Näites F.3 on väline sideliin fiiberoptiline, kuid sisemine vasest
+  sidesüsteem (U<sub>W</sub> = 1,5 kV) määrab r<sub>M</sub> = 233 m (tabel F.12).
+  Meie A<sub>M</sub> F.3 puhul on seetõttu väiksem (N<sub>M</sub> 0,157 vs 0,398).
+  Riski R F.3-s see ei mõjuta (R<sub>M</sub> ei rakendu), kuid haigla/plahvatusohu
+  juhtudel, kus R<sub>M</sub> arvestatakse, võib. Tulevane parandus.
 - **Haigla tüüp ehitis (F.4 standardis)** — vajab täiendavaid tsoonipõhiseid
   riskikomponente, mis pole praegu rakendatud. Lisame kui vajadus tekib.

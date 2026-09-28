@@ -30,3 +30,6 @@ sisendid_local.json
 # Testväljundid
 coverage/
 .nyc_output/
+
+# Standardi PDF (autoriõigusega kaitstud) — ainult lokaalselt, mitte GitHubi
+standard/

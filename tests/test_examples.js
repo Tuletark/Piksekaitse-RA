@@ -43,6 +43,13 @@ function fmtR(x) {
   return (x / 1e-5).toFixed(3) + ' × 10⁻⁵';
 }
 
+function kontrolliArv(label, actual, expected, tolerancePct = 1.0) {
+  const ok = lähedalT(actual, expected, tolerancePct);
+  RESULTS.push({ label, actual, expected, ok, tolerancePct });
+  const diff = (Math.abs(actual - expected) / Math.abs(expected) * 100).toFixed(2);
+  console.log(`  ${ok ? '✓' : '✗'} ${label}: ${actual.toExponential(3)}  (erinevus ${diff} %)`);
+}
+
 function kontrolli(label, actual, expected, tolerancePct = 1.0) {
   const ok = lähedalT(actual, expected, tolerancePct);
   RESULTS.push({ label, actual, expected, ok, tolerancePct });
@@ -98,12 +105,9 @@ function testF2_Maja() {
 // Standardi näide F.3: 5 tsooniga büroohoone (sissepääsuala, katus, arhiiv,
 // kontorid, arvutuskeskus). Iga tsoonil oma kohaloleku aeg, tuleoht ja kahjud.
 //
-// PIIRANG B1-versioonis: meie mudel kasutab ühte elektriliini segmenti
-// (kõrgepingelõik LL=1000m, CT=0,2). Standardi näide kasutab kahesegmendilist
-// liini (kõrgepinge 1000m + madalpinge 100m). Sellest tulenevalt jäävad RV ja
-// RU komponendid Z3-Z5 tsoonides standardi väärtustest umbes 30% madalamaks.
-// Aktsepteerime 35% tolerantsi nendele komponentidele; RB ja RAT/RAD peavad
-// vastama täpselt (need ei sõltu liinist).
+// Elektriliin on kahelõiguline (tabel F.11, jaotis 8.4): lõik 1 = madalpinge
+// 100 m (ehitise poolne), lisalõik = kõrgepinge 1000 m. RU, RV summeeritakse
+// lõikude kaupa (jaotis 8.2).
 
 function testF3_Büroohoone() {
   console.log('\n===== F.3 Büroohoone (5 tsooni, kaitsmata ehitis) =====');
@@ -117,9 +121,12 @@ function testF3_Büroohoone() {
     CE: 0.5,           // Äärelinnaline
     PLPS: 1.0,         // Kaitsmata
     PTWS: 1.0,
-    // Liinid (B1: ühe segmendi lähend — kasutame kõrgepingelõiku)
+    // Elektriliin (tabel F.11): lõik 1 = LV 100 m, lisalõik = HV 1000 m
     kasuta_elektriliin: true,
-    LL_P: 1000, CIP: 0.3, CTP: 0.2, UWP: 2.5,
+    LL_P: 100, CIP: 0.3, CTP: 1.0, UWP: 2.5,
+    lisalõigud_P: [
+      { LL: 1000, CI: 0.3, CT: 0.2, CE: 0.5, kaabli_tüüp: 'kaitsmata' },
+    ],
     kaabli_tüüp_P: 'kaitsmata',
     CLD_P: 1.0, CLI_P: 1.0,
     kasuta_sideliin: false,           // Fiiberoptiline kaabel — väline liin ei mõjuta
@@ -197,33 +204,73 @@ function testF3_Büroohoone() {
 
   const tulem = arvutaEhitis(shared, tsoonid);
 
+  // Tabel F.14: sagedused lõikude kaupa (NLP1 = HV, NLP2 = LV) ja kokku
+  const t3 = tulem.tsoonid[2].t;
+  kontrolliArv('NL,P HV-lõik (F.14: 4,8 × 10⁻³)', t3.lõigud_P[1].NL, 4.8e-3, 1.0);
+  kontrolliArv('NL,P LV-lõik (F.14: 2,4 × 10⁻³)', t3.lõigud_P[0].NL, 2.4e-3, 1.0);
+  kontrolliArv('NI,P HV-lõik (F.14: 4,61 × 10⁻²)', t3.lõigud_P[1].NI, 4.61e-2, 1.0);
+  kontrolliArv('NI,P LV-lõik (F.14: 2,31 × 10⁻²)', t3.lõigud_P[0].NI, 2.31e-2, 1.0);
+
   // Standardi tabel F.21 (kaitsmata ehitis, väärtused × 10⁻⁵)
   const oodatud = {
     Z1: { R: 0.002e-5 },
     Z2: { R: 2.259e-5 },
-    Z3: { R: 6.526e-5, RB: 5.770e-5 },
-    Z4: { R: 0.202e-5, RB: 0.179e-5 },
-    Z5: { R: 0.156e-5, RB: 0.137e-5 },
+    Z3: { R: 6.526e-5, RB: 5.770e-5, RV: 0.756e-5 },
+    Z4: { R: 0.202e-5, RB: 0.179e-5, RV: 0.023e-5 },
+    Z5: { R: 0.156e-5, RB: 0.137e-5, RV: 0.018e-5 },
   };
 
-  // RB on liinist sõltumatu — peab vastama täpselt (1% tolerants)
-  // R kogurisk võib RV osa tõttu olla ~5% madalam (vt B1 piirang ülal)
   // Z1 standardis ümardatud 0,002 (üks tüvenumber), arvutus annab 0,0022 —
-  // absoluutselt tühine erinevus, aga protsentuaalselt 10%
+  // absoluutselt tühine erinevus, aga protsentuaalselt 10 %.
+  // Z4/Z5 RV on standardis kolme komakohaga (0,023; 0,018) — ümardusviga
+  // kuni ~3 %, seepärast 3 % tolerants.
   kontrolli('Z1 R',     tulem.tsoonid[0].R.R,  oodatud.Z1.R, 15.0);
-  kontrolli('Z2 R',     tulem.tsoonid[1].R.R,  oodatud.Z2.R, 5.0);
+  kontrolli('Z2 R',     tulem.tsoonid[1].R.R,  oodatud.Z2.R, 1.0);
   kontrolli('Z3 RB',    tulem.tsoonid[2].R.RB, oodatud.Z3.RB, 1.0);
-  kontrolli('Z3 R',     tulem.tsoonid[2].R.R,  oodatud.Z3.R, 35.0);
+  kontrolli('Z3 RV',    tulem.tsoonid[2].R.RV, oodatud.Z3.RV, 1.0);
+  kontrolli('Z3 R',     tulem.tsoonid[2].R.R,  oodatud.Z3.R, 1.0);
   kontrolli('Z4 RB',    tulem.tsoonid[3].R.RB, oodatud.Z4.RB, 1.0);
-  kontrolli('Z4 R',     tulem.tsoonid[3].R.R,  oodatud.Z4.R, 35.0);
+  kontrolli('Z4 RV',    tulem.tsoonid[3].R.RV, oodatud.Z4.RV, 3.0);
+  kontrolli('Z4 R',     tulem.tsoonid[3].R.R,  oodatud.Z4.R, 1.0);
   kontrolli('Z5 RB',    tulem.tsoonid[4].R.RB, oodatud.Z5.RB, 1.0);
-  kontrolli('Z5 R',     tulem.tsoonid[4].R.R,  oodatud.Z5.R, 35.0);
+  kontrolli('Z5 RV',    tulem.tsoonid[4].R.RV, oodatud.Z5.RV, 3.0);
+  kontrolli('Z5 R',     tulem.tsoonid[4].R.R,  oodatud.Z5.R, 1.0);
+}
+
+// ===== Liinilõigud: sisemine kooskõla ==================================
+//
+// Liini jagamine samade omadustega lõikudeks ei tohi tulemust muuta:
+// 1000 m ühe lõiguna == 400 m + 600 m kahe lõiguna.
+
+function testLõigudKooskõla() {
+  console.log('\n===== Liinilõigud: 1 × 1000 m == 400 m + 600 m =====');
+  const baas = {
+    NSG: 8.0, k_tegur: 2, RT: 1e-5, PP: 0.5, Pe: 1.0,
+    L: 15, W: 20, H: 6, CD: 1.0, PS: 1.0, KS1: 1.0, KS2: 1.0,
+    kasuta_RAD: false, PO: 0, plahvatus_haigla_L1: true, plahvatus_L2: true,
+    CE: 1.0, rt: 1e-5, Pam: 1.0, rf: 1e-3, rp: 1.0,
+    KS3_P: 0.2, KS3_T: 1.0, PTWS: 1.0,
+    kasuta_elektriliin: true, LL_P: 1000, CIP: 1.0, CTP: 1.0, UWP: 2.5,
+    kaabli_tüüp_P: 'kaitsmata', CLD_P: 1.0, CLI_P: 1.0,
+    kasuta_sideliin: false, kasuta_naaber: false,
+    LT: 1e-2, LD: 1e-1, LF1: 2e-2, LF2: 2e-2, LO1: 1e-3, LO2: 1e-3,
+    PLPS: 1.0, PSPD_P: 1.0, PSPD_T: 1.0, PEB_P: 1.0, PEB_T: 1.0,
+  };
+  const üks = koguArvutus(baas);
+  const kaks = koguArvutus({
+    ...baas, LL_P: 400,
+    lisalõigud_P: [{ LL: 600, CI: 1.0, CT: 1.0, CE: 1.0, kaabli_tüüp: 'kaitsmata' }],
+  });
+  for (const k of ['RU', 'RV', 'RW', 'RZ', 'R']) {
+    kontrolli(k, kaks.R[k], üks.R[k], 0.001);
+  }
 }
 
 // ===== Käivita kõik testid ============================================
 
 testF2_Maja();
 testF3_Büroohoone();
+testLõigudKooskõla();
 
 // ===== Kokkuvõte ======================================================
 

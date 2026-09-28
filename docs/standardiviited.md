@@ -14,15 +14,15 @@ valem või jaotis. Standard: **EVS-EN IEC 62305-2:2025**.
 | Tabel A.2         | CI liini paigaldustegur           | `CI_VALIKUD`            |
 | Tabel A.3         | CT liini tüübitegur               | `CT_VALIKUD`            |
 | Tabel A.4         | CE keskkonnategur                 | `CE_VALIKUD`            |
-| Valem A.2         | AD = LW + 6H(L+W) + 9πH²          | `arvutaAD(L, W, H)`     |
-| Valem A.8         | rM = 350/UW; AM perimeeter        | `arvutaAM(L, W, UW_kV)` |
-| Valem A.10        | AL = 40 LL                        | `arvutaAL(LL)`          |
-| Valem A.11        | AI = 4000 √(LL/UW)                | `arvutaAI(LL, UW_kV)`   |
-| Lisa A.6 (NDJ)    | Naaberehitis                      | `koguArvutus` ADJ-haru |
-| Valem (sagedused) | ND = NSG·AD·CD·10⁻⁶               | `arvutaND`              |
-| Valem (sagedused) | NM = NSG·AM·k·10⁻⁶                | `arvutaNM`              |
-| Valem (sagedused) | NL = NSG·AL·CI·CE·CT·10⁻⁶         | `arvutaNL`              |
-| Valem (sagedused) | NI = NSG·AI·CI·CE·CT·k·10⁻⁶       | `arvutaNI`              |
+| Valem A.3         | AD = LW + 2·3H(L+W) + π(3H)²      | `arvutaAD(L, W, H)`     |
+| Valem A.8         | AM = 2rM(L+W) + πrM², rM = 350/UW | `arvutaAM(L, W, UW_kV)` |
+| Valem A.10        | AL = 40·LL (LL = lõigu pikkus)    | `arvutaAL(LL)`          |
+| Valem A.12        | AI = 2·rI·LL, rI = 2000/UW^1,8    | `arvutaAI(LL, UW_kV)`   |
+| Valem A.5         | ND = NSG·AD·CD·10⁻⁶               | `arvutaND`              |
+| Valem A.6 (jaotis A.2.5) | NDJ = NSG·ADJ·CDJ·CT·10⁻⁶  | `koguArvutus` → `arvutaLõigud` (lõik 1) |
+| Valem A.7         | NM = (1/k)·NSG·AM·10⁻⁶            | `arvutaNM`              |
+| Valem A.9         | NL = NSG·AL·CI·CE·CT·10⁻⁶         | `arvutaNL` (iga lõigu kohta) |
+| Valem A.11        | NI = (1/k)·NSG·AI·CI·CE·CT·10⁻⁶   | `arvutaNI` (iga lõigu kohta) |
 
 ## Lisa B — Tõenäosused
 
@@ -67,6 +67,8 @@ valem või jaotis. Standard: **EVS-EN IEC 62305-2:2025**.
 | Tabel 3, Jaotis 8| RA, RB, RU, RV, RC, RM, RW, RZ     | `arvutaRiskid`      |
 | Jaotis 8         | R<sub>D</sub> = R<sub>A</sub>+R<sub>B</sub>; R<sub>I</sub> = R<sub>U</sub>+R<sub>V</sub>+R<sub>C</sub>+R<sub>M</sub>+R<sub>W</sub>+R<sub>Z</sub>; R = R<sub>D</sub> + R<sub>I</sub> | `arvutaRiskid` lõpp |
 | Jaotis 6.1       | LPS klass I–IV soovitamine         | `hindaKlassid`      |
+| Jaotis 8.2       | RU, RV, RW, RZ = Σ üle liinilõikude | `arvutaRiskid` (`p.lõigud`) |
+| Jaotis 8.4       | Liini jaotamine lõikudeks (CI, CT, CE, varjestus) | `koostaLiiniLõigud`, `LISALÕIGUD` (vahekaart 4) |
 | Lisa F.3 (tsoonid) | Ehitise jaotamine tsoonideks, R = Σ R<sub>tsoon</sub> | `arvutaEhitis` |
 
 ## Lisa F — Näited (valideerimiseks)
@@ -74,12 +76,9 @@ valem või jaotis. Standard: **EVS-EN IEC 62305-2:2025**.
 | Näide       | Mida testib                  | Test                                  |
 |-------------|-------------------------------|---------------------------------------|
 | F.2 (Maja)  | Kogu arvutusahel, üks tsoon   | `tests/test_examples.js` — oodatud R = 1,793 × 10⁻⁵ |
-| F.3 (Büroohoone) | Mitme tsooni arvutus (`arvutaEhitis`), 5 tsooni | `tests/test_examples.js` — võrdlus tabeliga F.21 (kaitsmata ehitis) |
+| F.3 (Büroohoone) | Mitme tsooni arvutus (`arvutaEhitis`), 5 tsooni, kahelõiguline elektriliin | `tests/test_examples.js` — võrdlus tabelitega F.14 (N lõikude kaupa) ja F.21 (RB, RV, R) |
 | Haigla näide     | (pole veel testitud)     | —                                     |
 
-> F.3 piirang: elektriliin on modelleeritud ühe lõiguna (standardis kaks lõiku:
-> kõrgepinge + madalpinge). Seetõttu on Z3–Z5 R ~4 % madalam — vt CHANGELOG
-> „Teadaolevad piirangud”.
 
 ## Tähistused
 

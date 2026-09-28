@@ -34,7 +34,8 @@ Seejärel:
 1. **Üldine** — välgutiheduse andmed (NSG, k), vastuvõetav risk RT.
 2. **Ehitis** — mõõtmed (L, W, H), paiknemistegur CD, kategooria, kahjud (LT, LD, LF, LO).
 3. **Keskkond** — Pam, rt, rf, rp, KS3.
-4. **Liinid** — elektriliin ja sideliin (pikkus, CI, CT, UW, kaabli tüüp); naaberehitis.
+4. **Liinid** — elektriliin ja sideliin (pikkus, CI, CT, UW, kaabli tüüp); vajadusel
+   **lisalõigud** (nt LV-kaabel + HV-liin trafoga, jaotis 8.4); naaberehitis.
 5. **Kahjud** — kahjuväärtused tabeli C.2 vahemikest kategooria järgi.
 6. **Kaitse** — olemasolev LPS, SPD, PEB.
 7. **Tsoonid** — *(uus, v1.4)* mitme tsooni režiim büroohoonete, koolide jt
@@ -78,9 +79,11 @@ node tests/test_examples.js
 
 Test käivitab kaks standardi näidet:
 - **F.2 Maja** (üks tsoon, R = 1,793 × 10⁻⁵)
-- **F.3 Büroohoone** (viis tsooni: sissepääs, katus, arhiiv, kontorid, arvutuskeskus)
+- **F.3 Büroohoone** (viis tsooni: sissepääs, katus, arhiiv, kontorid, arvutuskeskus;
+  kahelõiguline elektriliin)
+- Liinilõikude sisemine kooskõla (1 × 1000 m == 400 m + 600 m)
 
-Oodatud kokkuvõte: **9 läbi, 0 luhtus.**
+Oodatud kokkuvõte: **21 läbi, 0 luhtus.**
 
 **Iga arvutusi puudutava muudatuse järel tuleb test läbi käia.**
 
