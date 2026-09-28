@@ -33,3 +33,6 @@ coverage/
 
 # Standardi PDF (autoriõigusega kaitstud) — ainult lokaalselt, mitte GitHubi
 standard/
+
+# Näidisprojektid (kliendi andmed) — ainult lokaalselt
+naidised/
