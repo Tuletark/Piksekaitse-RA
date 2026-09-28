@@ -279,6 +279,18 @@ PDF-faili füüsilised leheküljed; teise väljaande korral võivad need nihkuda
 
 ---
 
+## 17. r<sub>p</sub> < 1 → teavitus aruandes
+
+**Otsus:** kui r<sub>p</sub> < 1, lisab aruande kokkuvõte lause, et arvesse on võetud
+tulekahju tagajärgi vähendavad abinõud (valik ja väärtus), mis ei hoia ära
+tulekahju tekkimist, ning et arvutus eeldab nende töövalmidust.
+
+**Põhjendus:** tabeli B.5 järgne tekst — kui tulekahju tagajärgi vähendavaid
+abinõusid riskiarvutuses kasutatakse (r<sub>p</sub> ≠ 1), tuleks kasutajat sellest
+teavitada; kui teda pole teavitatud, tuleks kasutada r<sub>p</sub> = 1.
+
+---
+
 ## Otsused, mida me **ei** teinud
 
 - **Vigastumise sageduse F (jaotis 9) arvutus** — pole praegu rakenduses.

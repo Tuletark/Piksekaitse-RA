@@ -22,7 +22,7 @@
 
 ## 🎯 Praegune staatus (üleandmise hetkel)
 
-**Versioon:** v1.8 (Git-silt `v1.8`) — klikitavad standardi viited (kasutaja oma PDF); standardi audit v1.7
+**Versioon:** v1.9 (Git-silt `v1.9`) — parameetrite selgitused (ⓘ), r_p teavitus aruandes
 **Repositoorium:** https://github.com/Tuletark/Piksekaitse-RA (haru `main`)
 **Live:** https://tuletark.github.io/Piksekaitse-RA/ (GitHub Pages, avaldub `main`-ist)
 **Olek:** ✅ F.2 (Maja) ja F.3 (Büroohoone, 5 tsooni, kahelõiguline elektriliin) vastavad standardile (tabelid F.14, F.21)
@@ -41,6 +41,7 @@
 8. **v1.6** (2026-09-28) - Põhiandmed + lukus täpsemad vahekaardid, „teadmata” = ebasoodsaim, aruande plokid Wordi; PARANDUS: kriteerium R = R_L1 + R_L2 (varem ainult R1)
 9. **v1.7** (2026-09-28) - standardi audit: LPS-i korral P_S = 1, P_SPD tabelid B.7/B.8, P_LD ohutu pool; testid F.2–F.4 (120)
 10. **v1.8** (2026-09-28) - viited avavad kasutaja enda standardi PDF-i õigelt leheküljelt (DECISIONS §16)
+11. **v1.9** (2026-09-28) - ⓘ selgitused 42 väljal (oma sõnastus + „Praktikas”), r_p < 1 teavitus aruande kokkuvõttes
 
 **Liides (2026-09-28):** lihtsamast täpsemani — „Põhiandmed” + lukus täpsemad vahekaardid, „teadmata” = ebasoodsaim, aruande plokid Wordi. Kavand ja põhimõtted: `docs/KAVAND_liides_v2.md`, DECISIONS §12–13.
 

@@ -7,7 +7,11 @@ projekt järgib [semantilist versioneerimist](https://semver.org/lang/et/).
 
 ## [Avaldamata]
 
+## [1.9] — 2026-09-28
+
 ### Lisatud
+- **r<sub>p</sub> teavitus aruandes**: kui r<sub>p</sub> < 1, lisab kokkuvõte lause tulekahju
+  tagajärgi vähendavate abinõude arvestamisest (tabeli B.5 järgne nõue) — DECISIONS §17.
 - **Parameetrite selgitused (ⓘ)**: 42 välja juures aken — mis parameeter on,
   kõik valikud koos väärtuse ja „millal valida” juhisega, „teadmata” tähendus,
   praktilised märkused ning klikitav standardi viide. Tekstid on rakenduse enda

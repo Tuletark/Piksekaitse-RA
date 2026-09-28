@@ -3266,6 +3266,13 @@ function aruanneKokkuvõte(P, t, klassid) {
   if (P.eeldused && P.eeldused.length) {
     h += '<p>NB! Riskianalüüsis võeti juhul, kui andmed olid teadmata, aluseks kõige ebasoodsamad väärtused (vt tabel „Algandmed”).</p>';
   }
+  // Tabeli B.5 järgne nõue: kui r_p ≠ 1, tuleb tellijat teavitada (DECISIONS §17)
+  if (P.rp < 1) {
+    h += `<p>NB! Riskianalüüsis on arvestatud tulekahju tagajärgi vähendavate abinõudega ` +
+      `(${kuvaNimi('rp_valik', getSel('rp_valik'))}; r<sub>p</sub> = ${fmtArv(P.rp)}). ` +
+      'Need abinõud ei hoia ära välgust põhjustatud tulekahju tekkimist, vaid vähendavad selle tagajärgi. ' +
+      'Arvutus eeldab, et abinõud on välgu ajal töövalmis ja nõuetekohaselt hooldatud.</p>';
+  }
   return h;
 }
 
